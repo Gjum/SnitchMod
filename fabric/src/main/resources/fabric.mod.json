@@ -1,0 +1,26 @@
+{
+	"schemaVersion": 1,
+	"id": "snitchmod",
+	"version": "${version}",
+	"name": "Snitch Mod",
+	"description": "Snitch Mod",
+	"authors": [
+		"Gjum"
+	],
+	"license": "Copyright",
+	"icon": "assets/snitchmod/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"gjum.minecraft.civ.snitchmod.fabric.FabricSnitchMod"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.7.4",
+		"fabric": "*",
+		"minecraft": "1.16.x"
+	},
+	"mixins": [
+		"mixin.snitchmod.json"
+	]
+}
