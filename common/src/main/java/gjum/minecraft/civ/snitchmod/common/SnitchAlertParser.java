@@ -21,13 +21,13 @@ public class SnitchAlertParser {
 		Matcher textMatch = alertPattern.matcher(text);
 		if (!textMatch.matches()) return null;
 
-		String action = textMatch.group(0);
-		String accountName = textMatch.group(1);
-		String snitchName = textMatch.group(2);
-		String world = textMatch.group(3);
-		int x = Integer.parseInt(textMatch.group(4));
-		int y = Integer.parseInt(textMatch.group(5));
-		int z = Integer.parseInt(textMatch.group(6));
+		String action = textMatch.group(1);
+		String accountName = textMatch.group(2);
+		String snitchName = textMatch.group(3);
+		String world = textMatch.group(4) == null ? "world" : textMatch.group(4);
+		int x = Integer.parseInt(textMatch.group(5));
+		int y = Integer.parseInt(textMatch.group(6));
+		int z = Integer.parseInt(textMatch.group(7));
 
 		String group = null;
 		final HoverEvent hoverEvent = message.getSiblings().get(0).getStyle().getHoverEvent();
@@ -37,8 +37,8 @@ public class SnitchAlertParser {
 
 			Matcher hoverMatch = hoverPattern.matcher(hoverText);
 			if (hoverMatch.matches()) {
-				world = hoverMatch.group(0);
-				group = hoverMatch.group(5);
+				world = hoverMatch.group(1) == null ? world : hoverMatch.group(1);
+				group = hoverMatch.group(6);
 			}
 		}
 

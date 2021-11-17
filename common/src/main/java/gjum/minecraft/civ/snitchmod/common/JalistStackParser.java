@@ -50,17 +50,17 @@ public class JalistStackParser {
 						lores.getString(2)));
 		if (!lifetimeMatch.matches()) return null;
 
-		String world = locationMatch.group(0);
-		int x = Integer.parseInt(locationMatch.group(1));
-		int y = Integer.parseInt(locationMatch.group(2));
-		int z = Integer.parseInt(locationMatch.group(3));
+		String world = locationMatch.group(1);
+		int x = Integer.parseInt(locationMatch.group(2));
+		int y = Integer.parseInt(locationMatch.group(3));
+		int z = Integer.parseInt(locationMatch.group(4));
 
-		String group = groupMatch.group(0);
+		String group = groupMatch.group(1);
 
-		String lifetimeType = lifetimeMatch.group(0);
-		long h = Integer.parseInt(lifetimeMatch.group(1));
-		long m = Integer.parseInt(lifetimeMatch.group(2));
-		long s = Integer.parseInt(lifetimeMatch.group(3));
+		String lifetimeType = lifetimeMatch.group(1);
+		long h = Integer.parseInt(lifetimeMatch.group(2));
+		long m = Integer.parseInt(lifetimeMatch.group(3));
+		long s = Integer.parseInt(lifetimeMatch.group(4));
 
 		long dtMs = (h * 3600L + m * 60L + s) * 1000L;
 
