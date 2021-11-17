@@ -12,11 +12,11 @@ public class SnitchAlertParser {
 	// Enter  PLAYER  GROUPNAME  [123 45 -321]  [12m North West]
 	static Pattern alertPattern = Pattern.compile("^(Enter|Login|Logout) +([A-Za-z0-9_]{3,17}) +([^ ]+) +\\[(?:([A-Za-z][^ ]+),? )?([-0-9]+),? ([-0-9]+),? ([-0-9]+)\\].*");
 	// §6Location: §b(world) [123 45 -321]\n§6Name: §bSNITCHNAME\n§6Group: §bGROUPNAME
-	static Pattern hoverPattern = Pattern.compile("(?:§.)*Location: (?:(?:§.)*\\(?([^\\n)]+)\\)? )?\\[([-0-9]+),? ([-0-9]+),? ([-0-9]+)\\] *\\n(?:§.)*Name: (?:§.)*([^ ]+) *\\n(?:§.)*Group: (?:§.)*([^ ]+).*", Pattern.MULTILINE);
+	static Pattern hoverPattern = Pattern.compile("Location: (?:\\(?([^\\n)]+)\\)? )?\\[([-0-9]+),? ([-0-9]+),? ([-0-9]+)\\] *\\nName: ([^ ]+) *\\nGroup: ([^ ]+).*", Pattern.MULTILINE);
 
 	@Nullable
 	public static SnitchAlert getSnitchAlertFromChat(Component message, String server) {
-		String text = message.getString();
+		String text = message.getString().replaceAll("§.", "");
 
 		Matcher textMatch = alertPattern.matcher(text);
 		if (!textMatch.matches()) return null;
@@ -33,7 +33,7 @@ public class SnitchAlertParser {
 		final HoverEvent hoverEvent = message.getSiblings().get(0).getStyle().getHoverEvent();
 		if (hoverEvent != null && hoverEvent.getAction() == HoverEvent.Action.SHOW_TEXT) {
 			@SuppressWarnings("ConstantConditions")
-			String hoverText = hoverEvent.getValue(HoverEvent.Action.SHOW_TEXT).getString();
+			String hoverText = hoverEvent.getValue(HoverEvent.Action.SHOW_TEXT).getString().replaceAll("§.", "");
 
 			Matcher hoverMatch = hoverPattern.matcher(hoverText);
 			if (hoverMatch.matches()) {
