@@ -39,6 +39,7 @@ public class RangesOverlayRenderer {
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.enableAlphaTest();
+		RenderSystem.disableCull();
 
 		float r = 1;
 		float g = 1;
@@ -65,6 +66,7 @@ public class RangesOverlayRenderer {
 			}
 		}
 
+		RenderSystem.enableCull();
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.popMatrix();
 	}
