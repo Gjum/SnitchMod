@@ -50,6 +50,7 @@ public class SnitchesStore {
 	@Nullable
 	public Snitch deleteSnitch(WorldPos pos) {
 		Snitch snitch = snitches.remove(getId(pos));
+		if (snitch == null) return null;
 		if (db != null) db.deleteSnitch(pos);
 		return snitch;
 	}

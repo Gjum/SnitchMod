@@ -129,7 +129,7 @@ public class SnitchSqliteDb {
 			pstmt.setInt(++i, pos.getY());
 			pstmt.setInt(++i, pos.getZ());
 
-			pstmt.executeQuery();
+			pstmt.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
