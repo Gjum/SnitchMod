@@ -26,6 +26,9 @@ dependencies {
 	}
 	minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
 	mappings loom.officialMojangMappings()
+
+	implementation "org.xerial:sqlite-jdbc:3.36.0.3"
+	shadowCommon "org.xerial:sqlite-jdbc:3.36.0.3"
 }
 
 processResources {
