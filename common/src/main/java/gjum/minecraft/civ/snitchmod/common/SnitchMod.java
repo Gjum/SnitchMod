@@ -113,7 +113,7 @@ public abstract class SnitchMod {
 		if (store == null) return Collections.emptyList();
 		final int renderDistance = 260; // TODO
 		return store.getAllSnitches().stream()
-				.filter(s -> playerPos.distSqr(s) < renderDistance)
+				.filter(s -> playerPos.distSqr(s) < renderDistance * renderDistance)
 				.sorted(Comparator.comparing(playerPos::distSqr))
 				.limit(100)
 				.collect(Collectors.toList());

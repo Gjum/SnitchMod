@@ -30,12 +30,23 @@ public class RangesOverlayRenderer {
 		RenderSystem.multMatrix(matrices.last().pose());
 		RenderSystem.translated(-camPos.x(), -camPos.y(), -camPos.z());
 
+		RenderSystem.disableTexture();
+
+		RenderSystem.enableDepthTest();
+		RenderSystem.depthMask(true);
+
+		// need blend for alpha
+		RenderSystem.enableBlend();
+		RenderSystem.defaultBlendFunc();
+		RenderSystem.enableAlphaTest();
+
 		float r = 1;
 		float g = 1;
 		float b = 0;
 		float boxAlpha = 0.3f;
 		float lineAlpha = 1;
 		float lineWidth = 2;
+		int blockHlDist = 64;
 
 		for (Snitch snitch : getMod().getNearbySnitches(mc.player.blockPosition())) {
 			final AABB range = snitch.getAABB();
@@ -43,9 +54,15 @@ public class RangesOverlayRenderer {
 			final boolean playerInRange = range.contains(mc.player.position());
 			final AABB box = playerInRange ? range.inflate(-.01) : range.inflate(.01);
 
+			RenderSystem.enableDepthTest();
 			DebugRenderer.renderFilledBox(box, r, g, b, boxAlpha);
 
 			renderBoxOutline(box, r, g, b, lineAlpha, lineWidth);
+
+			if (snitch.distSqr(mc.player.blockPosition()) < blockHlDist * blockHlDist) {
+				RenderSystem.disableDepthTest();
+				renderBoxOutline(new AABB(snitch).inflate(.01), r, g, b, lineAlpha, lineWidth);
+			}
 		}
 
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
