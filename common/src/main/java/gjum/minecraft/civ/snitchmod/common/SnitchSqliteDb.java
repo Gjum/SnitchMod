@@ -37,7 +37,7 @@ public class SnitchSqliteDb {
 	synchronized
 	private void createTableSnitch() throws SQLException {
 		if (conn == null) return;
-		String sql = "CREATE TABLE IF NOT EXISTS snitches" +
+		String sql = "CREATE TABLE IF NOT EXISTS snitches " +
 				"( world TEXT" +
 				", x INT" +
 				", y INT" +
@@ -49,7 +49,8 @@ public class SnitchSqliteDb {
 				", cull_ts BIGINT" +
 				", first_seen_ts BIGINT" +
 				", last_seen_ts BIGINT" +
-				" PRIMARY KEY (" + pkeySnitches + "));";
+				", PRIMARY KEY (" + pkeySnitches + ")" +
+				");";
 		try (Statement stmt = conn.createStatement()) {
 			stmt.execute(sql);
 		}

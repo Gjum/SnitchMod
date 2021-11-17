@@ -46,7 +46,7 @@ public class Snitch extends WorldPos {
 		super(p.server, p.world, p.getX(), p.getY(), p.getZ());
 	}
 
-	public Snitch setFromDb(
+	public void setFromDb(
 			@Nullable String group,
 			@Nullable String type,
 			@Nullable String name,
@@ -62,7 +62,6 @@ public class Snitch extends WorldPos {
 		this.cullTs = cullTs;
 		this.firstSeenTs = firstSeenTs;
 		this.lastSeenTs = lastSeenTs;
-		return this;
 	}
 
 	public void updateFromJalist(JalistEntry jalist) {
