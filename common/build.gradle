@@ -8,7 +8,7 @@ dependencies {
 	minecraft "com.mojang:minecraft:1.16.5"
 	mappings loom.officialMojangMappings()
 
-	modImplementation "org.xerial:sqlite-jdbc:3.36.0.3"
+	implementation "org.xerial:sqlite-jdbc:3.36.0.3"
 }
 
 architectury {
