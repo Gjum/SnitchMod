@@ -33,7 +33,7 @@ public class RangesOverlayRenderer {
 		RenderSystem.disableTexture();
 
 		RenderSystem.enableDepthTest();
-		RenderSystem.depthMask(true);
+		RenderSystem.depthMask(false);
 
 		// need blend for alpha
 		RenderSystem.enableBlend();
@@ -44,7 +44,7 @@ public class RangesOverlayRenderer {
 		float r = 1;
 		float g = 1;
 		float b = 0;
-		float boxAlpha = 0.3f;
+		float boxAlpha = 0.2f;
 		float lineAlpha = 1;
 		float lineWidth = 2;
 		int blockHlDist = 64;
@@ -66,6 +66,7 @@ public class RangesOverlayRenderer {
 			}
 		}
 
+		RenderSystem.depthMask(true);
 		RenderSystem.enableCull();
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.popMatrix();
