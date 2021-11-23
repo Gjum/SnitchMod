@@ -9,11 +9,12 @@ import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Comparator;
+import java.util.stream.Stream;
 
 import static gjum.minecraft.civ.snitchmod.common.JalistStackParser.getSnitchFromStack;
 import static gjum.minecraft.civ.snitchmod.common.SnitchAlertParser.getSnitchAlertFromChat;
@@ -21,14 +22,29 @@ import static gjum.minecraft.civ.snitchmod.common.SnitchAlertParser.getSnitchAle
 public abstract class SnitchMod {
 	private static SnitchMod INSTANCE;
 
-	private static final KeyMapping toggleKey = new KeyMapping(
-			"Toggle snitch range overlay",
+	private static final KeyMapping openGuiKey = new KeyMapping(
+			"key.snitchmod.openGui",
 			InputConstants.Type.KEYSYM,
-			GLFW.GLFW_KEY_O,
-			"Snitch"
+			0,
+			"category.snitchmod"
 	);
 
-	public boolean rangeOverlayVisible = true;
+	private static final KeyMapping toggleOverlayKey = new KeyMapping(
+			"key.snitchmod.toggleOverlay",
+			InputConstants.Type.KEYSYM,
+			GLFW.GLFW_KEY_O,
+			"category.snitchmod"
+	);
+
+	private static final KeyMapping togglePlacementKey = new KeyMapping(
+			"key.snitchmod.togglePlacement",
+			InputConstants.Type.KEYSYM,
+			0,
+			"category.snitchmod"
+	);
+
+	public boolean rangeOverlayVisible = false;
+	public boolean placementHelperVisible = false;
 
 	@Nullable
 	private SnitchesStore store;
@@ -43,14 +59,21 @@ public abstract class SnitchMod {
 	}
 
 	public void init() {
-		registerKeyBinding(toggleKey);
+		registerKeyBinding(openGuiKey);
+		registerKeyBinding(toggleOverlayKey);
+		registerKeyBinding(togglePlacementKey);
 	}
 
 	public abstract void registerKeyBinding(KeyMapping mapping);
 
 	public void handleTick() {
-		while (toggleKey.consumeClick()) {
+		while (openGuiKey.consumeClick()) {
+		}
+		while (toggleOverlayKey.consumeClick()) {
 			rangeOverlayVisible = !rangeOverlayVisible;
+		}
+		while (togglePlacementKey.consumeClick()) {
+			placementHelperVisible = !placementHelperVisible;
 		}
 		// TODO if block pos changed -> if pos inside snitch range not in before -> send jainfo -> mark refreshed
 	}
@@ -90,8 +113,7 @@ public abstract class SnitchMod {
 	}
 
 	public void handleRenderBlockOverlay(PoseStack matrices, float partialTicks) {
-		if (!rangeOverlayVisible) return;
-		RangesOverlayRenderer.renderRangesOverlay(matrices, partialTicks);
+		Renderer.renderOverlays(matrices, partialTicks);
 	}
 
 	public void handleJalistEntry(JalistEntry jalistEntry) {
@@ -109,14 +131,12 @@ public abstract class SnitchMod {
 		return store.server;
 	}
 
-	public Collection<Snitch> getNearbySnitches(BlockPos playerPos) {
-		if (store == null) return Collections.emptyList();
-		final int renderDistance = 260; // TODO
+	public Stream<Snitch> streamNearbySnitches(BlockPos playerPos, int distance) {
+		if (store == null) return Stream.empty();
+		AABB aabb = new AABB(playerPos).inflate(distance);
 		return store.getAllSnitches().stream()
-				.filter(s -> playerPos.distSqr(s) < renderDistance * renderDistance)
-				.sorted(Comparator.comparing(playerPos::distSqr))
-				.limit(100)
-				.collect(Collectors.toList());
+				.filter(s -> aabb.contains(s.getX(), s.getY(), s.getZ()))
+				.sorted(Comparator.comparing(playerPos::distSqr));
 	}
 
 	/**

@@ -27,4 +27,9 @@ public class WorldPos extends BlockPos {
 	public String getWorld() {
 		return world;
 	}
+
+	@NotNull
+	public BlockPos getBlockPos() {
+		return this;
+	}
 }

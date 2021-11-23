@@ -2,7 +2,6 @@ package gjum.minecraft.civ.snitchmod.common;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import gjum.minecraft.civ.snitchmod.common.model.Snitch;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.debug.DebugRenderer;
@@ -13,10 +12,10 @@ import org.lwjgl.opengl.GL11;
 
 import static gjum.minecraft.civ.snitchmod.common.SnitchMod.getMod;
 
-public class RangesOverlayRenderer {
+public class Renderer {
 	private final static Minecraft mc = Minecraft.getInstance();
 
-	public static void renderRangesOverlay(PoseStack matrices, float partialTicks) {
+	public static void renderOverlays(PoseStack matrices, float partialTicks) {
 		if (mc.player == null) return;
 
 		final Level level = Minecraft.getInstance().level;
@@ -41,29 +40,56 @@ public class RangesOverlayRenderer {
 		RenderSystem.enableAlphaTest();
 		RenderSystem.disableCull();
 
-		float r = 1;
-		float g = 1;
-		float b = 0;
-		float boxAlpha = 0.2f;
-		float lineAlpha = 1;
-		float lineWidth = 2;
-		int blockHlDist = 64;
+		long now = System.currentTimeMillis();
 
-		for (Snitch snitch : getMod().getNearbySnitches(mc.player.blockPosition())) {
-			final AABB range = snitch.getAABB();
-			// make sure box isn't obstructed by blocks
-			final boolean playerInRange = range.contains(mc.player.position());
-			final AABB box = playerInRange ? range.inflate(-.01) : range.inflate(.01);
+		if (getMod().rangeOverlayVisible) {
+			float boxAlpha = 0.2f;
+			float lineAlpha = 1;
+			float lineWidth = 2;
+			int blockHlDist = 64;
+			int fieldDist = 260;
 
-			RenderSystem.enableDepthTest();
-			DebugRenderer.renderFilledBox(box, r, g, b, boxAlpha);
+			getMod().streamNearbySnitches(mc.player.blockPosition(), fieldDist).limit(100).forEach(snitch -> {
+				final AABB range = snitch.getAABB();
+				// make sure box isn't obstructed by blocks
+				final boolean playerInRange = range.contains(mc.player.position());
+				final AABB rangeBox = playerInRange ? range.inflate(-.01) : range.inflate(.01);
+				float r = 1;
+				float g = 1;
+				float b = 0;
+				if (snitch.getDormantTs() != 0 && snitch.getDormantTs() < now) {
+					g = .5f;
+				}
+				if (snitch.getCullTs() != 0 && snitch.getCullTs() < now) {
+					g = 0;
+				}
 
-			renderBoxOutline(box, r, g, b, lineAlpha, lineWidth);
+				RenderSystem.enableDepthTest();
+				DebugRenderer.renderFilledBox(rangeBox, r, g, b, boxAlpha);
 
-			if (snitch.distSqr(mc.player.blockPosition()) < blockHlDist * blockHlDist) {
-				RenderSystem.disableDepthTest();
-				renderBoxOutline(new AABB(snitch).inflate(.01), r, g, b, lineAlpha, lineWidth);
-			}
+				renderBoxOutline(rangeBox, r, g, b, lineAlpha, lineWidth);
+
+				if (snitch.distSqr(mc.player.blockPosition()) < blockHlDist * blockHlDist) {
+					RenderSystem.disableDepthTest();
+					final AABB blockBox = new AABB(snitch).inflate(.01);
+					renderBoxOutline(blockBox, r, g, b, lineAlpha, lineWidth);
+				}
+			});
+		}
+
+		if (getMod().placementHelperVisible) {
+			// light blue
+			float r = 0;
+			float g = 0.7f;
+			float b = 1;
+			float alpha = 0.1f;
+			int placeHelperDist = 30;
+			getMod().streamNearbySnitches(mc.player.blockPosition(), placeHelperDist).limit(100).forEach(snitch -> {
+				final boolean playerInRange = snitch.getAABB().contains(mc.player.position());
+				if (playerInRange) return; // only render helper for snitches the player isn't inside of
+				final AABB helperBox = new AABB(snitch.getBlockPos()).inflate(22.5);
+				DebugRenderer.renderFilledBox(helperBox, r, g, b, alpha);
+			});
 		}
 
 		RenderSystem.depthMask(true);
