@@ -82,9 +82,9 @@ public class Renderer {
 			float r = 0;
 			float g = 0.7f;
 			float b = 1;
-			float alpha = 0.1f;
+			float alpha = 0.2f;
 			int placeHelperDist = 30;
-			getMod().streamNearbySnitches(mc.player.blockPosition(), placeHelperDist).limit(100).forEach(snitch -> {
+			getMod().streamNearbySnitches(mc.player.blockPosition(), placeHelperDist).limit(10).forEach(snitch -> {
 				final boolean playerInRange = snitch.getAABB().contains(mc.player.position());
 				if (playerInRange) return; // only render helper for snitches the player isn't inside of
 				final AABB helperBox = new AABB(snitch.getBlockPos()).inflate(22.5);
@@ -92,6 +92,7 @@ public class Renderer {
 			});
 		}
 
+		RenderSystem.enableTexture();
 		RenderSystem.depthMask(true);
 		RenderSystem.enableCull();
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);

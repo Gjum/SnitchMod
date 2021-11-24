@@ -25,7 +25,7 @@ public abstract class SnitchMod {
 	private static final KeyMapping openGuiKey = new KeyMapping(
 			"key.snitchmod.openGui",
 			InputConstants.Type.KEYSYM,
-			0,
+			GLFW.GLFW_KEY_UNKNOWN,
 			"category.snitchmod"
 	);
 
@@ -39,7 +39,7 @@ public abstract class SnitchMod {
 	private static final KeyMapping togglePlacementKey = new KeyMapping(
 			"key.snitchmod.togglePlacement",
 			InputConstants.Type.KEYSYM,
-			0,
+			GLFW.GLFW_KEY_UNKNOWN,
 			"category.snitchmod"
 	);
 
