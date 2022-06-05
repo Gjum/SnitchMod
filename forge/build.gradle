@@ -9,7 +9,7 @@ architectury {
 
 loom {
 	forge {
-		mixinConfig "mixin.map-sync.json"
+		mixinConfig "mixin.snitchmod.json"
 	}
 }
 
