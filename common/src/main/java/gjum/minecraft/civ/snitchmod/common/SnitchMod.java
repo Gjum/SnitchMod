@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
@@ -20,12 +21,12 @@ import static gjum.minecraft.civ.snitchmod.common.JalistStackParser.getSnitchFro
 import static gjum.minecraft.civ.snitchmod.common.SnitchAlertParser.getSnitchAlertFromChat;
 
 public abstract class SnitchMod {
-	private static SnitchMod INSTANCE;
+	private final static Minecraft mc = Minecraft.getInstance();
 
 	private static final KeyMapping openGuiKey = new KeyMapping(
 			"key.snitchmod.openGui",
 			InputConstants.Type.KEYSYM,
-			GLFW.GLFW_KEY_UNKNOWN,
+			GLFW.GLFW_KEY_L,
 			"category.snitchmod"
 	);
 
@@ -39,9 +40,11 @@ public abstract class SnitchMod {
 	private static final KeyMapping togglePlacementKey = new KeyMapping(
 			"key.snitchmod.togglePlacement",
 			InputConstants.Type.KEYSYM,
-			GLFW.GLFW_KEY_UNKNOWN,
+			GLFW.GLFW_KEY_P,
 			"category.snitchmod"
 	);
+
+	private static SnitchMod INSTANCE;
 
 	public boolean rangeOverlayVisible = false;
 	public boolean placementHelperVisible = false;
@@ -68,12 +71,17 @@ public abstract class SnitchMod {
 
 	public void handleTick() {
 		while (openGuiKey.consumeClick()) {
+			// TODO open gui
 		}
 		while (toggleOverlayKey.consumeClick()) {
 			rangeOverlayVisible = !rangeOverlayVisible;
+			mc.gui.getChat().addMessage(new TextComponent(
+					"Range overlay " + (rangeOverlayVisible ? "visible" : "off")));
 		}
 		while (togglePlacementKey.consumeClick()) {
 			placementHelperVisible = !placementHelperVisible;
+			mc.gui.getChat().addMessage(new TextComponent(
+					"Placement helper " + (placementHelperVisible ? "visible" : "off")));
 		}
 		// TODO if block pos changed -> if pos inside snitch range not in before -> send jainfo -> mark refreshed
 	}
@@ -81,7 +89,7 @@ public abstract class SnitchMod {
 	public void handleConnectedToServer() {
 		if (store != null) store.close();
 		store = null;
-		final ServerData currentServer = Minecraft.getInstance().getCurrentServer();
+		final ServerData currentServer = mc.getCurrentServer();
 		if (currentServer == null) return;
 		String server = currentServer.ip;
 		store = new SnitchesStore(server);
