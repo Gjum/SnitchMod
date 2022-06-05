@@ -1,9 +1,5 @@
 plugins {
-	id "com.github.johnrengelman.shadow" version "5.0.0"
-}
-
-configurations {
-	shadowCommon
+	id "com.github.johnrengelman.shadow" version "7.0.0"
 }
 
 architectury {
@@ -11,24 +7,29 @@ architectury {
 	fabric()
 }
 
+configurations {
+	common
+	shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
+	compileClasspath.extendsFrom common
+	runtimeClasspath.extendsFrom common
+	developmentFabric.extendsFrom common
+}
+
 dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
 	modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
 
-	implementation(project(path: ":common")) {
-		transitive = false
-	}
-	developmentFabric(project(path: ":common")) {
-		transitive = false
-	}
-	shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) {
-		transitive = false
-	}
+	common(project(path: ":common", configuration: "namedElements")) { transitive false }
+	shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
+
 	minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
 	mappings loom.officialMojangMappings()
 
 	implementation "org.xerial:sqlite-jdbc:3.36.0.3"
 	shadowCommon "org.xerial:sqlite-jdbc:3.36.0.3"
+
+	modCompileOnly "curse.maven:journeymap-32274:3796377" // version 1.18.2-5.8.4-fabric
+	modCompileOnly files("../libs/voxelmap-1.18.2-1.11.2.jar")
 }
 
 processResources {
@@ -54,27 +55,23 @@ jar {
 	classifier "dev"
 }
 
-java {
-	withSourcesJar()
-}
-
 sourcesJar {
 	def commonSources = project(":common").sourcesJar
 	dependsOn commonSources
 	from commonSources.archiveFile.map { zipTree(it) }
 }
 
+components.java {
+	withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+		skip()
+	}
+}
+
 publishing {
 	publications {
 		mavenFabric(MavenPublication) {
 			artifactId = rootProject.archives_base_name + "-" + project.name
-			// add all the jars that should be included when publishing to maven
-			artifact(remapJar) {
-				classifier null
-			}
-			artifact(sourcesJar) {
-				builtBy remapSourcesJar
-			}
+			from components.java
 		}
 	}
 
