@@ -27,7 +27,7 @@ public abstract class MixinClientPacketListener {
 		}
 	}
 
-	@Inject(method = "handleContainerSetSlot", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "handleContainerSetSlot", at = @At("HEAD"))
 	protected void onHandleContainerSetSlot(ClientboundContainerSetSlotPacket packetIn, CallbackInfo ci) {
 		if (!Minecraft.getInstance().isSameThread()) {
 			// waiting for mc to call this again from the mc thread

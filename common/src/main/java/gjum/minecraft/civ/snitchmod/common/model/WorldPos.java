@@ -1,6 +1,7 @@
 package gjum.minecraft.civ.snitchmod.common.model;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 public class WorldPos extends BlockPos {
@@ -31,5 +32,9 @@ public class WorldPos extends BlockPos {
 	@NotNull
 	public BlockPos getBlockPos() {
 		return this;
+	}
+
+	public Vec3 getCenter() {
+		return new Vec3(getX() + .5, getY() + .5, getZ() + .5);
 	}
 }

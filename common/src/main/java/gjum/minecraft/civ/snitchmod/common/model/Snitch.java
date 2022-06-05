@@ -83,7 +83,7 @@ public class Snitch extends WorldPos {
 		if (lastSeenTs < alert.ts) lastSeenTs = alert.ts;
 	}
 
-	public AABB getAABB() {
+	public AABB getRangeAABB() {
 		return new AABB(this).inflate(11);
 	}
 
@@ -102,13 +102,27 @@ public class Snitch extends WorldPos {
 		return name;
 	}
 
+	public boolean hasDormantTs() {
+		return dormantTs != 0;
+	}
+
+	/**
+	 * "soft cull" date; ms since UNIX epoch.
+	 * 0 means unknown (e.g. from alert).
+	 */
 	public long getDormantTs() {
-		// TODO if 0, fallback to cullTs
 		return dormantTs;
 	}
 
+	public boolean hasCullTs() {
+		return cullTs != 0;
+	}
+
+	/**
+	 * "hard cull" date; ms since UNIX epoch.
+	 * 0 means unknown (e.g. from alert).
+	 */
 	public long getCullTs() {
-		// TODO if 0, fallback to dormantTs
 		return cullTs;
 	}
 
