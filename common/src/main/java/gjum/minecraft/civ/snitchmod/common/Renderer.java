@@ -2,43 +2,30 @@ package gjum.minecraft.civ.snitchmod.common;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.debug.DebugRenderer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.lwjgl.opengl.GL11;
 
 import static gjum.minecraft.civ.snitchmod.common.SnitchMod.getMod;
 
 public class Renderer {
 	private final static Minecraft mc = Minecraft.getInstance();
 
-	public static void renderOverlays(PoseStack matrices, float partialTicks) {
+	public static void renderOverlays(PoseStack poseStackArg, float partialTicks) {
 		if (mc.player == null) return;
+		if (mc.level == null) return;
 
-		final Level level = Minecraft.getInstance().level;
-		if (level == null) return;
+		if (mc.options.hideGui) return; // F1 mode
+		// if (mc.options.renderDebug) return; // F3 mode
 
-		RenderSystem.pushMatrix();
-
-		final Camera camera = mc.gameRenderer.getMainCamera();
-		final Vec3 camPos = camera.getPosition();
-
-		RenderSystem.multMatrix(matrices.last().pose());
-		RenderSystem.translated(-camPos.x(), -camPos.y(), -camPos.z());
-
-		RenderSystem.disableTexture();
-
-		RenderSystem.enableDepthTest();
-		RenderSystem.depthMask(false);
-
-		// need blend for alpha
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.enableAlphaTest();
-		RenderSystem.disableCull();
+		Vec3 camPos = mc.gameRenderer.getMainCamera().getPosition();
+		PoseStack modelViewStack = RenderSystem.getModelViewStack();
+		modelViewStack.pushPose();
+		modelViewStack.mulPoseMatrix(poseStackArg.last().pose());
+		modelViewStack.translate(-camPos.x, -camPos.y, -camPos.z);
+		RenderSystem.applyModelViewMatrix();
+		var poseStack = new PoseStack();
 
 		long now = System.currentTimeMillis();
 
@@ -73,6 +60,7 @@ public class Renderer {
 					RenderSystem.disableDepthTest();
 					final AABB blockBox = new AABB(snitch).inflate(.01);
 					renderBoxOutline(blockBox, r, g, b, lineAlpha, lineWidth);
+//					renderTextFacingCamera(poseStack, text, snitch, -.5f, 1); // XXX
 				}
 			});
 		}
@@ -93,17 +81,20 @@ public class Renderer {
 		}
 
 		RenderSystem.enableTexture();
+		RenderSystem.enableDepthTest();
 		RenderSystem.depthMask(true);
 		RenderSystem.enableCull();
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		RenderSystem.popMatrix();
 	}
 
 	static void renderBoxOutline(AABB box, float r, float g, float b, float a, float lineWidth) {
+		RenderSystem.disableTexture();
+		RenderSystem.disableDepthTest();
+		RenderSystem.depthMask(false);
+
 		RenderSystem.lineWidth(lineWidth);
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
-		bufferBuilder.begin(GL11.GL_LINES, DefaultVertexFormat.POSITION_COLOR);
+		bufferBuilder.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR);
 
 		bufferBuilder.vertex(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
 		bufferBuilder.vertex(box.maxX, box.minY, box.minZ).color(r, g, b, a).endVertex();
