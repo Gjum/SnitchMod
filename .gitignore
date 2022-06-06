@@ -7,7 +7,7 @@ out/
 .gradle/
 output/
 bin/
-libs/
+dist/
 
 .classpath
 .project
@@ -17,5 +17,3 @@ classes/
 .vscode
 .settings
 *.launch
-
-dist/
