@@ -18,9 +18,9 @@ public class SnitchCreatedChatParser {
 		if (!textMatch.matches()) return null;
 
 		String group = textMatch.group(2);
-		int x = Integer.parseInt(textMatch.group(5));
-		int y = Integer.parseInt(textMatch.group(6));
-		int z = Integer.parseInt(textMatch.group(7));
+		int x = Integer.parseInt(textMatch.group(4));
+		int y = Integer.parseInt(textMatch.group(5));
+		int z = Integer.parseInt(textMatch.group(6));
 
 		Snitch snitch = new Snitch(server, world, x, y, z);
 		snitch.updateFromCreation(group, clientUuid);
