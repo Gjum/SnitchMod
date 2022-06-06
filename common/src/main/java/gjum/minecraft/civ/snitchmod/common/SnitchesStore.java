@@ -51,6 +51,7 @@ public class SnitchesStore {
 		// don't reuse any existing snitch, it no longer exists, only the new snitch does
 		snitches.put(getId(snitch), snitch);
 		if (db != null) db.upsertSnitch(snitch);
+		// TODO remember last created snitch for placement helper
 	}
 
 	@Nullable

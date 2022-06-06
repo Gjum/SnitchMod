@@ -18,8 +18,6 @@ import java.util.Comparator;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static gjum.minecraft.civ.snitchmod.common.model.JalistStackParser.getJalistEntryFromStack;
-import static gjum.minecraft.civ.snitchmod.common.model.SnitchAlertParser.getSnitchAlertFromChat;
 import static gjum.minecraft.civ.snitchmod.common.model.SnitchCreatedChatParser.getSnitchCreationFromChat;
 
 public abstract class SnitchMod {
@@ -106,41 +104,27 @@ public abstract class SnitchMod {
 	 * Returns true when the packet should be dropped
 	 */
 	public boolean handleChat(Component message) {
-		SnitchAlert snitchAlert = getSnitchAlertFromChat(message, getCurrentServer());
-		if (snitchAlert != null) handleSnitchAlert(snitchAlert);
+		if (store == null) return false;
+
+		SnitchAlert snitchAlert = SnitchAlert.fromChat(message, getCurrentServer());
+		if (snitchAlert != null) store.updateSnitchFromAlert(snitchAlert);
+
 		Snitch snitchCreated = getSnitchCreationFromChat(message, getCurrentServer(), getCurrentWorld(), getClientUuid());
-		if (snitchCreated != null) handleSnitchCreation(snitchCreated);
+		if (snitchCreated != null) store.updateSnitchFromCreation(snitchCreated);
+
 		// TODO any broken snitch messages (own, hostile) -> mark snitch as broken
 		// TODO if chat is jainfo and can refresh group -> mark refreshed
 		return false;
 	}
 
 	public void handleSetSlot(ItemStack stack) {
-		JalistEntry jalistEntry = getJalistEntryFromStack(
-				stack,
-				getCurrentServer(),
-				getSnitchCullDurationForServer(getCurrentServer()));
-		if (jalistEntry != null) handleJalistEntry(jalistEntry);
+		if (store == null) return;
+		JalistEntry jalistEntry = JalistEntry.fromStack(stack, getCurrentServer());
+		if (jalistEntry != null) store.updateSnitchFromJalist(jalistEntry);
 	}
 
 	public void handleRenderBlockOverlay(PoseStack matrices, float partialTicks) {
 		Renderer.renderOverlays(matrices, partialTicks);
-	}
-
-	public void handleJalistEntry(JalistEntry jalistEntry) {
-		if (store == null) return;
-		store.updateSnitchFromJalist(jalistEntry);
-	}
-
-	public void handleSnitchAlert(SnitchAlert snitchAlert) {
-		if (store == null) return;
-		store.updateSnitchFromAlert(snitchAlert);
-	}
-
-	public void handleSnitchCreation(Snitch snitch) {
-		if (store == null) return;
-		store.updateSnitchFromCreation(snitch);
-		// TODO remember last created snitch for placement helper
 	}
 
 	public String getCurrentServer() {
@@ -164,12 +148,5 @@ public abstract class SnitchMod {
 		return store.getAllSnitches().stream()
 				.filter(s -> aabb.contains(s.getX(), s.getY(), s.getZ()))
 				.sorted(Comparator.comparing(playerPos::distSqr));
-	}
-
-	/**
-	 * milliseconds
-	 */
-	public long getSnitchCullDurationForServer(String server) {
-		return 4L * 7L * 24L * 60L * 60L * 1000L; // 4 weeks (CivClassic config) TODO other servers CullDuration
 	}
 }
