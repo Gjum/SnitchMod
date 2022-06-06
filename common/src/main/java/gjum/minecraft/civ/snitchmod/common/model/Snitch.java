@@ -104,6 +104,13 @@ public class Snitch extends WorldPos {
 		// TODO set dormantTs/cullTs from server config
 	}
 
+	public void updateFromBroken(SnitchBroken snitchBroken) {
+		this.group = snitchBroken.group;
+		lastSeenTs = System.currentTimeMillis();
+		dormantTs = 0;
+		cullTs = 0;
+	}
+
 	public AABB getRangeAABB() {
 		return new AABB(this).inflate(11);
 	}

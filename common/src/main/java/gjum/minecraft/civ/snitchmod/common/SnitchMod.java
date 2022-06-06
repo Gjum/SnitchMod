@@ -10,6 +10,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -106,20 +108,36 @@ public abstract class SnitchMod {
 	public boolean handleChat(Component message) {
 		if (store == null) return false;
 
-		SnitchAlert snitchAlert = SnitchAlert.fromChat(message, getCurrentServer());
+		SnitchAlert snitchAlert = SnitchAlert.fromChat(message, store.server);
 		if (snitchAlert != null) store.updateSnitchFromAlert(snitchAlert);
 
-		Snitch snitchCreated = getSnitchCreationFromChat(message, getCurrentServer(), getCurrentWorld(), getClientUuid());
+		Snitch snitchCreated = getSnitchCreationFromChat(message, store.server, getCurrentWorld(), getClientUuid());
 		if (snitchCreated != null) store.updateSnitchFromCreation(snitchCreated);
 
-		// TODO any broken snitch messages (own, hostile) -> mark snitch as broken
+		long now = System.currentTimeMillis();
+		if (lastBrokenBlockTs > now - 1000 && lastBrokenBlockPos != null) {
+			SnitchBroken snitchBroken = SnitchBroken.fromChat(message, lastBrokenBlockPos, store.server, getCurrentWorld());
+			if (snitchBroken != null) store.updateSnitchBroken(snitchBroken);
+		}
+
 		// TODO if chat is jainfo and can refresh group -> mark refreshed
+
 		return false;
+	}
+
+	private BlockPos lastBrokenBlockPos;
+	private long lastBrokenBlockTs;
+
+	public void handleBlockUpdate(BlockPos pos, BlockState blockState) {
+		if (blockState == Blocks.AIR.defaultBlockState()) {
+			lastBrokenBlockPos = pos;
+			lastBrokenBlockTs = System.currentTimeMillis();
+		}
 	}
 
 	public void handleSetSlot(ItemStack stack) {
 		if (store == null) return;
-		JalistEntry jalistEntry = JalistEntry.fromStack(stack, getCurrentServer());
+		JalistEntry jalistEntry = JalistEntry.fromStack(stack, store.server);
 		if (jalistEntry != null) store.updateSnitchFromJalist(jalistEntry);
 	}
 

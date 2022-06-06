@@ -54,6 +54,11 @@ public class SnitchesStore {
 		// TODO remember last created snitch for placement helper
 	}
 
+	public void updateSnitchBroken(SnitchBroken snitchBroken) {
+		Snitch snitch = snitches.getOrDefault(getId(snitchBroken), new Snitch(snitchBroken));
+		snitch.updateFromBroken(snitchBroken);
+	}
+
 	@Nullable
 	public Snitch deleteSnitch(WorldPos pos) {
 		Snitch snitch = snitches.remove(getId(pos));
