@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.*;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -27,14 +28,16 @@ public abstract class MixinClientPacketListener {
 		}
 	}
 
-	@Inject(method = "handleContainerSetSlot", at = @At("HEAD"))
-	protected void onHandleContainerSetSlot(ClientboundContainerSetSlotPacket packetIn, CallbackInfo ci) {
+	@Inject(method = "handleContainerContent", at = @At("HEAD"))
+	protected void onHandleContainerContent(ClientboundContainerSetContentPacket packetIn, CallbackInfo ci) {
 		if (!Minecraft.getInstance().isSameThread()) {
 			// waiting for mc to call this again from the mc thread
 			return; // continue method normally
 		}
 		try {
-			getMod().handleSetSlot(packetIn.getItem());
+			for (ItemStack slot : packetIn.getItems()) {
+				getMod().handleSetSlot(slot);
+			}
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}

@@ -17,7 +17,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
-import static gjum.minecraft.civ.snitchmod.common.JalistStackParser.getSnitchFromStack;
+import static gjum.minecraft.civ.snitchmod.common.JalistStackParser.getJalistEntryFromStack;
 import static gjum.minecraft.civ.snitchmod.common.SnitchAlertParser.getSnitchAlertFromChat;
 
 public abstract class SnitchMod {
@@ -113,7 +113,7 @@ public abstract class SnitchMod {
 	}
 
 	public void handleSetSlot(ItemStack stack) {
-		JalistEntry jalistEntry = getSnitchFromStack(
+		JalistEntry jalistEntry = getJalistEntryFromStack(
 				stack,
 				getCurrentServer(),
 				getSnitchCullDurationForServer(getCurrentServer()));

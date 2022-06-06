@@ -12,13 +12,16 @@ import org.jetbrains.annotations.Nullable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static net.minecraft.nbt.Tag.TAG_LIST;
+import static net.minecraft.nbt.Tag.TAG_STRING;
+
 public class JalistStackParser {
 	static Pattern locationPattern = Pattern.compile("^Location: (?:([A-Za-z][^ ]+),? )?([-0-9]+),? ([-0-9]+),? ([-0-9]+)");
 	static Pattern groupPattern = Pattern.compile("^Group: ([^ ]+)");
 	static Pattern lifetimePattern = Pattern.compile("^Will (cull|go dormant) in ([0-9]+) h(?:our)?s? ([0-9]+) min(?:ute)?s? ([0-9]+) sec(?:ond)?s?");
 
 	@Nullable
-	public static JalistEntry getSnitchFromStack(ItemStack stack, @NotNull String server, long cullDuration) {
+	public static JalistEntry getJalistEntryFromStack(ItemStack stack, @NotNull String server, long cullDuration) {
 		String type;
 		if (stack.getItem() == Items.NOTE_BLOCK) {
 			type = "noteblock";
@@ -28,13 +31,12 @@ public class JalistStackParser {
 
 		CompoundTag displayTag = stack.getTagElement("display");
 		if (displayTag == null) return null;
-		if (displayTag.getTagType("Name") != 8) return null;
-		if (displayTag.getTagType("Lore") != 9) return null;
+		if (displayTag.getTagType("Name") != TAG_STRING) return null;
+		if (displayTag.getTagType("Lore") !=TAG_LIST) return null;
 
-		String name = getStringFromChatJson(
-				displayTag.getString("Name"));
+		String name = getStringFromChatJson(displayTag.getString("Name"));
 
-		ListTag lores = displayTag.getList("Lore", 8);
+		ListTag lores = displayTag.getList("Lore", TAG_STRING);
 		if (lores.size() < 3) return null;
 
 		Matcher locationMatch = locationPattern.matcher(
