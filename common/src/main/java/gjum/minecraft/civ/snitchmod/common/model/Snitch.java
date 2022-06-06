@@ -4,6 +4,8 @@ import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.UUID;
+
 public class Snitch extends WorldPos {
 	@Nullable
 	private String group;
@@ -24,6 +26,16 @@ public class Snitch extends WorldPos {
 	 * 0 means unknown (e.g. from alert).
 	 */
 	private long cullTs;
+	/**
+	 * who created the snitch.
+	 * null means unknown who created it.
+	 */
+	private @Nullable UUID creatorUuid;
+	/**
+	 * when snitch was created; ms since UNIX epoch.
+	 * 0 means unknown when it was created.
+	 */
+	private long createdTs;
 	/**
 	 * when snitch was first seen; ms since UNIX epoch.
 	 * 0 means unknown (e.g. never seen).
@@ -83,6 +95,15 @@ public class Snitch extends WorldPos {
 		if (lastSeenTs < alert.ts) lastSeenTs = alert.ts;
 	}
 
+	public void updateFromCreation(String group, UUID creatorUuid) {
+		this.group = group;
+		this.creatorUuid = creatorUuid;
+		createdTs = System.currentTimeMillis();
+		firstSeenTs = createdTs;
+		lastSeenTs = createdTs;
+		// TODO set dormantTs/cullTs from server config
+	}
+
 	public AABB getRangeAABB() {
 		return new AABB(this).inflate(11);
 	}
@@ -124,6 +145,14 @@ public class Snitch extends WorldPos {
 	 */
 	public long getCullTs() {
 		return cullTs;
+	}
+
+	public @Nullable UUID getCreatorUuid() {
+		return creatorUuid;
+	}
+
+	public long getCreatedTs() {
+		return createdTs;
 	}
 
 	public long getFirstSeenTs() {

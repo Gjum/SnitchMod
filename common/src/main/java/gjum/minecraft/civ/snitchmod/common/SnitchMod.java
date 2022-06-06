@@ -15,10 +15,12 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Comparator;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static gjum.minecraft.civ.snitchmod.common.model.JalistStackParser.getJalistEntryFromStack;
 import static gjum.minecraft.civ.snitchmod.common.model.SnitchAlertParser.getSnitchAlertFromChat;
+import static gjum.minecraft.civ.snitchmod.common.model.SnitchCreatedChatParser.getSnitchCreationFromChat;
 
 public abstract class SnitchMod {
 	private final static Minecraft mc = Minecraft.getInstance();
@@ -106,8 +108,9 @@ public abstract class SnitchMod {
 	public boolean handleChat(Component message) {
 		SnitchAlert snitchAlert = getSnitchAlertFromChat(message, getCurrentServer());
 		if (snitchAlert != null) handleSnitchAlert(snitchAlert);
-		// TODO snitch created message -> remember for placement helper
-		// TODO any broken snitch messages (own, hostile) -> delete snitch
+		Snitch snitchCreated = getSnitchCreationFromChat(message, getCurrentServer(), getCurrentWorld(), getClientUuid());
+		if (snitchCreated != null) handleSnitchCreation(snitchCreated);
+		// TODO any broken snitch messages (own, hostile) -> mark snitch as broken
 		// TODO if chat is jainfo and can refresh group -> mark refreshed
 		return false;
 	}
@@ -134,9 +137,25 @@ public abstract class SnitchMod {
 		store.updateSnitchFromAlert(snitchAlert);
 	}
 
+	public void handleSnitchCreation(Snitch snitch) {
+		if (store == null) return;
+		store.updateSnitchFromCreation(snitch);
+		// TODO remember last created snitch for placement helper
+	}
+
 	public String getCurrentServer() {
 		if (store == null) return null;
 		return store.server;
+	}
+
+	public String getCurrentWorld() {
+		if (mc.level == null) return null;
+		return mc.level.dimension().location().getPath();
+	}
+
+	public UUID getClientUuid() {
+		if (mc.player == null) return null;
+		return mc.player.getUUID();
 	}
 
 	public Stream<Snitch> streamNearbySnitches(BlockPos playerPos, int distance) {

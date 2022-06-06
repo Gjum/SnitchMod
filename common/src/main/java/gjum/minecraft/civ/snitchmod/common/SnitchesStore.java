@@ -47,6 +47,12 @@ public class SnitchesStore {
 		if (db != null) db.upsertSnitch(snitch);
 	}
 
+	public void updateSnitchFromCreation(Snitch snitch) {
+		// don't reuse any existing snitch, it no longer exists, only the new snitch does
+		snitches.put(getId(snitch), snitch);
+		if (db != null) db.upsertSnitch(snitch);
+	}
+
 	@Nullable
 	public Snitch deleteSnitch(WorldPos pos) {
 		Snitch snitch = snitches.remove(getId(pos));
