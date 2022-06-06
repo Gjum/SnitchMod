@@ -15,8 +15,7 @@ import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.Comparator;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static gjum.minecraft.civ.snitchmod.common.model.SnitchCreatedChatParser.getSnitchCreationFromChat;
@@ -110,7 +109,7 @@ public abstract class SnitchMod {
 	public void handleTick() {
 		while (openGuiKey.consumeClick()) {
 			// TODO open gui
-			mc.gui.getChat().addMessage(new TextComponent(
+			logToChat(new TextComponent(
 					"GUI does not exist in this version :( Check for updates: " +
 							"https://github.com/Gjum/SnitchMod/releases"
 			).setStyle(Style.EMPTY.withClickEvent(new ClickEvent(
@@ -119,13 +118,13 @@ public abstract class SnitchMod {
 		}
 		while (toggleOverlayKey.consumeClick()) {
 			rangeOverlayVisible = !rangeOverlayVisible;
-			mc.gui.getChat().addMessage(new TextComponent(
-					"Range overlay " + (rangeOverlayVisible ? "visible" : "off")));
+			logToChat(new TextComponent(
+					"Range overlay " + (rangeOverlayVisible ? "visible" : "hidden")));
 		}
 		while (togglePlacementKey.consumeClick()) {
 			placementHelperVisible = !placementHelperVisible;
-			mc.gui.getChat().addMessage(new TextComponent(
-					"Placement helper " + (placementHelperVisible ? "visible" : "off")));
+			logToChat(new TextComponent(
+					"Placement helper " + (placementHelperVisible ? "visible" : "hidden")));
 		}
 		// TODO if block pos changed -> if pos inside snitch range not in before -> send jainfo -> mark refreshed
 	}
@@ -164,11 +163,29 @@ public abstract class SnitchMod {
 		}
 	}
 
-	public void handleSetSlot(ItemStack stack) {
+	public void handleWindowItems(List<ItemStack> stacks) {
 		getStore();
 		if (store == null) return;
-		JalistEntry jalistEntry = JalistEntry.fromStack(stack, store.server);
-		if (jalistEntry != null) store.updateSnitchFromJalist(jalistEntry);
+		int foundSnitches = 0;
+		for (int i = 0; i < stacks.size(); i++) {
+			ItemStack stack = stacks.get(i);
+			try {
+				JalistEntry jalistEntry = JalistEntry.fromStack(stack, store.server);
+				if (jalistEntry != null) {
+					foundSnitches++;
+					store.updateSnitchFromJalist(jalistEntry);
+				}
+			} catch (Throwable e) {
+				System.err.println("Failed parsing jalist stack " + i + " " + stack);
+				e.printStackTrace();
+				logToChat(new TextComponent(
+						"Failed reading snitch " + i + " on JAList page"));
+			}
+		}
+		if (foundSnitches > 0) {
+			logToChat(new TextComponent(
+					"Found " + foundSnitches + " snitches on JAList page"));
+		}
 	}
 
 	public void handleRenderBlockOverlay(PoseStack matrices, float partialTicks) {
@@ -182,5 +199,9 @@ public abstract class SnitchMod {
 		return store.getAllSnitches().stream()
 				.filter(s -> aabb.contains(s.getX(), s.getY(), s.getZ()))
 				.sorted(Comparator.comparing(playerPos::distSqr));
+	}
+
+	private void logToChat(Component msg) {
+		mc.gui.getChat().addMessage(new TextComponent("[SnitchMod] ").append(msg));
 	}
 }
