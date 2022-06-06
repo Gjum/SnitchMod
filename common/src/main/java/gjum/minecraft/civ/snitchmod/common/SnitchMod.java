@@ -71,6 +71,43 @@ public abstract class SnitchMod {
 
 	public abstract void registerKeyBinding(KeyMapping mapping);
 
+	public @Nullable String getCurrentServer() {
+		final ServerData currentServer = mc.getCurrentServer();
+		if (currentServer == null) return null;
+		return currentServer.ip;
+	}
+
+	public String getCurrentWorld() {
+		if (mc.level == null) return null;
+		return mc.level.dimension().location().getPath();
+	}
+
+	public UUID getClientUuid() {
+		if (mc.player == null) return null;
+		return mc.player.getUUID();
+	}
+
+	public @Nullable SnitchesStore getStore() {
+		String server = getCurrentServer();
+		if (store != null && !store.server.equals(server)) {
+			store.close();
+			store = null;
+		}
+		if (store == null && server != null) {
+			store = new SnitchesStore(server);
+		}
+		return store;
+	}
+
+	public void handleConnectedToServer() {
+		getStore();
+	}
+
+	public void handleDisconnectedFromServer() {
+		if (store != null) store.close();
+		store = null;
+	}
+
 	public void handleTick() {
 		while (openGuiKey.consumeClick()) {
 			// TODO open gui
@@ -88,24 +125,11 @@ public abstract class SnitchMod {
 		// TODO if block pos changed -> if pos inside snitch range not in before -> send jainfo -> mark refreshed
 	}
 
-	public void handleConnectedToServer() {
-		if (store != null) store.close();
-		store = null;
-		final ServerData currentServer = mc.getCurrentServer();
-		if (currentServer == null) return;
-		String server = currentServer.ip;
-		store = new SnitchesStore(server);
-	}
-
-	public void handleDisconnectedFromServer() {
-		if (store != null) store.close();
-		store = null;
-	}
-
 	/**
 	 * Returns true when the packet should be dropped
 	 */
 	public boolean handleChat(Component message) {
+		getStore();
 		if (store == null) return false;
 
 		SnitchAlert snitchAlert = SnitchAlert.fromChat(message, store.server);
@@ -136,6 +160,7 @@ public abstract class SnitchMod {
 	}
 
 	public void handleSetSlot(ItemStack stack) {
+		getStore();
 		if (store == null) return;
 		JalistEntry jalistEntry = JalistEntry.fromStack(stack, store.server);
 		if (jalistEntry != null) store.updateSnitchFromJalist(jalistEntry);
@@ -145,22 +170,8 @@ public abstract class SnitchMod {
 		Renderer.renderOverlays(matrices, partialTicks);
 	}
 
-	public String getCurrentServer() {
-		if (store == null) return null;
-		return store.server;
-	}
-
-	public String getCurrentWorld() {
-		if (mc.level == null) return null;
-		return mc.level.dimension().location().getPath();
-	}
-
-	public UUID getClientUuid() {
-		if (mc.player == null) return null;
-		return mc.player.getUUID();
-	}
-
 	public Stream<Snitch> streamNearbySnitches(BlockPos playerPos, int distance) {
+		getStore();
 		if (store == null) return Stream.empty();
 		AABB aabb = new AABB(playerPos).inflate(distance);
 		return store.getAllSnitches().stream()
