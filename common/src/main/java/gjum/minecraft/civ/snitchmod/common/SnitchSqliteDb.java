@@ -80,6 +80,7 @@ public class SnitchSqliteDb {
 				snitches.add(snitch);
 			}
 		} catch (SQLException e) {
+			System.err.println("Failed loading all snitches");
 			e.printStackTrace();
 		}
 		return snitches;
@@ -114,6 +115,7 @@ public class SnitchSqliteDb {
 
 			pstmt.executeUpdate();
 		} catch (SQLException e) {
+			System.err.println("Failed updating snitch " + snitch);
 			e.printStackTrace();
 		}
 	}
@@ -131,6 +133,7 @@ public class SnitchSqliteDb {
 
 			pstmt.executeUpdate();
 		} catch (SQLException e) {
+			System.err.println("Failed deleting snitch at " + pos);
 			e.printStackTrace();
 		}
 	}
