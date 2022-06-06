@@ -17,8 +17,8 @@ import org.lwjgl.glfw.GLFW;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
-import static gjum.minecraft.civ.snitchmod.common.JalistStackParser.getJalistEntryFromStack;
-import static gjum.minecraft.civ.snitchmod.common.SnitchAlertParser.getSnitchAlertFromChat;
+import static gjum.minecraft.civ.snitchmod.common.model.JalistStackParser.getJalistEntryFromStack;
+import static gjum.minecraft.civ.snitchmod.common.model.SnitchAlertParser.getSnitchAlertFromChat;
 
 public abstract class SnitchMod {
 	private final static Minecraft mc = Minecraft.getInstance();

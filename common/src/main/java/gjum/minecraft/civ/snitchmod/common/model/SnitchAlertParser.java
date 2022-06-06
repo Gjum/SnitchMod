@@ -1,4 +1,4 @@
-package gjum.minecraft.civ.snitchmod.common;
+package gjum.minecraft.civ.snitchmod.common.model;
 
 import gjum.minecraft.civ.snitchmod.common.model.SnitchAlert;
 import net.minecraft.network.chat.Component;
