@@ -5,8 +5,7 @@ import gjum.minecraft.civ.snitchmod.common.model.WorldPos;
 
 import java.io.File;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 
 public class SnitchSqliteDb {
 	public final String server;
@@ -137,9 +136,9 @@ public class SnitchSqliteDb {
 			pstmt.setLong(++i, snitch.getFirstSeenTs());
 			pstmt.setLong(++i, snitch.getLastSeenTs());
 			pstmt.setLong(++i, snitch.getCreatedTs());
-			pstmt.setString(++i, snitch.getCreatedByUuid().toString());
+			pstmt.setString(++i, uuidStringOrNull(snitch.getCreatedByUuid()));
 			pstmt.setLong(++i, snitch.getRenamedTs());
-			pstmt.setString(++i, snitch.getRenamedByUuid().toString());
+			pstmt.setString(++i, uuidStringOrNull(snitch.getRenamedByUuid()));
 			pstmt.setLong(++i, snitch.getLostJalistAccessTs());
 			pstmt.setLong(++i, snitch.getBrokenTs());
 			pstmt.setLong(++i, snitch.getGoneTs());
@@ -149,6 +148,11 @@ public class SnitchSqliteDb {
 			System.err.println("Failed updating snitch " + snitch);
 			e.printStackTrace();
 		}
+	}
+
+	private static String uuidStringOrNull(UUID uuid) {
+		if (uuid == null) return null;
+		return uuid.toString();
 	}
 
 	synchronized
