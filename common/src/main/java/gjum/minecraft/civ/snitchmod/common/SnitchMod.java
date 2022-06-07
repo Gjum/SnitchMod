@@ -77,7 +77,14 @@ public abstract class SnitchMod {
 
 	public String getCurrentWorld() {
 		if (mc.level == null) return null;
-		return mc.level.dimension().location().getPath();
+		String dimension = mc.level.dimension().location().getPath();
+		// civ server world names as they occur in snitches are different from dimension names
+		return switch (dimension) {
+			case "overworld" -> "world";
+			case "the_nether" -> "world_the_nether";
+			case "the_end" -> "world_the_end";
+			default -> dimension;
+		};
 	}
 
 	public UUID getClientUuid() {
