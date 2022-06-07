@@ -41,7 +41,7 @@ public abstract class MixinClientPacketListener {
 	}
 
 	@Inject(method = "handleBlockUpdate", at = @At("HEAD"))
-	protected void onHandleContainerContent(ClientboundBlockUpdatePacket packetIn, CallbackInfo ci) {
+	protected void onHandleBlockUpdate(ClientboundBlockUpdatePacket packetIn, CallbackInfo ci) {
 		if (!Minecraft.getInstance().isSameThread()) {
 			// waiting for mc to call this again from the mc thread
 			return; // continue method normally
