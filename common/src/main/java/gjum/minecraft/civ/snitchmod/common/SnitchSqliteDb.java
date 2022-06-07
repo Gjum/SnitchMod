@@ -15,9 +15,10 @@ public class SnitchSqliteDb {
 
 	public SnitchSqliteDb(String server) throws ClassNotFoundException, SQLException {
 		this.server = server;
-		new File("SnitchMod/" + server).mkdirs();
+		String serverDir = server.replaceAll(":", "~");
+		new File("SnitchMod/" + serverDir).mkdirs();
 		Class.forName("org.sqlite.JDBC"); // load driver
-		conn = DriverManager.getConnection("jdbc:sqlite:SnitchMod/" + server + "/snitches.sqlite");
+		conn = DriverManager.getConnection("jdbc:sqlite:SnitchMod/" + serverDir + "/snitches.sqlite");
 		createTableSnitch();
 	}
 
