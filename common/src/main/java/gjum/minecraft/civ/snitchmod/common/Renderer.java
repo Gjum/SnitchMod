@@ -130,6 +130,11 @@ public class Renderer {
 	}
 
 	private static void renderPlacementHelper(Snitch snitch) {
+		if (snitch.isGone()) return;
+		long now = System.currentTimeMillis();
+		if (snitch.hasCullTs() && snitch.getCullTs() < now) return;
+		if (snitch.hasDormantTs() && snitch.getDormantTs() < now) return;
+
 		// light blue
 		float r = 0;
 		float g = 0.7f;
