@@ -94,6 +94,7 @@ public class Snitch extends WorldPos {
 		dormantTs = jalist.dormantTs;
 		cullTs = jalist.cullTs;
 		updateSeen(jalist.ts);
+		lostJalistAccessTs = 0;
 	}
 
 	public void updateFromAlert(SnitchAlert alert) {
