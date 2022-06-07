@@ -4,7 +4,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import gjum.minecraft.civ.snitchmod.common.model.Snitch;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.debug.DebugRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -107,14 +106,15 @@ public class Renderer {
 			}
 
 			final String livelinessText;
-			if (snitch.hasDormantTs() && snitch.getDormantTs() > now) {
-				// prefer known good state
+			if (snitch.wasBroken()) {
+				livelinessText = "broken " + timestampRelativeText(snitch.getBrokenTs());
+			} else if (snitch.isGone()) {
+				livelinessText = "gone " + timestampRelativeText(snitch.getGoneTs());
+			} else if (snitch.hasDormantTs() && snitch.getDormantTs() > now) {
 				livelinessText = "deactivates " + timestampRelativeText(snitch.getDormantTs());
 			} else if (snitch.hasCullTs() && snitch.getCullTs() < now) {
-				// prefer known bad state
 				livelinessText = "culled " + timestampRelativeText(snitch.getCullTs());
 			} else if (snitch.hasCullTs() && snitch.getCullTs() > now) {
-				// prefer future
 				livelinessText = "culls " + timestampRelativeText(snitch.getCullTs());
 			} else if (snitch.hasDormantTs() && snitch.getDormantTs() < now) {
 				livelinessText = "deactivated " + timestampRelativeText(snitch.getDormantTs());
