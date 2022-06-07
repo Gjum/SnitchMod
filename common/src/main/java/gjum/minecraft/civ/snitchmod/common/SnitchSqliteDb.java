@@ -62,7 +62,6 @@ public class SnitchSqliteDb {
 				", PRIMARY KEY (" + pkeySnitches + ")" +
 				");";
 		try (Statement stmt = conn.createStatement()) {
-			System.err.println("Failed creating table " + tableSnitches);
 			stmt.execute(sql);
 		}
 	}
@@ -107,7 +106,7 @@ public class SnitchSqliteDb {
 	synchronized
 	public void upsertSnitch(Snitch snitch) {
 		if (conn == null) return;
-		String sql = "INSERT INTO " + tableSnitches + " (world,x,y,z,group_name,type,name,dormant_ts,cull_ts,first_seen_ts,last_seen_ts,created_ts,created_by_uuid,renamed_ts,renamed_by_uuid,lost_jalist_access_ts,broken_ts,gone_ts)" +
+		String sql = "INSERT INTO " + tableSnitches + " (world,x,y,z,group_name,type,name,dormant_ts,cull_ts,first_seen_ts,last_seen_ts,created_ts,created_by_uuid,renamed_ts,renamed_by_uuid,lost_jalist_access_ts,broken_ts,gone_ts,tags,notes)" +
 				" VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)" +
 				"ON CONFLICT (" + pkeySnitches + ") DO UPDATE SET " +
 				"group_name = excluded.group_name," +
