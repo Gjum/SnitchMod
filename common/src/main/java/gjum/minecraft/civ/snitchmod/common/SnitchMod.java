@@ -7,7 +7,8 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -115,13 +116,11 @@ public abstract class SnitchMod {
 
 	public void handleTick() {
 		while (openGuiKey.consumeClick()) {
-			// TODO open gui
-			logToChat(new TextComponent(
-					"GUI does not exist in this version :( Check for updates: " +
-							"https://github.com/Gjum/SnitchMod/releases"
-			).setStyle(Style.EMPTY.withClickEvent(new ClickEvent(
-					ClickEvent.Action.OPEN_URL,
-					"https://github.com/Gjum/SnitchMod/releases"))));
+			// TODO open gui, and rename keybind
+			store.close();
+			store = null;
+			getStore();
+			logToChat(new TextComponent("Reloaded the database"));
 		}
 		while (toggleOverlayKey.consumeClick()) {
 			rangeOverlayVisible = !rangeOverlayVisible;
