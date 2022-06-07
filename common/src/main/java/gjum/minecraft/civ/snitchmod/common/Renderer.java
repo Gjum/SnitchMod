@@ -56,6 +56,9 @@ public class Renderer {
 	}
 
 	private static void renderSnitch(Snitch snitch) {
+		if (snitch.wasBroken()) return;
+		// but still show culled/gone snitches
+
 		float boxAlpha = 0.2f;
 		float lineAlpha = 1;
 		float lineWidth = 2;
@@ -65,7 +68,7 @@ public class Renderer {
 
 		final AABB range = snitch.getRangeAABB();
 
-		// inflate/deflate so the box face isn't obstructed by adjacent blocks
+		// inflate/deflate so the box face isn't obscured by adjacent blocks
 		final boolean playerInRange = range.contains(mc.player.position());
 		AABB rangeBox = playerInRange ? range.inflate(-.01) : range.inflate(.01);
 
@@ -73,11 +76,11 @@ public class Renderer {
 		float r = 1;
 		float g = 1;
 		float b = 0;
-
-		if (snitch.hasCullTs() && snitch.getCullTs() < now)
+		if (snitch.hasCullTs() && snitch.getCullTs() < now) {
 			g = 0; // red
-		else if (snitch.hasDormantTs() && snitch.getDormantTs() < now)
+		} else if (snitch.hasDormantTs() && snitch.getDormantTs() < now) {
 			g = .5f; // orange
+		}
 
 		RenderSystem.enableDepthTest();
 		RenderSystem.enableBlend();
