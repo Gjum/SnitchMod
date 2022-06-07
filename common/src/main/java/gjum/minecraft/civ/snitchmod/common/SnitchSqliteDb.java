@@ -57,6 +57,8 @@ public class SnitchSqliteDb {
 				", lost_jalist_access_ts BIGINT" +
 				", broken_ts BIGINT" +
 				", gone_ts BIGINT" +
+				", tags TEXT" +
+				", notes TEXT" +
 				", PRIMARY KEY (" + pkeySnitches + ")" +
 				");";
 		try (Statement stmt = conn.createStatement()) {
@@ -106,7 +108,7 @@ public class SnitchSqliteDb {
 	public void upsertSnitch(Snitch snitch) {
 		if (conn == null) return;
 		String sql = "INSERT INTO " + tableSnitches + " (world,x,y,z,group_name,type,name,dormant_ts,cull_ts,first_seen_ts,last_seen_ts,created_ts,created_by_uuid,renamed_ts,renamed_by_uuid,lost_jalist_access_ts,broken_ts,gone_ts)" +
-				" VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)" +
+				" VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)" +
 				"ON CONFLICT (" + pkeySnitches + ") DO UPDATE SET " +
 				"group_name = excluded.group_name," +
 				"type = excluded.type," +
@@ -121,7 +123,9 @@ public class SnitchSqliteDb {
 				"renamed_by_uuid = excluded.renamed_by_uuid," +
 				"lost_jalist_access_ts = excluded.lost_jalist_access_ts," +
 				"broken_ts = excluded.broken_ts," +
-				"gone_ts = excluded.gone_ts";
+				"gone_ts = excluded.gone_ts," +
+				"tags = excluded.tags," +
+				"notes = excluded.notes";
 		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
 			int i = 0;
 			pstmt.setString(++i, snitch.getWorld());
@@ -142,6 +146,8 @@ public class SnitchSqliteDb {
 			pstmt.setLong(++i, snitch.getLostJalistAccessTs());
 			pstmt.setLong(++i, snitch.getBrokenTs());
 			pstmt.setLong(++i, snitch.getGoneTs());
+			pstmt.setString(++i, String.join("\n", snitch.getTags()));
+			pstmt.setString(++i, snitch.getNotes());
 
 			pstmt.executeUpdate();
 		} catch (SQLException e) {

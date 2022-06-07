@@ -71,6 +71,7 @@ public class Snitch extends WorldPos {
 		this.lostJalistAccessTs = lostJalistAccessTs;
 		this.brokenTs = brokenTs;
 		this.goneTs = goneTs;
+		// TODO move deserialization logic to database
 		this.tags.clear();
 		if (tags != null && !tags.isEmpty()) {
 			this.tags.addAll(Arrays.asList(tags.split("\n")));
