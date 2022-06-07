@@ -4,48 +4,29 @@ import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.UUID;
+import java.util.*;
 
 public class Snitch extends WorldPos {
-	@Nullable
-	private String group;
-	/**
-	 * block id: NOTEBLOCK or JUKEBOX
-	 */
-	@Nullable
-	private String type;
-	@Nullable
-	private String name;
-	/**
-	 * "soft cull" date; ms since UNIX epoch.
-	 * 0 means unknown (e.g. from alert).
-	 */
+	private @Nullable String group;
+	private @Nullable String type;
+	private @Nullable String name;
 	private long dormantTs;
-	/**
-	 * "hard cull" date; ms since UNIX epoch.
-	 * 0 means unknown (e.g. from alert).
-	 */
 	private long cullTs;
-	/**
-	 * who created the snitch.
-	 * null means unknown who created it.
-	 */
-	private @Nullable UUID creatorUuid;
-	/**
-	 * when snitch was created; ms since UNIX epoch.
-	 * 0 means unknown when it was created.
-	 */
-	private long createdTs;
-	/**
-	 * when snitch was first seen; ms since UNIX epoch.
-	 * 0 means unknown (e.g. never seen).
-	 */
 	private long firstSeenTs;
-	/**
-	 * when snitch was last seen; ms since UNIX epoch.
-	 * 0 means unknown (e.g. never seen).
-	 */
 	private long lastSeenTs;
+	private long createdTs;
+	private @Nullable UUID createdByUuid;
+	private long renamedTs;
+	private @Nullable UUID renamedByUuid;
+	private long lostJalistAccessTs;
+	private long brokenTs;
+	private long goneTs;
+	private @NotNull HashSet<String> tags = new HashSet<>();
+	private @Nullable String notes;
+
+	public Snitch(WorldPos p) {
+		super(p.server, p.world, p.getX(), p.getY(), p.getZ());
+	}
 
 	public Snitch(
 			@NotNull String server,
@@ -54,19 +35,28 @@ public class Snitch extends WorldPos {
 		super(server, world, x, y, z);
 	}
 
-	public Snitch(WorldPos p) {
-		super(p.server, p.world, p.getX(), p.getY(), p.getZ());
-	}
-
-	public void setFromDb(
+	public Snitch(
+			@NotNull String server,
+			@NotNull String world,
+			int x, int y, int z,
 			@Nullable String group,
 			@Nullable String type,
 			@Nullable String name,
 			long dormantTs,
 			long cullTs,
 			long firstSeenTs,
-			long lastSeenTs
+			long lastSeenTs,
+			long createdTs,
+			@Nullable String createdByUuid,
+			long renamedTs,
+			@Nullable String renamedByUuid,
+			long lostJalistAccessTs,
+			long brokenTs,
+			long goneTs,
+			@Nullable String tags,
+			@Nullable String notes
 	) {
+		super(server, world, x, y, z);
 		this.group = group;
 		this.type = type;
 		this.name = name;
@@ -74,6 +64,27 @@ public class Snitch extends WorldPos {
 		this.cullTs = cullTs;
 		this.firstSeenTs = firstSeenTs;
 		this.lastSeenTs = lastSeenTs;
+		this.createdTs = createdTs;
+		if (createdByUuid != null) this.createdByUuid = UUID.fromString(createdByUuid);
+		this.renamedTs = renamedTs;
+		if (renamedByUuid != null) this.renamedByUuid = UUID.fromString(renamedByUuid);
+		this.lostJalistAccessTs = lostJalistAccessTs;
+		this.brokenTs = brokenTs;
+		this.goneTs = goneTs;
+		this.tags.clear();
+		if (tags != null && !tags.isEmpty()) {
+			this.tags.addAll(Arrays.asList(tags.split("\n")));
+		}
+		this.notes = notes;
+	}
+
+	public void updateFromCreation(String group, UUID createdByUuid) {
+		this.group = group;
+		this.createdByUuid = createdByUuid;
+		createdTs = System.currentTimeMillis();
+		firstSeenTs = createdTs;
+		lastSeenTs = createdTs;
+		// TODO set dormantTs/cullTs from server config
 	}
 
 	public void updateFromJalist(JalistEntry jalist) {
@@ -82,33 +93,30 @@ public class Snitch extends WorldPos {
 		name = jalist.name;
 		dormantTs = jalist.dormantTs;
 		cullTs = jalist.cullTs;
-		if (firstSeenTs == 0 || firstSeenTs > jalist.ts) firstSeenTs = jalist.ts;
-		if (lastSeenTs < jalist.ts) lastSeenTs = jalist.ts;
+		updateSeen(jalist.ts);
 	}
 
 	public void updateFromAlert(SnitchAlert alert) {
 		group = alert.group;
 		name = alert.snitchName;
-		if (dormantTs > 0 && dormantTs < alert.ts) dormantTs = alert.ts;
-		if (cullTs > 0 && cullTs < alert.ts) cullTs = alert.ts;
-		if (firstSeenTs == 0 || firstSeenTs > alert.ts) firstSeenTs = alert.ts;
-		if (lastSeenTs < alert.ts) lastSeenTs = alert.ts;
-	}
-
-	public void updateFromCreation(String group, UUID creatorUuid) {
-		this.group = group;
-		this.creatorUuid = creatorUuid;
-		createdTs = System.currentTimeMillis();
-		firstSeenTs = createdTs;
-		lastSeenTs = createdTs;
-		// TODO set dormantTs/cullTs from server config
+		// if dormant/cull disagrees, we clearly don't know their true values
+		if (dormantTs != 0 && dormantTs < alert.ts) dormantTs = 0;
+		if (cullTs != 0 && cullTs < alert.ts) cullTs = 0;
+		updateSeen(alert.ts);
 	}
 
 	public void updateFromBroken(SnitchBroken snitchBroken) {
 		this.group = snitchBroken.group;
-		lastSeenTs = System.currentTimeMillis();
 		dormantTs = 0;
 		cullTs = 0;
+		updateSeen(snitchBroken.ts); // must have been alive to be broken like this
+		brokenTs = snitchBroken.ts;
+		goneTs = snitchBroken.ts;
+	}
+
+	private void updateSeen(long ts) {
+		if (firstSeenTs == 0 || firstSeenTs > ts) firstSeenTs = ts;
+		if (lastSeenTs < ts) lastSeenTs = ts;
 	}
 
 	public AABB getRangeAABB() {
@@ -120,6 +128,9 @@ public class Snitch extends WorldPos {
 		return group;
 	}
 
+	/**
+	 * Block id: `note_block` or `jukebox`.
+	 */
 	@Nullable
 	public String getType() {
 		return type;
@@ -130,16 +141,26 @@ public class Snitch extends WorldPos {
 		return name;
 	}
 
+	/**
+	 * "soft cull" date.
+	 * Milliseconds since the UNIX epoch.
+	 * 0 means unknown (e.g. from alert).
+	 */
+	public long getDormantTs() {
+		return dormantTs;
+	}
+
 	public boolean hasDormantTs() {
 		return dormantTs != 0;
 	}
 
 	/**
-	 * "soft cull" date; ms since UNIX epoch.
+	 * "hard cull" date.
+	 * Milliseconds since the UNIX epoch.
 	 * 0 means unknown (e.g. from alert).
 	 */
-	public long getDormantTs() {
-		return dormantTs;
+	public long getCullTs() {
+		return cullTs;
 	}
 
 	public boolean hasCullTs() {
@@ -147,26 +168,119 @@ public class Snitch extends WorldPos {
 	}
 
 	/**
-	 * "hard cull" date; ms since UNIX epoch.
-	 * 0 means unknown (e.g. from alert).
+	 * When the snitch was first seen.
+	 * Milliseconds since the UNIX epoch.
+	 * 0 means unknown (e.g. never seen).
 	 */
-	public long getCullTs() {
-		return cullTs;
-	}
-
-	public @Nullable UUID getCreatorUuid() {
-		return creatorUuid;
-	}
-
-	public long getCreatedTs() {
-		return createdTs;
-	}
-
 	public long getFirstSeenTs() {
 		return firstSeenTs;
 	}
 
+	/**
+	 * When the snitch was last seen.
+	 * Milliseconds since the UNIX epoch.
+	 * 0 means unknown (e.g. never seen).
+	 */
 	public long getLastSeenTs() {
 		return lastSeenTs;
+	}
+
+	/**
+	 * When the snitch was created.
+	 * Milliseconds since the UNIX epoch.
+	 * 0 means unknown when it was created.
+	 */
+	public long getCreatedTs() {
+		return createdTs;
+	}
+
+	public boolean hasCreatedTs() {
+		return createdTs != 0;
+	}
+
+	/**
+	 * Who created the snitch.
+	 * null means unknown who created it.
+	 */
+	public @Nullable UUID getCreatedByUuid() {
+		return createdByUuid;
+	}
+
+	/**
+	 * When the snitch was last renamed by the client player.
+	 * Milliseconds since the UNIX epoch.
+	 * 0 means it was not renamed by the client player.
+	 */
+	public long getRenamedTs() {
+		return renamedTs;
+	}
+
+	public boolean hasRenamedTs() {
+		return renamedTs != 0;
+	}
+
+	/**
+	 * UUID of the client player when she last renamed the snitch.
+	 * null means it was not renamed by the client player.
+	 */
+	public @Nullable UUID getRenamedByUuid() {
+		return renamedByUuid;
+	}
+
+	/**
+	 * When the snitch was first missing from `/jalist`.
+	 * Milliseconds since the UNIX epoch.
+	 * 0 means unknown or still have access.
+	 * This is only set if the jalist has no snitches for the snitch's `group` at all,
+	 * indicating missing permissions on that group instead of a broken snitch.
+	 * Otherwise, `goneTs` is set instead.
+	 */
+	// TODO can this be different for different snitches in a given group?
+	public long getLostJalistAccessTs() {
+		return lostJalistAccessTs;
+	}
+
+	public boolean haveLostJalistAccess() {
+		return lostJalistAccessTs != 0;
+	}
+
+	/**
+	 * Precise time when the snitch was broken.
+	 * Milliseconds since the UNIX epoch.
+	 * 0 means still alive, or unknown when exactly it was broken.
+	 * If a snitch is gone but it's not known precisely when, `goneTs` is set instead.
+	 * Always less than or equal to `goneTs`.
+	 */
+	public long getBrokenTs() {
+		return brokenTs;
+	}
+
+	public boolean wasBroken() {
+		return brokenTs != 0;
+	}
+
+	/**
+	 * When the snitch was first missing from `/jalist`.
+	 * Milliseconds since the UNIX epoch.
+	 * 0 means alive or missing `/jalist` permissions.
+	 * This is not set if the jalist has no snitches for the snitch's `group` at all,
+	 * indicating missing permissions on that group instead of a broken snitch.
+	 * In that case, `lostJalistAccessTs` is set instead.
+	 * Always greater than or equal to `brokenTs`.
+	 */
+	public long getGoneTs() {
+		return goneTs;
+	}
+
+	public boolean isGone() {
+		return goneTs != 0;
+	}
+
+	public @NotNull HashSet<String> getTags() {
+		return tags;
+	}
+
+	public @Nullable String getNotes() {
+		return notes;
 	}
 }

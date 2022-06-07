@@ -8,11 +8,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SnitchBroken extends WorldPos {
+	public final long ts;
 	public final String group;
 
 	public SnitchBroken(@NotNull String server, @NotNull String world, int x, int y, int z, String group) {
 		super(server, world, x, y, z);
 		this.group = group;
+		this.ts = System.currentTimeMillis();
 	}
 
 	// Snitch was reinforced on GROUP owned by OWNER

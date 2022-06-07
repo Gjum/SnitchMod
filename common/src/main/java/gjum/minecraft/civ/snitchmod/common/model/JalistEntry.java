@@ -16,18 +16,16 @@ import static net.minecraft.nbt.Tag.TAG_STRING;
 
 public class JalistEntry extends WorldPos {
 	/**
-	 * ms since UNIX epoch.
+	 * When the `/jalist` entry was taken.
+	 * Milliseconds since UNIX epoch.
 	 */
 	public final long ts;
-	@NotNull
-	public final String group;
+	public final @NotNull String group;
 	/**
-	 * block id: NOTEBLOCK or JUKEBOX
+	 * Block id: note_block or jukebox
 	 */
-	@NotNull
-	public final String type;
-	@NotNull
-	public final String name;
+	public final @NotNull String type;
+	public final @NotNull String name;
 	/**
 	 * "soft cull" date; ms since UNIX epoch.
 	 * 0 means unknown (e.g. from alert).
@@ -66,10 +64,10 @@ public class JalistEntry extends WorldPos {
 	public static JalistEntry fromStack(ItemStack stack, @NotNull String server) {
 		String type;
 		if (stack.getItem() == Items.NOTE_BLOCK) {
-			type = "noteblock";
+			type = "note_block";
 		} else if (stack.getItem() == Items.JUKEBOX) {
 			type = "jukebox";
-		} else return null;
+		} else return null; // TODO support other block types
 
 		CompoundTag displayTag = stack.getTagElement("display");
 		if (displayTag == null) return null;
@@ -101,26 +99,25 @@ public class JalistEntry extends WorldPos {
 
 		String group = groupMatch.group(1);
 
+		long ts = System.currentTimeMillis();
+
 		String lifetimeType = lifetimeMatch.group(1);
 		long h = Integer.parseInt(lifetimeMatch.group(2));
 		long m = Integer.parseInt(lifetimeMatch.group(3));
 		long s = Integer.parseInt(lifetimeMatch.group(4));
-
-		long dtMs = (h * 3600L + m * 60L + s) * 1000L;
+		long lifetimeDurationMs = (h * 3600L + m * 60L + s) * 1000L;
 
 		long dormant_ts = 0, cull_ts = 0;
-		long now = System.currentTimeMillis();
-
 		if ("go dormant".equals(lifetimeType)) {
-			dormant_ts = now + dtMs;
+			dormant_ts = ts + lifetimeDurationMs;
 		} else if ("cull".equals(lifetimeType)) {
-			cull_ts = now + dtMs;
+			cull_ts = ts + lifetimeDurationMs;
 		} else {
 			System.err.println("Ignoring malformed jalist entry with lifetime type: " + lifetimeType);
 			return null;
 		}
 
-		return new JalistEntry(System.currentTimeMillis(), server, world, x, y, z, group, type, name, dormant_ts, cull_ts);
+		return new JalistEntry(ts, server, world, x, y, z, group, type, name, dormant_ts, cull_ts);
 	}
 
 	private static String getStringFromChatJson(String json) {
