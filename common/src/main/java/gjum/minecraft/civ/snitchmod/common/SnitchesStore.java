@@ -5,6 +5,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 
 public class SnitchesStore {
 	public final String server;
@@ -33,24 +35,32 @@ public class SnitchesStore {
 		return snitches.values();
 	}
 
-	public void updateSnitchFromJalist(JalistEntry jalist) {
-		Snitch snitch = snitches.getOrDefault(getId(jalist), new Snitch(jalist));
-		snitch.updateFromJalist(jalist);
-		snitches.put(getId(snitch), snitch);
-		if (db != null) db.upsertSnitch(snitch);
+	public void updateSnitchesFromJalist(List<JalistEntry> jalist) {
+		List<Snitch> jalistSnitches = new ArrayList<Snitch>(jalist.size());
+		for (JalistEntry entry : jalist) {
+			Snitch snitch = snitches.getOrDefault(getId(entry), new Snitch(entry));
+			snitch.updateFromJalist(entry);
+			snitches.put(getId(snitch), snitch);
+			jalistSnitches.add(snitch);
+		}
+		if (db != null) db.upsertSnitches(jalistSnitches);
 	}
 
 	public void updateSnitchFromAlert(SnitchAlert alert) {
 		Snitch snitch = snitches.getOrDefault(getId(alert), new Snitch(alert));
 		snitch.updateFromAlert(alert);
 		snitches.put(getId(snitch), snitch);
-		if (db != null) db.upsertSnitch(snitch);
+		List<Snitch> jalistSnitches = new ArrayList<Snitch>(1);
+		jalistSnitches.add(snitch);
+		if (db != null) db.upsertSnitches(jalistSnitches);
 	}
 
 	public void updateSnitchFromCreation(Snitch snitch) {
 		// don't reuse any existing snitch, it no longer exists, only the new snitch does
 		snitches.put(getId(snitch), snitch);
-		if (db != null) db.upsertSnitch(snitch);
+		List<Snitch> jalistSnitches = new ArrayList<Snitch>(1);
+		jalistSnitches.add(snitch);
+		if (db != null) db.upsertSnitches(jalistSnitches);
 		// TODO remember last created snitch for placement helper
 	}
 

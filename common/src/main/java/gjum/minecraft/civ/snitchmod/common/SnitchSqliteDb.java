@@ -104,7 +104,7 @@ public class SnitchSqliteDb {
 	}
 
 	synchronized
-	public void upsertSnitch(Snitch snitch) {
+	public void upsertSnitches(List<Snitch> snitches) {
 		if (conn == null) return;
 		String sql = "INSERT INTO " + tableSnitches + " (world,x,y,z,group_name,type,name,dormant_ts,cull_ts,first_seen_ts,last_seen_ts,created_ts,created_by_uuid,renamed_ts,renamed_by_uuid,lost_jalist_access_ts,broken_ts,gone_ts,tags,notes)" +
 				" VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)" +
@@ -125,33 +125,57 @@ public class SnitchSqliteDb {
 				"gone_ts = excluded.gone_ts," +
 				"tags = excluded.tags," +
 				"notes = excluded.notes";
-		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-			int i = 0;
-			pstmt.setString(++i, snitch.getWorld());
-			pstmt.setInt(++i, snitch.getX());
-			pstmt.setInt(++i, snitch.getY());
-			pstmt.setInt(++i, snitch.getZ());
-			pstmt.setString(++i, snitch.getGroup());
-			pstmt.setString(++i, snitch.getType());
-			pstmt.setString(++i, snitch.getName());
-			pstmt.setLong(++i, snitch.getDormantTs());
-			pstmt.setLong(++i, snitch.getCullTs());
-			pstmt.setLong(++i, snitch.getFirstSeenTs());
-			pstmt.setLong(++i, snitch.getLastSeenTs());
-			pstmt.setLong(++i, snitch.getCreatedTs());
-			pstmt.setString(++i, uuidStringOrNull(snitch.getCreatedByUuid()));
-			pstmt.setLong(++i, snitch.getRenamedTs());
-			pstmt.setString(++i, uuidStringOrNull(snitch.getRenamedByUuid()));
-			pstmt.setLong(++i, snitch.getLostJalistAccessTs());
-			pstmt.setLong(++i, snitch.getBrokenTs());
-			pstmt.setLong(++i, snitch.getGoneTs());
-			pstmt.setString(++i, String.join("\n", snitch.getTags()));
-			pstmt.setString(++i, snitch.getNotes());
 
-			pstmt.executeUpdate();
+		PreparedStatement pstmt;
+		try {
+			pstmt = conn.prepareStatement(sql);
+			conn.setAutoCommit(false);
 		} catch (SQLException e) {
-			System.err.println("Failed updating snitch " + snitch);
+			System.err.printf("Failed updating %d snitches\n", snitches.size());
 			e.printStackTrace();
+			return;
+		}
+
+		for (Snitch snitch : snitches) {
+			try {
+				int i = 0;
+				pstmt.setString(++i, snitch.getWorld());
+				pstmt.setInt(++i, snitch.getX());
+				pstmt.setInt(++i, snitch.getY());
+				pstmt.setInt(++i, snitch.getZ());
+				pstmt.setString(++i, snitch.getGroup());
+				pstmt.setString(++i, snitch.getType());
+				pstmt.setString(++i, snitch.getName());
+				pstmt.setLong(++i, snitch.getDormantTs());
+				pstmt.setLong(++i, snitch.getCullTs());
+				pstmt.setLong(++i, snitch.getFirstSeenTs());
+				pstmt.setLong(++i, snitch.getLastSeenTs());
+				pstmt.setLong(++i, snitch.getCreatedTs());
+				pstmt.setString(++i, uuidStringOrNull(snitch.getCreatedByUuid()));
+				pstmt.setLong(++i, snitch.getRenamedTs());
+				pstmt.setString(++i, uuidStringOrNull(snitch.getRenamedByUuid()));
+				pstmt.setLong(++i, snitch.getLostJalistAccessTs());
+				pstmt.setLong(++i, snitch.getBrokenTs());
+				pstmt.setLong(++i, snitch.getGoneTs());
+				pstmt.setString(++i, String.join("\n", snitch.getTags()));
+				pstmt.setString(++i, snitch.getNotes());
+
+				pstmt.addBatch();
+			} catch (SQLException e) {
+				System.err.printf(
+						"Failed updating %d snitches: Failed updating snitch %s\n", snitches.size(), snitch);
+				e.printStackTrace();
+				return;
+			}
+		}
+
+		try {
+			pstmt.executeBatch();
+			conn.commit();
+		} catch (SQLException e) {
+			System.err.printf("Failed updating %d snitches\n", snitches.size());
+			e.printStackTrace();
+			return;
 		}
 	}
 
