@@ -3,10 +3,7 @@ package gjum.minecraft.civ.snitchmod.common;
 import gjum.minecraft.civ.snitchmod.common.model.*;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
 
 public class SnitchesStore {
 	public final String server;
@@ -50,23 +47,20 @@ public class SnitchesStore {
 		Snitch snitch = snitches.getOrDefault(getId(alert), new Snitch(alert));
 		snitch.updateFromAlert(alert);
 		snitches.put(getId(snitch), snitch);
-		List<Snitch> jalistSnitches = new ArrayList<Snitch>(1);
-		jalistSnitches.add(snitch);
-		if (db != null) db.upsertSnitches(jalistSnitches);
+		if (db != null) db.upsertSnitch(snitch);
 	}
 
 	public void updateSnitchFromCreation(Snitch snitch) {
 		// don't reuse any existing snitch, it no longer exists, only the new snitch does
 		snitches.put(getId(snitch), snitch);
-		List<Snitch> jalistSnitches = new ArrayList<Snitch>(1);
-		jalistSnitches.add(snitch);
-		if (db != null) db.upsertSnitches(jalistSnitches);
+		if (db != null) db.upsertSnitch(snitch);
 		// TODO remember last created snitch for placement helper
 	}
 
 	public void updateSnitchBroken(SnitchBroken snitchBroken) {
 		Snitch snitch = snitches.getOrDefault(getId(snitchBroken), new Snitch(snitchBroken));
 		snitch.updateFromBroken(snitchBroken);
+		if (db != null) db.upsertSnitch(snitch);
 	}
 
 	@Nullable
