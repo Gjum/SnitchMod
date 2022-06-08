@@ -172,14 +172,13 @@ public abstract class SnitchMod {
 	public void handleWindowItems(List<ItemStack> stacks) {
 		getStore();
 		if (store == null) return;
-		int foundSnitches = 0;
+		List<JalistEntry> jalistEntries = new ArrayList<JalistEntry>(stacks.size());
 		for (int i = 0; i < stacks.size(); i++) {
 			ItemStack stack = stacks.get(i);
 			try {
 				JalistEntry jalistEntry = JalistEntry.fromStack(stack, store.server);
 				if (jalistEntry != null) {
-					foundSnitches++;
-					store.updateSnitchFromJalist(jalistEntry);
+					jalistEntries.add(jalistEntry);
 				}
 			} catch (Throwable e) {
 				System.err.println("Failed parsing jalist stack " + i + " " + stack);
@@ -188,9 +187,10 @@ public abstract class SnitchMod {
 						"Failed reading snitch " + i + " on JAList page"));
 			}
 		}
-		if (foundSnitches > 0) {
+		store.updateSnitchesFromJalist(jalistEntries);
+		if (jalistEntries.size() > 0) {
 			logToChat(new TextComponent(
-					"Found " + foundSnitches + " snitches on JAList page"));
+					"Found " + jalistEntries.size() + " snitches on JAList page"));
 		}
 	}
 
