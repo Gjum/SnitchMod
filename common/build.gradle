@@ -8,6 +8,8 @@ dependencies {
 
 	implementation "org.xerial:sqlite-jdbc:3.36.0.3"
 	modCompileOnly files("../libs/voxelmap-1.18.2-1.11.2.jar")
+
+	compileOnly group: 'info.journeymap', name: 'journeymap-api', version: project.journeymap_api_common_version, changing: true
 }
 
 architectury {

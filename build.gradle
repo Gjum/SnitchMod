@@ -36,6 +36,10 @@ allprojects {
 				includeGroup "curse.maven"
 			}
 		}
+		maven {
+			name = "JourneyMap (Public)"
+			url = "https://jm.gserv.me/repository/maven-public/"
+		}
 	}
 
 	tasks.withType(JavaCompile) {
