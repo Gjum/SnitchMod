@@ -43,6 +43,13 @@ public class SnitchesStore {
 		if (db != null) db.upsertSnitches(jalistSnitches);
 	}
 
+	public void updateSnitchFromRename(SnitchRename rename) {
+		Snitch snitch = snitches.getOrDefault(getId(rename), new Snitch(rename));
+		snitch.updateFromRename(rename);
+		snitches.put(getId(snitch), snitch);
+		if (db != null) db.upsertSnitch(snitch);
+	}
+
 	public void updateSnitchFromAlert(SnitchAlert alert) {
 		Snitch snitch = snitches.getOrDefault(getId(alert), new Snitch(alert));
 		snitch.updateFromAlert(alert);

@@ -145,6 +145,9 @@ public abstract class SnitchMod {
 		SnitchAlert snitchAlert = SnitchAlert.fromChat(message, store.server);
 		if (snitchAlert != null) store.updateSnitchFromAlert(snitchAlert);
 
+		SnitchRename snitchRename = SnitchRename.fromChat(message, store.server, getClientUuid());
+		if (snitchRename != null) store.updateSnitchFromRename(snitchRename);
+
 		Snitch snitchCreated = getSnitchCreationFromChat(message, store.server, getCurrentWorld(), getClientUuid());
 		if (snitchCreated != null) store.updateSnitchFromCreation(snitchCreated);
 
