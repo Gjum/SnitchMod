@@ -28,9 +28,7 @@ dependencies {
 	implementation "org.xerial:sqlite-jdbc:3.36.0.3"
 	shadowCommon "org.xerial:sqlite-jdbc:3.36.0.3"
 
-	modApi group: 'info.journeymap', name: 'journeymap-api', version: project.journeymap_api_fabric_version, changing: true
-	modRuntimeOnly "curse.maven:journeymap-${project.jm_project_id}:${project.jm_fabric_file_id}"
-
+	modCompileOnly "curse.maven:journeymap-32274:3796377" // version 1.18.2-5.8.4-fabric
 	modCompileOnly files("../libs/voxelmap-1.18.2-1.11.2.jar")
 }
 

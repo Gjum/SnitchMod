@@ -33,8 +33,7 @@ dependencies {
 	implementation "org.xerial:sqlite-jdbc:3.36.0.3"
 	shadowCommon "org.xerial:sqlite-jdbc:3.36.0.3"
 
-	compileOnly fg.deobf(group: 'info.journeymap', name: 'journeymap-api', version: project.journeymap_api_forge_version, changing: true)
-	runtimeOnly fg.deobf("curse.maven:journeymap-${project.jm_project_id}:${project.jm_forge_file_id}")
+	modCompileOnly "curse.maven:journeymap-32274:3796379" // version 1.18.2-5.8.4-forge
 }
 
 processResources {
