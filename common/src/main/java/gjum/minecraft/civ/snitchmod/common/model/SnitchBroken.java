@@ -7,12 +7,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SnitchBroken extends WorldPos {
+public class SnitchBroken {
 	public final long ts;
-	public final String group;
+	public final @NotNull WorldPos pos;
+	public final @NotNull String group;
 
-	public SnitchBroken(@NotNull String server, @NotNull String world, int x, int y, int z, String group) {
-		super(server, world, x, y, z);
+	public SnitchBroken(@NotNull WorldPos pos, @NotNull String group) {
+		this.pos = pos;
 		this.group = group;
 		this.ts = System.currentTimeMillis();
 	}
@@ -21,10 +22,10 @@ public class SnitchBroken extends WorldPos {
 	private static final Pattern brokenPattern = Pattern.compile("^(\\S+) was reinforced on (\\S+) owned by ([A-Za-z0-9_]{3,17}).*");
 
 	public static SnitchBroken fromChat(
-			Component message,
+			@NotNull Component message,
 			@NotNull BlockPos lastBrokenBlockPos,
-			String server,
-			String world
+			@NotNull String server,
+			@NotNull String world
 	) {
 		String text = message.getString().replaceAll("§.", "");
 
@@ -38,6 +39,6 @@ public class SnitchBroken extends WorldPos {
 		int y = lastBrokenBlockPos.getY();
 		int z = lastBrokenBlockPos.getZ();
 
-		return new SnitchBroken(server, world, x, y, z, group);
+		return new SnitchBroken(new WorldPos(server, world, x, y, z), group);
 	}
 }

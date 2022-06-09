@@ -35,7 +35,7 @@ public class SnitchesStore {
 	public void updateSnitchesFromJalist(List<JalistEntry> jalist) {
 		List<Snitch> jalistSnitches = new ArrayList<>(jalist.size());
 		for (JalistEntry entry : jalist) {
-			Snitch snitch = snitches.computeIfAbsent(getId(entry), id -> new Snitch(entry));
+			Snitch snitch = snitches.computeIfAbsent(getId(entry.pos), id -> new Snitch(entry.pos));
 			snitch.updateFromJalist(entry);
 			jalistSnitches.add(snitch);
 		}
@@ -43,13 +43,13 @@ public class SnitchesStore {
 	}
 
 	public void updateSnitchFromRename(SnitchRename rename) {
-		Snitch snitch = snitches.computeIfAbsent(getId(rename), id -> new Snitch(rename));
+		Snitch snitch = snitches.computeIfAbsent(getId(rename.pos), id -> new Snitch(rename.pos));
 		snitch.updateFromRename(rename);
 		if (db != null) db.upsertSnitch(snitch);
 	}
 
 	public void updateSnitchFromAlert(SnitchAlert alert) {
-		Snitch snitch = snitches.computeIfAbsent(getId(alert), id -> new Snitch(alert));
+		Snitch snitch = snitches.computeIfAbsent(getId(alert.pos), id -> new Snitch(alert.pos));
 		snitch.updateFromAlert(alert);
 		if (db != null) db.upsertSnitch(snitch);
 	}
@@ -62,7 +62,7 @@ public class SnitchesStore {
 	}
 
 	public void updateSnitchBroken(SnitchBroken snitchBroken) {
-		Snitch snitch = snitches.computeIfAbsent(getId(snitchBroken), id -> new Snitch(snitchBroken));
+		Snitch snitch = snitches.computeIfAbsent(getId(snitchBroken.pos), id -> new Snitch(snitchBroken.pos));
 		snitch.updateFromBroken(snitchBroken);
 		if (db != null) db.upsertSnitch(snitch);
 	}

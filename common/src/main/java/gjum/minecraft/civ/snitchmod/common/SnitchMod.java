@@ -20,8 +20,6 @@ import org.lwjgl.glfw.GLFW;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static gjum.minecraft.civ.snitchmod.common.model.SnitchCreatedChatParser.getSnitchCreationFromChat;
-
 public abstract class SnitchMod {
 	private final static Minecraft mc = Minecraft.getInstance();
 
@@ -143,13 +141,13 @@ public abstract class SnitchMod {
 		getStore();
 		if (store == null) return false;
 
-		SnitchAlert snitchAlert = SnitchAlert.fromChat(message, store.server);
+		SnitchAlert snitchAlert = SnitchAlert.fromChat(message, store.server, getCurrentWorld());
 		if (snitchAlert != null) store.updateSnitchFromAlert(snitchAlert);
 
-		SnitchRename snitchRename = SnitchRename.fromChat(message, store.server, getClientUuid());
+		SnitchRename snitchRename = SnitchRename.fromChat(message, store.server, getCurrentWorld(), getClientUuid());
 		if (snitchRename != null) store.updateSnitchFromRename(snitchRename);
 
-		Snitch snitchCreated = getSnitchCreationFromChat(message, store.server, getCurrentWorld(), getClientUuid());
+		Snitch snitchCreated = SnitchCreatedChatParser.fromChat(message, store.server, getCurrentWorld(), getClientUuid());
 		if (snitchCreated != null) store.updateSnitchFromCreation(snitchCreated);
 
 		long now = System.currentTimeMillis();

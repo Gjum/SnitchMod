@@ -14,12 +14,13 @@ import java.util.regex.Pattern;
 import static net.minecraft.nbt.Tag.TAG_LIST;
 import static net.minecraft.nbt.Tag.TAG_STRING;
 
-public class JalistEntry extends WorldPos {
+public class JalistEntry {
 	/**
 	 * When the `/jalist` entry was taken.
 	 * Milliseconds since UNIX epoch.
 	 */
 	public final long ts;
+	public final @NotNull WorldPos pos;
 	public final @NotNull String group;
 	/**
 	 * Block id: note_block or jukebox
@@ -39,16 +40,14 @@ public class JalistEntry extends WorldPos {
 
 	public JalistEntry(
 			long ts,
-			@NotNull String server,
-			@NotNull String world,
-			int x, int y, int z,
+			@NotNull WorldPos pos,
 			@NotNull String group,
 			@NotNull String type,
 			@NotNull String name,
 			long dormantTs, long cullTs
 	) {
-		super(server, world, x, y, z);
 		this.ts = ts;
+		this.pos = pos;
 		this.group = group;
 		this.type = type;
 		this.name = name;
@@ -117,7 +116,8 @@ public class JalistEntry extends WorldPos {
 			return null;
 		}
 
-		return new JalistEntry(ts, server, world, x, y, z, group, type, name, dormant_ts, cull_ts);
+		var pos = new WorldPos(server, world, x, y, z);
+		return new JalistEntry(ts, pos, group, type, name, dormant_ts, cull_ts);
 	}
 
 	private static String getStringFromChatJson(String json) {

@@ -8,31 +8,28 @@ import org.jetbrains.annotations.Nullable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SnitchAlert extends WorldPos {
+import static gjum.minecraft.civ.snitchmod.common.Utils.nonEmptyOrDefault;
+
+public class SnitchAlert {
 	/**
 	 * ms since UNIX epoch when alert happened
 	 */
 	public final long ts;
-	@NotNull
-	public final String action;
-	@NotNull
-	public final String accountName;
-	@NotNull
-	public final String snitchName;
-	@Nullable
-	public final String group;
+	public final @NotNull WorldPos pos;
+	public final @NotNull String action;
+	public final @NotNull String accountName;
+	public final @NotNull String snitchName;
+	public final @Nullable String group;
 
 	public SnitchAlert(
 			long ts,
-			@NotNull String server,
+			@NotNull WorldPos pos,
 			@NotNull String action,
 			@NotNull String accountName,
 			@NotNull String snitchName,
-			@NotNull String world,
-			int x, int y, int z,
 			@Nullable String group) {
-		super(server, world, x, y, z);
 		this.ts = ts;
+		this.pos = pos;
 		this.action = action;
 		this.accountName = accountName;
 		this.snitchName = snitchName;
@@ -45,7 +42,11 @@ public class SnitchAlert extends WorldPos {
 	static Pattern hoverPattern = Pattern.compile("Location: (?:\\(?([^\\n)]+)\\)? )?\\[([-0-9]+),? ([-0-9]+),? ([-0-9]+)\\] *\\nName: ([^ ]+) *\\nGroup: ([^ ]+).*", Pattern.MULTILINE);
 
 	@Nullable
-	public static SnitchAlert fromChat(Component message, String server) {
+	public static SnitchAlert fromChat(
+			@NotNull Component message,
+			@NotNull String server,
+			@NotNull String world
+	) {
 		String text = message.getString().replaceAll("§.", "");
 
 		Matcher textMatch = alertPattern.matcher(text);
@@ -54,7 +55,7 @@ public class SnitchAlert extends WorldPos {
 		String action = textMatch.group(1);
 		String accountName = textMatch.group(2);
 		String snitchName = textMatch.group(3);
-		String world = textMatch.group(4) == null ? "world" : textMatch.group(4);
+		world = nonEmptyOrDefault(textMatch.group(4), world);
 		int x = Integer.parseInt(textMatch.group(5));
 		int y = Integer.parseInt(textMatch.group(6));
 		int z = Integer.parseInt(textMatch.group(7));
@@ -67,13 +68,15 @@ public class SnitchAlert extends WorldPos {
 
 			Matcher hoverMatch = hoverPattern.matcher(hoverText);
 			if (hoverMatch.matches()) {
-				world = hoverMatch.group(1) == null ? world : hoverMatch.group(1);
+				world = nonEmptyOrDefault(hoverMatch.group(1), world);
 				group = hoverMatch.group(6);
 			}
 		}
 
 		long now = System.currentTimeMillis();
 
-		return new SnitchAlert(now, server, action, accountName, snitchName, world, x, y, z, group);
+		var pos = new WorldPos(server, world, x, y, z);
+
+		return new SnitchAlert(now, pos, action, accountName, snitchName, group);
 	}
 }

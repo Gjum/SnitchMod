@@ -7,17 +7,20 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static gjum.minecraft.civ.snitchmod.common.Utils.nonEmptyOrDefault;
+
 public class SnitchCreatedChatParser {
 	// Created Snitch on group GROUPNAME at [123 45 -321]
 	static Pattern createdPattern = Pattern.compile("^Created (\\S+) on group (\\S+) at \\[(?:\\(?([^\\n)]+)\\)? )?([-0-9.]+) ([-0-9.]+) ([-0-9.]+)\\].*");
 
-	public static Snitch getSnitchCreationFromChat(Component message, String server, String world, @NotNull UUID clientUuid) {
+	public static Snitch fromChat(Component message, String server, String world, @NotNull UUID clientUuid) {
 		String text = message.getString().replaceAll("§.", "");
 
 		Matcher textMatch = createdPattern.matcher(text);
 		if (!textMatch.matches()) return null;
 
 		String group = textMatch.group(2);
+		world = nonEmptyOrDefault(textMatch.group(3), world);
 		int x = Integer.parseInt(textMatch.group(4));
 		int y = Integer.parseInt(textMatch.group(5));
 		int z = Integer.parseInt(textMatch.group(6));

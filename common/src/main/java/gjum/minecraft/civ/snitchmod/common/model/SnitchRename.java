@@ -9,28 +9,25 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SnitchRename extends WorldPos {
+import static gjum.minecraft.civ.snitchmod.common.Utils.nonEmptyOrDefault;
+
+public class SnitchRename {
 	public final long ts;
-	@NotNull
-	public final String snitchName;
-	@Nullable
-	private final String snitchOldName;
-	@Nullable
-	public final String group;
-	@NotNull
-	public final UUID clientUuid;
+	public final @NotNull WorldPos pos;
+	public final @NotNull String snitchName;
+	private final @Nullable String snitchOldName;
+	public final @Nullable String group;
+	public final @NotNull UUID clientUuid;
 
 	public SnitchRename(
 			long ts,
-			@NotNull String server,
+			@NotNull WorldPos pos,
 			@NotNull String snitchName,
 			@Nullable String snitchOldName,
-			@NotNull String world,
-			int x, int y, int z,
 			@Nullable String group,
 			@NotNull UUID clientUuid) {
-		super(server, world, x, y, z);
 		this.ts = ts;
+		this.pos = pos;
 		this.snitchName = snitchName;
 		this.snitchOldName = snitchOldName;
 		this.group = group;
@@ -43,8 +40,12 @@ public class SnitchRename extends WorldPos {
 	// §6Location: §b(world) [123 45 -321]\n§6Name: §bSNITCHNAME\n§6Group: §bGROUPNAME
 	static Pattern hoverPattern = Pattern.compile("Location: (?:\\(?([^\\n)]+)\\)? )?\\[([-0-9]+),? ([-0-9]+),? ([-0-9]+)\\] *\\nName: ([^ ]+) *\\nGroup: ([^ ]+).*", Pattern.MULTILINE);
 
-	@Nullable
-	public static SnitchRename fromChat(Component message, String server, @NotNull UUID clientUuid) {
+	public static @Nullable SnitchRename fromChat(
+			@NotNull Component message,
+			@NotNull String server,
+			@NotNull String world,
+			@NotNull UUID clientUuid
+	) {
 		String text = message.getString().replaceAll("§.", "");
 
 		Matcher textMatch = renamePattern.matcher(text);
@@ -53,11 +54,6 @@ public class SnitchRename extends WorldPos {
 		String snitchName = textMatch.group(1);
 		String snitchOldName = textMatch.group(2);
 
-		String world = null;
-		int x = 0;
-		int y = 0;
-		int z = 0;
-		String group = null;
 		final HoverEvent hoverEvent = message.getSiblings().get(0).getStyle().getHoverEvent();
 		if (hoverEvent == null || hoverEvent.getAction() != HoverEvent.Action.SHOW_TEXT) return null;
 
@@ -67,14 +63,16 @@ public class SnitchRename extends WorldPos {
 		Matcher hoverMatch = hoverPattern.matcher(hoverText);
 		if (!hoverMatch.matches()) return null;
 
-		world = hoverMatch.group(1) == null ? world : hoverMatch.group(1);
-		x = Integer.parseInt(hoverMatch.group(2));
-		y = Integer.parseInt(hoverMatch.group(3));
-		z = Integer.parseInt(hoverMatch.group(4));
-		group = hoverMatch.group(6);
+		world = nonEmptyOrDefault(hoverMatch.group(1), world);
+		int x = Integer.parseInt(hoverMatch.group(2));
+		int y = Integer.parseInt(hoverMatch.group(3));
+		int z = Integer.parseInt(hoverMatch.group(4));
+		String group = hoverMatch.group(6);
+
+		var pos = new WorldPos(server, world, x, y, z);
 
 		long now = System.currentTimeMillis();
 
-		return new SnitchRename(now, server, snitchName, snitchOldName, world, x, y, z, group, clientUuid);
+		return new SnitchRename(now, pos, snitchName, snitchOldName, group, clientUuid);
 	}
 }
