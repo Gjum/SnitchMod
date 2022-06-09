@@ -22,7 +22,7 @@ public class SnitchCreatedChatParser {
 		int y = Integer.parseInt(textMatch.group(5));
 		int z = Integer.parseInt(textMatch.group(6));
 
-		Snitch snitch = new Snitch(server, world, x, y, z);
+		Snitch snitch = new Snitch(new WorldPos(server, world, x, y, z));
 		snitch.updateFromCreation(group, clientUuid);
 		return snitch;
 	}

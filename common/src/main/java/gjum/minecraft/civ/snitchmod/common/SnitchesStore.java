@@ -9,8 +9,8 @@ public class SnitchesStore {
 	public final String server;
 
 	private final HashMap<String, Snitch> snitches = new HashMap<>();
-	@Nullable
-	private SnitchSqliteDb db;
+
+	private @Nullable SnitchSqliteDb db;
 
 	public SnitchesStore(String server) {
 		this.server = server;
@@ -33,7 +33,7 @@ public class SnitchesStore {
 	}
 
 	public void updateSnitchesFromJalist(List<JalistEntry> jalist) {
-		List<Snitch> jalistSnitches = new ArrayList<Snitch>(jalist.size());
+		List<Snitch> jalistSnitches = new ArrayList<>(jalist.size());
 		for (JalistEntry entry : jalist) {
 			Snitch snitch = snitches.getOrDefault(getId(entry), new Snitch(entry));
 			snitch.updateFromJalist(entry);
@@ -80,12 +80,8 @@ public class SnitchesStore {
 		if (db != null) db.upsertSnitch(snitch);
 	}
 
-	@Nullable
-	public Snitch deleteSnitch(WorldPos pos) {
-		Snitch snitch = snitches.remove(getId(pos));
-		if (snitch == null) return null;
-		if (db != null) db.deleteSnitch(pos);
-		return snitch;
+	private static String getId(Snitch snitch) {
+		return getId(snitch.pos);
 	}
 
 	private static String getId(WorldPos pos) {

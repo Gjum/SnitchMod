@@ -13,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -207,13 +208,14 @@ public abstract class SnitchMod {
 		Renderer.renderOverlays(matrices, partialTicks);
 	}
 
-	public Stream<Snitch> streamNearbySnitches(BlockPos playerPos, int distance) {
+	public Stream<Snitch> streamNearbySnitches(Vec3 playerPos, int distance) {
 		getStore();
 		if (store == null) return Stream.empty();
-		AABB aabb = new AABB(playerPos).inflate(distance);
+		var playerBlockPos = new BlockPos(playerPos);
+		AABB aabb = new AABB(playerBlockPos).inflate(distance);
 		return store.getAllSnitches().stream()
-				.filter(s -> aabb.contains(s.getX(), s.getY(), s.getZ()))
-				.sorted(Comparator.comparing(playerPos::distSqr));
+				.filter(s -> aabb.contains(playerPos))
+				.sorted(Comparator.comparing(s -> playerBlockPos.distSqr(s.pos)));
 	}
 
 	private void logToChat(Component msg) {

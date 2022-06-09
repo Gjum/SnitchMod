@@ -6,7 +6,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class Snitch extends WorldPos {
+public class Snitch {
+	public final @NotNull WorldPos pos;
 	private @Nullable String group;
 	private @Nullable String type;
 	private @Nullable String name;
@@ -24,15 +25,8 @@ public class Snitch extends WorldPos {
 	private @NotNull HashSet<String> tags = new HashSet<>();
 	private @Nullable String notes;
 
-	public Snitch(WorldPos p) {
-		super(p.server, p.world, p.getX(), p.getY(), p.getZ());
-	}
-
-	public Snitch(
-			@NotNull String server,
-			@NotNull String world,
-			int x, int y, int z) {
-		super(server, world, x, y, z);
+	public Snitch(@NotNull WorldPos pos) {
+		this.pos = pos;
 	}
 
 	public Snitch(
@@ -56,7 +50,7 @@ public class Snitch extends WorldPos {
 			@Nullable String tags,
 			@Nullable String notes
 	) {
-		super(server, world, x, y, z);
+		this.pos = new WorldPos(server, world, x, y, z);
 		this.group = group;
 		this.type = type;
 		this.name = name;
@@ -135,8 +129,12 @@ public class Snitch extends WorldPos {
 		if (lastSeenTs < ts) lastSeenTs = ts;
 	}
 
+	public WorldPos getPos() {
+		return pos;
+	}
+
 	public AABB getRangeAABB() {
-		return new AABB(this).inflate(11);
+		return new AABB(pos).inflate(11);
 	}
 
 	@Nullable

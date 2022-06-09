@@ -144,10 +144,10 @@ public class SnitchSqliteDb {
 		for (Snitch snitch : snitches) {
 			try {
 				int i = 0;
-				pstmt.setString(++i, snitch.getWorld());
-				pstmt.setInt(++i, snitch.getX());
-				pstmt.setInt(++i, snitch.getY());
-				pstmt.setInt(++i, snitch.getZ());
+				pstmt.setString(++i, snitch.pos.getWorld());
+				pstmt.setInt(++i, snitch.pos.getX());
+				pstmt.setInt(++i, snitch.pos.getY());
+				pstmt.setInt(++i, snitch.pos.getZ());
 				pstmt.setString(++i, snitch.getGroup());
 				pstmt.setString(++i, snitch.getType());
 				pstmt.setString(++i, snitch.getName());

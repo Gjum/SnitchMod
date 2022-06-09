@@ -32,14 +32,14 @@ public class Renderer {
 
 		if (getMod().rangeOverlayVisible) {
 			int fieldDist = 260;
-			getMod().streamNearbySnitches(mc.player.blockPosition(), fieldDist)
+			getMod().streamNearbySnitches(mc.player.position(), fieldDist)
 					.limit(100)
 					.forEach(Renderer::renderSnitch);
 		}
 
 		if (getMod().placementHelperVisible) {
 			int placeHelperDist = 50;
-			getMod().streamNearbySnitches(mc.player.blockPosition(), placeHelperDist)
+			getMod().streamNearbySnitches(mc.player.position(), placeHelperDist)
 					.limit(10)
 					.forEach(Renderer::renderPlacementHelper);
 		}
@@ -90,11 +90,11 @@ public class Renderer {
 
 		renderBoxOutline(rangeBox, r, g, b, lineAlpha, lineWidth);
 
-		if (snitch.distSqr(mc.player.blockPosition()) < blockHlDist * blockHlDist) {
+		if (snitch.pos.distSqr(mc.player.blockPosition()) < blockHlDist * blockHlDist) {
 			RenderSystem.disableDepthTest();
 
 			// inflate so it isn't obstructed by the snitch block
-			final AABB blockBox = new AABB(snitch).inflate(.01);
+			final AABB blockBox = new AABB(snitch.pos).inflate(.01);
 			renderBoxOutline(blockBox, r, g, b, lineAlpha, lineWidth);
 		}
 
@@ -105,7 +105,7 @@ public class Renderer {
 						? String.format("[%s] %s", group, snitch.getName())
 						: String.format("[%s]", group);
 
-				renderTextFacingCamera(new TextComponent(nameText), snitch.getCenter(), -.5f, 1);
+				renderTextFacingCamera(new TextComponent(nameText), snitch.pos.getCenter(), -.5f, 1);
 			}
 
 			final String livelinessText;
@@ -124,7 +124,7 @@ public class Renderer {
 			} else livelinessText = null;
 
 			if (livelinessText != null) {
-				renderTextFacingCamera(new TextComponent(livelinessText), snitch.getCenter(), .5f, 1);
+				renderTextFacingCamera(new TextComponent(livelinessText), snitch.pos.getCenter(), .5f, 1);
 			}
 		}
 	}
@@ -143,7 +143,7 @@ public class Renderer {
 
 		final boolean playerInRange = snitch.getRangeAABB().contains(mc.player.position());
 		if (playerInRange) return; // only render helper for snitches the player isn't inside of
-		final AABB helperBox = new AABB(snitch.getBlockPos()).inflate(22.5);
+		final AABB helperBox = new AABB(snitch.pos).inflate(22.5);
 
 		RenderSystem.enableDepthTest();
 		RenderSystem.enableBlend();
