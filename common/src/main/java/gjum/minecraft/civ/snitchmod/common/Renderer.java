@@ -99,13 +99,17 @@ public class Renderer {
 		}
 
 		if (playerInRange) {
+			Vec3 center = snitch.pos.getCenter();
+
+			String name = snitch.getName();
+			if (name != null && !name.isEmpty()) {
+				renderTextFacingCamera(new TextComponent(name), center, -1, 1);
+			}
+
 			String group = snitch.getGroup();
 			if (group != null) {
-				String nameText = (snitch.getName() != null && !snitch.getName().isEmpty())
-						? String.format("[%s] %s", group, snitch.getName())
-						: String.format("[%s]", group);
-
-				renderTextFacingCamera(new TextComponent(nameText), snitch.pos.getCenter(), -.5f, 1);
+				var comp = new TextComponent(String.format("[%s]", group));
+				renderTextFacingCamera(comp, center, 0, 1);
 			}
 
 			final String livelinessText;
@@ -124,7 +128,7 @@ public class Renderer {
 			} else livelinessText = null;
 
 			if (livelinessText != null) {
-				renderTextFacingCamera(new TextComponent(livelinessText), snitch.pos.getCenter(), .5f, 1);
+				renderTextFacingCamera(new TextComponent(livelinessText), center, 1, 1);
 			}
 		}
 	}
