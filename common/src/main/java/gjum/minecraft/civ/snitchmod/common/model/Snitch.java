@@ -98,6 +98,14 @@ public class Snitch extends WorldPos {
 		lostJalistAccessTs = 0;
 	}
 
+	public void updateFromRename(SnitchRename rename) {
+		this.group = rename.group;
+		this.name = rename.snitchName;
+		this.renamedTs = rename.ts;
+		this.renamedByUuid = rename.clientUuid;
+		updateSeen(rename.ts);
+	}
+
 	public void updateFromAlert(SnitchAlert alert) {
 		group = alert.group;
 		name = alert.snitchName;
