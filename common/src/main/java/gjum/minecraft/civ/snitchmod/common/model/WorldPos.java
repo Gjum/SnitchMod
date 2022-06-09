@@ -4,6 +4,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 public class WorldPos extends BlockPos {
 	@NotNull
 	public final String server;
@@ -38,12 +40,20 @@ public class WorldPos extends BlockPos {
 		return world;
 	}
 
-	@NotNull
-	public BlockPos getBlockPos() {
-		return this;
-	}
-
 	public Vec3 getCenter() {
 		return new Vec3(getX() + .5, getY() + .5, getZ() + .5);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof WorldPos worldPos)) return false;
+		if (!super.equals(o)) return false;
+		return server.equals(worldPos.server) && world.equals(worldPos.world);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), server, world);
 	}
 }
