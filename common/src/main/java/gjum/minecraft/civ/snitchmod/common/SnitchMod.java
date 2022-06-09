@@ -142,18 +142,30 @@ public abstract class SnitchMod {
 		if (store == null) return false;
 
 		SnitchAlert snitchAlert = SnitchAlert.fromChat(message, store.server, getCurrentWorld());
-		if (snitchAlert != null) store.updateSnitchFromAlert(snitchAlert);
+		if (snitchAlert != null) {
+			store.updateSnitchFromAlert(snitchAlert);
+			return false;
+		}
 
 		SnitchRename snitchRename = SnitchRename.fromChat(message, store.server, getCurrentWorld(), getClientUuid());
-		if (snitchRename != null) store.updateSnitchFromRename(snitchRename);
+		if (snitchRename != null) {
+			store.updateSnitchFromRename(snitchRename);
+			return false;
+		}
 
 		Snitch snitchCreated = SnitchCreatedChatParser.fromChat(message, store.server, getCurrentWorld(), getClientUuid());
-		if (snitchCreated != null) store.updateSnitchFromCreation(snitchCreated);
+		if (snitchCreated != null) {
+			store.updateSnitchFromCreation(snitchCreated);
+			return false;
+		}
 
 		long now = System.currentTimeMillis();
 		if (lastBrokenBlockTs > now - 1000 && lastBrokenBlockPos != null) {
 			SnitchBroken snitchBroken = SnitchBroken.fromChat(message, lastBrokenBlockPos, store.server, getCurrentWorld());
-			if (snitchBroken != null) store.updateSnitchBroken(snitchBroken);
+			if (snitchBroken != null) {
+				store.updateSnitchBroken(snitchBroken);
+				return false;
+			}
 		}
 
 		// TODO if chat is jainfo and can refresh group -> mark refreshed
