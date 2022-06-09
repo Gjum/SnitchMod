@@ -169,15 +169,12 @@ public abstract class SnitchMod {
 		if (blockState == Blocks.AIR.defaultBlockState()) {
 			lastBrokenBlockPos = pos;
 			lastBrokenBlockTs = System.currentTimeMillis();
-		// Prevent interaction between this and placing new snitches.
-		} else if (!blockState.is(Blocks.JUKEBOX) && !blockState.is(Blocks.NOTE_BLOCK)) {
-			WorldPos potentialSnitchPos = new WorldPos(
-				store.server, getCurrentWorld(), pos.getX(), pos.getY(), pos.getZ());
-			if (store.getAllSnitches().contains(potentialSnitchPos)) {
-				// The player placed a block where we think a snitch is. That's
-				// impossible, so we need to remove the snitch.
-				store.deleteSnitch(potentialSnitchPos);
-			}
+		} else if (store != null
+				// Prevent interaction between this and placing new snitches.
+				&& !blockState.is(Blocks.JUKEBOX)
+				&& !blockState.is(Blocks.NOTE_BLOCK)
+		) {
+			store.updateSnitchGone(new WorldPos(store.server, getCurrentWorld(), pos));
 		}
 	}
 

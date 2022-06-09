@@ -70,6 +70,16 @@ public class SnitchesStore {
 		if (db != null) db.upsertSnitch(snitch);
 	}
 
+	/**
+	 * There is no snitch at the given WorldPos
+	 */
+	public void updateSnitchGone(WorldPos pos) {
+		Snitch snitch = snitches.get(getId(pos));
+		if (snitch == null) return;
+		snitch.updateGone();
+		if (db != null) db.upsertSnitch(snitch);
+	}
+
 	@Nullable
 	public Snitch deleteSnitch(WorldPos pos) {
 		Snitch snitch = snitches.remove(getId(pos));

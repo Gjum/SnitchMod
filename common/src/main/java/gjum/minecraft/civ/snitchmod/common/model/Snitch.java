@@ -124,6 +124,12 @@ public class Snitch extends WorldPos {
 		goneTs = snitchBroken.ts;
 	}
 
+	public void updateGone() {
+		goneTs = System.currentTimeMillis();
+		dormantTs = 0;
+		cullTs = 0;
+	}
+
 	private void updateSeen(long ts) {
 		if (firstSeenTs == 0 || firstSeenTs > ts) firstSeenTs = ts;
 		if (lastSeenTs < ts) lastSeenTs = ts;

@@ -19,6 +19,15 @@ public class WorldPos extends BlockPos {
 		this.world = world;
 	}
 
+	public WorldPos(
+			@NotNull String server,
+			@NotNull String world,
+			BlockPos pos) {
+		super(pos);
+		this.server = server;
+		this.world = world;
+	}
+
 	@NotNull
 	public String getServer() {
 		return server;
