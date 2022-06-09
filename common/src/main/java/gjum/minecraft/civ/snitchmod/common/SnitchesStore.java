@@ -35,25 +35,22 @@ public class SnitchesStore {
 	public void updateSnitchesFromJalist(List<JalistEntry> jalist) {
 		List<Snitch> jalistSnitches = new ArrayList<>(jalist.size());
 		for (JalistEntry entry : jalist) {
-			Snitch snitch = snitches.getOrDefault(getId(entry), new Snitch(entry));
+			Snitch snitch = snitches.computeIfAbsent(getId(entry), id -> new Snitch(entry));
 			snitch.updateFromJalist(entry);
-			snitches.put(getId(snitch), snitch);
 			jalistSnitches.add(snitch);
 		}
 		if (db != null) db.upsertSnitches(jalistSnitches);
 	}
 
 	public void updateSnitchFromRename(SnitchRename rename) {
-		Snitch snitch = snitches.getOrDefault(getId(rename), new Snitch(rename));
+		Snitch snitch = snitches.computeIfAbsent(getId(rename), id -> new Snitch(rename));
 		snitch.updateFromRename(rename);
-		snitches.put(getId(snitch), snitch);
 		if (db != null) db.upsertSnitch(snitch);
 	}
 
 	public void updateSnitchFromAlert(SnitchAlert alert) {
-		Snitch snitch = snitches.getOrDefault(getId(alert), new Snitch(alert));
+		Snitch snitch = snitches.computeIfAbsent(getId(alert), id -> new Snitch(alert));
 		snitch.updateFromAlert(alert);
-		snitches.put(getId(snitch), snitch);
 		if (db != null) db.upsertSnitch(snitch);
 	}
 
@@ -65,19 +62,23 @@ public class SnitchesStore {
 	}
 
 	public void updateSnitchBroken(SnitchBroken snitchBroken) {
-		Snitch snitch = snitches.getOrDefault(getId(snitchBroken), new Snitch(snitchBroken));
+		Snitch snitch = snitches.computeIfAbsent(getId(snitchBroken), id -> new Snitch(snitchBroken));
 		snitch.updateFromBroken(snitchBroken);
 		if (db != null) db.upsertSnitch(snitch);
 	}
 
 	/**
 	 * There is no snitch at the given WorldPos
+	 *
+	 * @return The snitch that was at the WorldPos,
+	 * or null if no snitch was ever known there.
 	 */
-	public void updateSnitchGone(WorldPos pos) {
+	public @Nullable Snitch updateSnitchGone(WorldPos pos) {
 		Snitch snitch = snitches.get(getId(pos));
-		if (snitch == null) return;
+		if (snitch == null) return null;
 		snitch.updateGone();
 		if (db != null) db.upsertSnitch(snitch);
+		return snitch;
 	}
 
 	private static String getId(Snitch snitch) {
