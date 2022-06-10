@@ -2,5 +2,6 @@
   "key.snitchmod.openGui": "Reload database",
   "key.snitchmod.toggleOverlay": "Toggle Snitch overlay",
   "key.snitchmod.togglePlacement": "Toggle Snitch placement helper",
+  "key.snitchmod.togglePreviewSnitchFieldKey": "Show a Snitch field preview",
   "category.snitchmod": "Snitch Mod"
 }
