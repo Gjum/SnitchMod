@@ -12,7 +12,6 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -221,11 +220,9 @@ public abstract class SnitchMod {
 	public Stream<Snitch> streamNearbySnitches(Vec3 playerPos, int distance) {
 		getStore();
 		if (store == null) return Stream.empty();
-		var playerBlockPos = new BlockPos(playerPos);
-		AABB aabb = new AABB(playerBlockPos).inflate(distance);
 		return store.getAllSnitches().stream()
-				.filter(s -> aabb.contains(playerPos))
-				.sorted(Comparator.comparing(s -> playerBlockPos.distSqr(s.pos)));
+				.filter(s -> s.getPos().getCenter().distanceTo(playerPos) < distance)
+				.sorted(Comparator.comparing(s -> s.getPos().getCenter().distanceTo(playerPos)));
 	}
 
 	private void logToChat(Component msg) {
