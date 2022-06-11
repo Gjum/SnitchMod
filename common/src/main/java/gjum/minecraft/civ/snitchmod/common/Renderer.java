@@ -71,6 +71,7 @@ public class Renderer {
 		// inflate/deflate so the box face isn't obscured by adjacent blocks
 		final boolean playerInRange = range.contains(mc.player.position());
 		AABB rangeBox = playerInRange ? range.inflate(-.01) : range.inflate(.01);
+		AABB outlineBox = playerInRange ? range.inflate(-.05) : range.inflate(.05);
 
 		// yellow by default
 		float r = 1;
@@ -88,7 +89,7 @@ public class Renderer {
 		RenderSystem.disableCull();
 		DebugRenderer.renderFilledBox(rangeBox, r, g, b, boxAlpha);
 
-		renderBoxOutline(rangeBox, r, g, b, lineAlpha, lineWidth);
+		renderBoxOutline(outlineBox, r, g, b, lineAlpha, lineWidth);
 
 		if (snitch.pos.distSqr(mc.player.blockPosition()) < blockHlDist * blockHlDist) {
 			RenderSystem.disableDepthTest();
@@ -147,7 +148,7 @@ public class Renderer {
 
 		final boolean playerInRange = snitch.getRangeAABB().contains(mc.player.position());
 		if (playerInRange) return; // only render helper for snitches the player isn't inside of
-		final AABB helperBox = new AABB(snitch.pos).inflate(22.5);
+		final AABB helperBox = new AABB(snitch.pos).inflate(22.3);
 
 		RenderSystem.enableDepthTest();
 		RenderSystem.enableBlend();
