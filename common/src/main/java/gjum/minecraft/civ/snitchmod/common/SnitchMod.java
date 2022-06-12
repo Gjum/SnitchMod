@@ -170,13 +170,24 @@ public abstract class SnitchMod {
 				placementHelperVisible = false;
 			}
 
-			snitchFieldToPreview = new Snitch(
+			Snitch newSnitchFieldToPreview = new Snitch(
 				new WorldPos(
 					nearestSnitch.getPos().getServer(),
 					nearestSnitch.getPos().getWorld(),
 					previewPos.getX(),
 					previewPos.getY(),
 					previewPos.getZ()));
+
+			if (
+				snitchFieldToPreview != null
+				&& newSnitchFieldToPreview.getPos().equals(snitchFieldToPreview.getPos())
+			) {
+				logToChat(new TextComponent("Turning off the snitch field preview"));
+				snitchFieldToPreview = null;
+				break;
+			}
+
+			snitchFieldToPreview = newSnitchFieldToPreview;
 			logToChat(new TextComponent("Showing a snitch field preview"));
 		}
 		// TODO if block pos changed -> if pos inside snitch range not in before -> send jainfo -> mark refreshed
