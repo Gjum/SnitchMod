@@ -138,6 +138,11 @@ public abstract class SnitchMod {
 		}
 		while (togglePlacementKey.consumeClick()) {
 			placementHelperVisible = !placementHelperVisible;
+
+			if (placementHelperVisible) {
+				snitchFieldToPreview = null;
+			}
+
 			logToChat(new TextComponent(
 					"Placement helper " + (placementHelperVisible ? "visible" : "hidden")));
 		}
@@ -160,6 +165,11 @@ public abstract class SnitchMod {
 				logToChat(new TextComponent("Internal error"));
 				break;
 			}
+
+			if (placementHelperVisible) {
+				placementHelperVisible = false;
+			}
+
 			snitchFieldToPreview = new Snitch(
 				new WorldPos(
 					nearestSnitch.getPos().getServer(),
