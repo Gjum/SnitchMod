@@ -44,6 +44,10 @@ public class Renderer {
 					.forEach(Renderer::renderPlacementHelper);
 		}
 
+		if (getMod().snitchFieldToPreview != null) {
+			renderSnitchFieldPreview(getMod().snitchFieldToPreview);
+		}
+
 		RenderSystem.enableTexture();
 		RenderSystem.enableDepthTest();
 		RenderSystem.depthMask(true);
@@ -53,6 +57,40 @@ public class Renderer {
 
 		modelViewStack.popPose();
 		RenderSystem.applyModelViewMatrix();
+	}
+
+	private static void renderSnitchFieldPreview(Snitch snitch) {
+		float boxAlpha = 0.2f;
+		float lineAlpha = 1;
+		float lineWidth = 2;
+		int blockHlDist = 64;
+
+		final AABB range = snitch.getRangeAABB();
+
+		// inflate/deflate so the box face isn't obscured by adjacent blocks
+		final boolean playerInRange = range.contains(mc.player.position());
+		AABB rangeBox = playerInRange ? range.inflate(-.01) : range.inflate(.01);
+
+		// green by default
+		float r = 0.3f;
+		float g = 0.8f;
+		float b = 0.3f;
+
+		RenderSystem.enableDepthTest();
+		RenderSystem.enableBlend();
+
+		RenderSystem.disableCull();
+		DebugRenderer.renderFilledBox(rangeBox, r, g, b, boxAlpha);
+
+		renderBoxOutline(rangeBox, r, g, b, lineAlpha, lineWidth);
+
+		if (snitch.pos.distSqr(mc.player.blockPosition()) < blockHlDist * blockHlDist) {
+			RenderSystem.disableDepthTest();
+
+			// inflate so it isn't obstructed by the snitch block
+			final AABB blockBox = new AABB(snitch.pos).inflate(.01);
+			renderBoxOutline(blockBox, r, g, b, lineAlpha, lineWidth);
+		}
 	}
 
 	private static void renderSnitch(Snitch snitch) {

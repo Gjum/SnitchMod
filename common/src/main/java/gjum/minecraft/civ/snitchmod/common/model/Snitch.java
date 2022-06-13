@@ -155,6 +155,13 @@ public class Snitch {
 		return name;
 	}
 
+	public boolean isAlive() {
+		if (brokenTs != 0 || goneTs != 0) return false;
+		if (dormantTs == 0 && cullTs == 0) return true;
+		long now = System.currentTimeMillis();
+		return (dormantTs == 0 || now < dormantTs) && (cullTs == 0 || now < cullTs);
+	}
+
 	/**
 	 * "soft cull" date.
 	 * Milliseconds since the UNIX epoch.

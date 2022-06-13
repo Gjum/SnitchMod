@@ -43,10 +43,19 @@ public abstract class SnitchMod {
 			"category.snitchmod"
 	);
 
+	private static final KeyMapping previewSnitchFieldKey = new KeyMapping(
+			"key.snitchmod.togglePreviewSnitchFieldKey",
+			InputConstants.Type.KEYSYM,
+			GLFW.GLFW_KEY_N,
+			"category.snitchmod"
+	);
+
 	private static SnitchMod INSTANCE;
 
 	public boolean rangeOverlayVisible = false;
 	public boolean placementHelperVisible = false;
+	@Nullable
+	public Snitch snitchFieldToPreview = null;
 
 	@Nullable
 	private SnitchesStore store;
@@ -64,6 +73,7 @@ public abstract class SnitchMod {
 		registerKeyBinding(openGuiKey);
 		registerKeyBinding(toggleOverlayKey);
 		registerKeyBinding(togglePlacementKey);
+		registerKeyBinding(previewSnitchFieldKey);
 	}
 
 	public abstract void registerKeyBinding(KeyMapping mapping);
@@ -127,8 +137,57 @@ public abstract class SnitchMod {
 		}
 		while (togglePlacementKey.consumeClick()) {
 			placementHelperVisible = !placementHelperVisible;
+
+			if (placementHelperVisible) {
+				snitchFieldToPreview = null;
+			}
+
 			logToChat(new TextComponent(
 					"Placement helper " + (placementHelperVisible ? "visible" : "hidden")));
+		}
+		while (previewSnitchFieldKey.consumeClick()) {
+			Optional<Snitch> optNearestSnitch = streamNearbySnitches(mc.player.position(), 2*23)
+				.filter(Snitch::isAlive)
+				.findFirst();
+			if (optNearestSnitch.isEmpty()) {
+				snitchFieldToPreview = null;
+				logToChat(new TextComponent("No nearby snitches to base a field preview on"));
+				break;
+			}
+			Snitch nearestSnitch = optNearestSnitch.get();
+			BlockPos previewPos = PlacementHelper.transposeSnitchFieldPositionByDirection(
+				nearestSnitch.getPos(),
+				mc.player.getYRot(),
+				mc.player.getXRot());
+			if (previewPos == null) {
+				// TODO log this
+				logToChat(new TextComponent("Internal error"));
+				break;
+			}
+
+			if (placementHelperVisible) {
+				placementHelperVisible = false;
+			}
+
+			Snitch newSnitchFieldToPreview = new Snitch(
+				new WorldPos(
+					nearestSnitch.getPos().getServer(),
+					nearestSnitch.getPos().getWorld(),
+					previewPos.getX(),
+					previewPos.getY(),
+					previewPos.getZ()));
+
+			if (
+				snitchFieldToPreview != null
+				&& newSnitchFieldToPreview.getPos().equals(snitchFieldToPreview.getPos())
+			) {
+				logToChat(new TextComponent("Turning off the snitch field preview"));
+				snitchFieldToPreview = null;
+				break;
+			}
+
+			snitchFieldToPreview = newSnitchFieldToPreview;
+			logToChat(new TextComponent("Showing a snitch field preview"));
 		}
 		// TODO if block pos changed -> if pos inside snitch range not in before -> send jainfo -> mark refreshed
 	}
