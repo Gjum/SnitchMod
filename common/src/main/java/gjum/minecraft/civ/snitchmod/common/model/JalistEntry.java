@@ -57,7 +57,7 @@ public class JalistEntry {
 
 	private static final Pattern locationPattern = Pattern.compile("^Location: (?:([A-Za-z][^ ]+),? )?([-0-9]+),? ([-0-9]+),? ([-0-9]+)");
 	private static final Pattern groupPattern = Pattern.compile("^Group: ([^ ]+)");
-	private static final Pattern lifetimePattern = Pattern.compile("^Will (cull|go dormant) in ([0-9]+) h(?:our)?s? ([0-9]+) min(?:ute)?s? ([0-9]+) sec(?:ond)?s?");
+	private static final Pattern lifetimePattern = Pattern.compile("^Will (cull|go dormant) in (?:([0-9]+) h(?:our)?s? ?)?(?:([0-9]+) min(?:ute)?s? ?)?(?:([0-9]+) sec(?:ond)?s?)?\s*");
 
 	@Nullable
 	public static JalistEntry fromStack(ItemStack stack, @NotNull String server) {
@@ -101,9 +101,24 @@ public class JalistEntry {
 		long ts = System.currentTimeMillis();
 
 		String lifetimeType = lifetimeMatch.group(1);
-		long h = Integer.parseInt(lifetimeMatch.group(2));
-		long m = Integer.parseInt(lifetimeMatch.group(3));
-		long s = Integer.parseInt(lifetimeMatch.group(4));
+		long h;
+		if (lifetimeMatch.group(2) != null) {
+			h = Integer.parseInt(lifetimeMatch.group(2));
+		} else {
+			h = 0;
+		}
+		long m;
+		if (lifetimeMatch.group(3) != null) {
+			m = Integer.parseInt(lifetimeMatch.group(3));
+		} else {
+			m = 0;
+		}
+		long s;
+		if (lifetimeMatch.group(4) != null) {
+			s = Integer.parseInt(lifetimeMatch.group(4));
+		} else {
+			s = 0;
+		}
 		long lifetimeDurationMs = (h * 3600L + m * 60L + s) * 1000L;
 
 		long dormant_ts = 0, cull_ts = 0;
