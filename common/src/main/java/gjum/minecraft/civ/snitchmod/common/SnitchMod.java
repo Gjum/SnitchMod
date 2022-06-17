@@ -90,7 +90,7 @@ public abstract class SnitchMod {
 		// civ server world names as they occur in snitches are different from dimension names
 		return switch (dimension) {
 			case "overworld" -> "world";
-			case "the_nether" -> "world_the_nether";
+			case "the_nether" -> "world_nether";
 			case "the_end" -> "world_the_end";
 			default -> dimension;
 		};
