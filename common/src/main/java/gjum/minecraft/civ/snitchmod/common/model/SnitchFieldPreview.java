@@ -1,22 +1,47 @@
-package gjum.minecraft.civ.snitchmod.common;
+package gjum.minecraft.civ.snitchmod.common.model;
 
 import net.minecraft.core.BlockPos;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-public class PlacementHelper {
-	public static @Nullable BlockPos transposeSnitchFieldPositionByDirection(
-			@NotNull
-			BlockPos fieldCenter,
-			double yaw,
-			double pitch) {
+public class SnitchFieldPreview {
+	private Snitch source;
+	private Direction direction;
+	private Snitch field;
+
+	public SnitchFieldPreview(
+		Snitch source,
+		Direction direction
+	) {
+		this.source = source;
+		this.direction = direction;
+
+		BlockPos previewPos = transposeSnitchFieldPositionByDirection(
+			source.getPos(),
+			direction);
+		this.field = new Snitch(
+			new WorldPos(
+				source.getPos().getServer(),
+				source.getPos().getWorld(),
+				previewPos.getX(),
+				previewPos.getY(),
+				previewPos.getZ()));
+	}
+
+	public static @NotNull BlockPos transposeSnitchFieldPositionByDirection(
+		@NotNull
+		BlockPos fieldCenter,
+		@NotNull
+		Direction direction
+	) {
 		int x = fieldCenter.getX();
 		int y = fieldCenter.getY();
 		int z = fieldCenter.getZ();
+		double yaw = direction.yaw().value();
 		yaw = ((double) yaw + 180) % 360;
 		if (yaw < 0) {
 			yaw += 360;
 		}
+		double pitch = direction.pitch().value();
 
 		// Straight up
 		if (pitch <= -60) {
@@ -73,6 +98,29 @@ public class PlacementHelper {
 			return new BlockPos(x-22, y, z-22);
 		}
 
-		return null;
+		throw new IllegalArgumentException(String.format(
+			"Out of range values of yaw %f and/or pitch %f.",
+			direction.yaw().value(), direction.pitch().value()));
+	}
+
+	public Snitch source() {
+		return this.source;
+	}
+
+	public Direction direction() {
+		return this.direction;
+	}
+
+	public Snitch field() {
+		return this.field;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof SnitchFieldPreview)) {
+			return false;
+		}
+		SnitchFieldPreview p = (SnitchFieldPreview)obj;
+		return this.field.pos.equals(p.field.pos);
 	}
 }
