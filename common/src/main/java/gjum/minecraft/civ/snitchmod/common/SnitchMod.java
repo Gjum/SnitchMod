@@ -199,6 +199,21 @@ public abstract class SnitchMod {
 		Snitch snitchCreated = SnitchCreatedChatParser.fromChat(message, store.server, getCurrentWorld(), getClientUuid());
 		if (snitchCreated != null) {
 			store.updateSnitchFromCreation(snitchCreated);
+
+			if (
+				snitchFieldToPreview != null
+				&& snitchFieldToPreview.field().pos.equals(snitchCreated.pos)
+			) {
+				if (placementHelperVisible) {
+					placementHelperVisible = false;
+				}
+
+				snitchFieldToPreview = new SnitchFieldPreview(
+					snitchCreated, snitchFieldToPreview.direction());
+
+				logToChat(new TextComponent("Showing an inferred snitch field preview"));
+			}
+
 			return false;
 		}
 
