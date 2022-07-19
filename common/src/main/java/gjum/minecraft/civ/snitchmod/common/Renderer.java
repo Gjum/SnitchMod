@@ -3,6 +3,7 @@ package gjum.minecraft.civ.snitchmod.common;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import gjum.minecraft.civ.snitchmod.common.model.Snitch;
+import gjum.minecraft.civ.snitchmod.common.model.SnitchFieldPreview;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.debug.DebugRenderer;
 import net.minecraft.network.chat.Component;
@@ -59,13 +60,13 @@ public class Renderer {
 		RenderSystem.applyModelViewMatrix();
 	}
 
-	private static void renderSnitchFieldPreview(Snitch snitch) {
+	private static void renderSnitchFieldPreview(SnitchFieldPreview preview) {
 		float boxAlpha = 0.2f;
 		float lineAlpha = 1;
 		float lineWidth = 2;
 		int blockHlDist = 64;
 
-		final AABB range = snitch.getRangeAABB();
+		final AABB range = preview.field().getRangeAABB();
 
 		// inflate/deflate so the box face isn't obscured by adjacent blocks
 		final boolean playerInRange = range.contains(mc.player.position());
@@ -84,11 +85,11 @@ public class Renderer {
 
 		renderBoxOutline(rangeBox, r, g, b, lineAlpha, lineWidth);
 
-		if (snitch.pos.distSqr(mc.player.blockPosition()) < blockHlDist * blockHlDist) {
+		if (preview.field().pos.distSqr(mc.player.blockPosition()) < blockHlDist * blockHlDist) {
 			RenderSystem.disableDepthTest();
 
 			// inflate so it isn't obstructed by the snitch block
-			final AABB blockBox = new AABB(snitch.pos).inflate(.01);
+			final AABB blockBox = new AABB(preview.field().pos).inflate(.01);
 			renderBoxOutline(blockBox, r, g, b, lineAlpha, lineWidth);
 		}
 	}

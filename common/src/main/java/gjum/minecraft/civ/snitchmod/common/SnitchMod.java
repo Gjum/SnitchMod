@@ -55,7 +55,7 @@ public abstract class SnitchMod {
 	public boolean rangeOverlayVisible = false;
 	public boolean placementHelperVisible = false;
 	@Nullable
-	public Snitch snitchFieldToPreview = null;
+	public SnitchFieldPreview snitchFieldToPreview = null;
 
 	@Nullable
 	private SnitchesStore store;
@@ -155,31 +155,16 @@ public abstract class SnitchMod {
 				break;
 			}
 			Snitch nearestSnitch = optNearestSnitch.get();
-			BlockPos previewPos = PlacementHelper.transposeSnitchFieldPositionByDirection(
-				nearestSnitch.getPos(),
-				mc.player.getYRot(),
-				mc.player.getXRot());
-			if (previewPos == null) {
-				// TODO log this
-				logToChat(new TextComponent("Internal error"));
-				break;
-			}
 
 			if (placementHelperVisible) {
 				placementHelperVisible = false;
 			}
 
-			Snitch newSnitchFieldToPreview = new Snitch(
-				new WorldPos(
-					nearestSnitch.getPos().getServer(),
-					nearestSnitch.getPos().getWorld(),
-					previewPos.getX(),
-					previewPos.getY(),
-					previewPos.getZ()));
-
+			SnitchFieldPreview newSnitchFieldToPreview = new SnitchFieldPreview(
+				nearestSnitch, Direction.ofPlayer(mc.player));
 			if (
 				snitchFieldToPreview != null
-				&& newSnitchFieldToPreview.getPos().equals(snitchFieldToPreview.getPos())
+				&& newSnitchFieldToPreview.equals(snitchFieldToPreview)
 			) {
 				logToChat(new TextComponent("Turning off the snitch field preview"));
 				snitchFieldToPreview = null;
@@ -214,6 +199,21 @@ public abstract class SnitchMod {
 		Snitch snitchCreated = SnitchCreatedChatParser.fromChat(message, store.server, getCurrentWorld(), getClientUuid());
 		if (snitchCreated != null) {
 			store.updateSnitchFromCreation(snitchCreated);
+
+			if (
+				snitchFieldToPreview != null
+				&& snitchFieldToPreview.field().pos.equals(snitchCreated.pos)
+			) {
+				if (placementHelperVisible) {
+					placementHelperVisible = false;
+				}
+
+				snitchFieldToPreview = new SnitchFieldPreview(
+					snitchCreated, snitchFieldToPreview.direction());
+
+				logToChat(new TextComponent("Showing an inferred snitch field preview"));
+			}
+
 			return false;
 		}
 
