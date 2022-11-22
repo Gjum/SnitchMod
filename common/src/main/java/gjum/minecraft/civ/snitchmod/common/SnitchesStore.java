@@ -83,11 +83,11 @@ public class SnitchesStore {
 	 * @return The snitch that was at the WorldPos,
 	 * or null if no snitch was ever known there.
 	 */
-	public @Nullable Snitch updateSnitchGone(@NotNull WorldPos pos) {
+/**	public @Nullable Snitch updateSnitchGone(@NotNull WorldPos pos) {
 		Snitch snitch = snitches.get(pos);
 		if (snitch == null) return null;
 		snitch.updateGone();
 		if (db != null) db.upsertSnitch(snitch);
 		return snitch;
-	}
+	} */
 }
