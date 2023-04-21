@@ -56,6 +56,8 @@ public abstract class SnitchMod {
 	public boolean placementHelperVisible = false;
 	@Nullable
 	public SnitchFieldPreview snitchFieldToPreview = null;
+	@Nullable
+	public Snitch lastBrokenSnitch = null;
 
 	@Nullable
 	private SnitchesStore store;
@@ -214,6 +216,22 @@ public abstract class SnitchMod {
 				logToChat(new TextComponent("Showing an inferred snitch field preview"));
 			}
 
+			if (
+				lastBrokenSnitch != null
+				&& lastBrokenSnitch.getName() != null
+				&& !lastBrokenSnitch.getName().equals("")
+				&& lastBrokenSnitch.pos.equals(snitchCreated.pos)
+			) {
+				mc.player.chat(
+					String.format(
+						"/janameat %d %d %d %s",
+						lastBrokenSnitch.pos.getX(),
+						lastBrokenSnitch.pos.getY(),
+						lastBrokenSnitch.pos.getZ(),
+						lastBrokenSnitch.getName()));
+				logToChat(new TextComponent("Named the replaced snitch"));
+			}
+
 			return false;
 		}
 
@@ -222,6 +240,12 @@ public abstract class SnitchMod {
 			SnitchBroken snitchBroken = SnitchBroken.fromChat(message, lastBrokenBlockPos, store.server, getCurrentWorld());
 			if (snitchBroken != null) {
 				store.updateSnitchBroken(snitchBroken);
+
+				Snitch snitch = store.getSnitch(getCurrentWorld(), lastBrokenBlockPos);
+				if (snitch != null) {
+					lastBrokenSnitch = snitch;
+				}
+
 				return false;
 			}
 		}
@@ -243,7 +267,14 @@ public abstract class SnitchMod {
 				&& !blockState.is(Blocks.JUKEBOX)
 				&& !blockState.is(Blocks.NOTE_BLOCK)
 		) {
-			store.updateSnitchGone(new WorldPos(store.server, getCurrentWorld(), pos));
+			WorldPos worldPos = new WorldPos(store.server, getCurrentWorld(), pos);
+
+			store.updateSnitchGone(worldPos);
+
+			Snitch snitch = store.getSnitch(worldPos);
+			if (snitch != null) {
+				lastBrokenSnitch = snitch;
+			}
 		}
 	}
 
