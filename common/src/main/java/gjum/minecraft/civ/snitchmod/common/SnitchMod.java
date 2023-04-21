@@ -222,7 +222,13 @@ public abstract class SnitchMod {
 				&& !lastBrokenSnitch.getName().equals("")
 				&& lastBrokenSnitch.pos.equals(snitchCreated.pos)
 			) {
-				mc.player.chat(String.format("/janame %s ", lastBrokenSnitch.getName()));
+				mc.player.chat(
+					String.format(
+						"/janameat %d %d %d %s",
+						lastBrokenSnitch.pos.getX(),
+						lastBrokenSnitch.pos.getY(),
+						lastBrokenSnitch.pos.getZ(),
+						lastBrokenSnitch.getName()));
 				logToChat(new TextComponent("Named the replaced snitch"));
 			}
 
