@@ -121,18 +121,18 @@ public class JalistEntry {
 		}
 		long lifetimeDurationMs = (h * 3600L + m * 60L + s) * 1000L;
 
-		long dormant_ts = 0, cull_ts = 0;
+		long dormantTs = 0, cullTs = 0;
 		if ("go dormant".equals(lifetimeType)) {
-			dormant_ts = ts + lifetimeDurationMs;
+			dormantTs = ts + lifetimeDurationMs;
 		} else if ("cull".equals(lifetimeType)) {
-			cull_ts = ts + lifetimeDurationMs;
+			cullTs = ts + lifetimeDurationMs;
 		} else {
 			System.err.println("Ignoring malformed jalist entry with lifetime type: " + lifetimeType);
 			return null;
 		}
 
 		var pos = new WorldPos(server, world, x, y, z);
-		return new JalistEntry(ts, pos, group, type, name, dormant_ts, cull_ts);
+		return new JalistEntry(ts, pos, group, type, name, dormantTs, cullTs);
 	}
 
 	private static String getStringFromChatJson(String json) {
