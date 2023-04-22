@@ -175,8 +175,8 @@ public class Renderer {
 	}
 
 	public static boolean playerIsLookingAtSnitch(LocalPlayer player, Snitch snitch) {
-		Vec3 playerLookAngle = mc.player.getLookAngle();
-		Vec3 playerPos = mc.player.getEyePosition();
+		Vec3 playerLookAngle = player.getLookAngle();
+		Vec3 playerPos = player.getEyePosition();
 		AABB snitchBox = new AABB(snitch.pos);
 
 		double invertedLookAngleX = 1/playerLookAngle.x;
