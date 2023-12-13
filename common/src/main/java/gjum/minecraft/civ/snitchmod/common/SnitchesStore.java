@@ -5,17 +5,21 @@ import net.minecraft.core.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.*;
 
 public class SnitchesStore {
 	public final @NotNull String server;
 
 	private final HashMap<WorldPos, Snitch> snitches = new HashMap<>();
+	private final ConcurrentLinkedQueue<Snitch> queuedDBSnitches = new ConcurrentLinkedQueue<>();
 
 	private @Nullable SnitchSqliteDb db;
 
 	public SnitchesStore(@NotNull String server) {
 		this.server = server;
+
 		try {
 			db = new SnitchSqliteDb(server);
 			for (Snitch snitch : db.selectAllSnitches()) {
@@ -24,6 +28,34 @@ public class SnitchesStore {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		new Thread() {
+			public void run() {
+				int lastAddedSnitchCount = 0;
+				while (true) {
+					try {
+						TimeUnit.MILLISECONDS.sleep(1000);
+					} catch (InterruptedException err) {
+						Thread.currentThread().interrupt();
+					}
+
+					final long startTime = System.currentTimeMillis();
+					List<Snitch> snitches = new ArrayList<>(lastAddedSnitchCount);
+					while (true) {
+						Snitch newSnitch = queuedDBSnitches.poll();
+						if (newSnitch != null) {
+							snitches.add(newSnitch);
+						}
+
+						if (snitches.size() >= 1000 || System.currentTimeMillis() - startTime >= 1000) {
+							if (db != null) db.upsertSnitches(snitches);
+							lastAddedSnitchCount = snitches.size();
+							break;
+						}
+					}
+				}
+			}
+		}.start();
 	}
 
 	public void close() {
@@ -55,26 +87,26 @@ public class SnitchesStore {
 	public void updateSnitchFromRename(SnitchRename rename) {
 		Snitch snitch = snitches.computeIfAbsent(rename.pos, Snitch::new);
 		snitch.updateFromRename(rename);
-		if (db != null) db.upsertSnitch(snitch);
+		upsertSnitchToDB(snitch);
 	}
 
 	public void updateSnitchFromAlert(SnitchAlert alert) {
 		Snitch snitch = snitches.computeIfAbsent(alert.pos, Snitch::new);
 		snitch.updateFromAlert(alert);
-		if (db != null) db.upsertSnitch(snitch);
+		upsertSnitchToDB(snitch);
 	}
 
 	public void updateSnitchFromCreation(Snitch snitch) {
 		// don't reuse any existing snitch, it no longer exists, only the new snitch does
 		snitches.put(snitch.pos, snitch);
-		if (db != null) db.upsertSnitch(snitch);
+		upsertSnitchToDB(snitch);
 		// TODO remember last created snitch for placement helper
 	}
 
 	public void updateSnitchBroken(SnitchBroken snitchBroken) {
 		Snitch snitch = snitches.computeIfAbsent(snitchBroken.pos, Snitch::new);
 		snitch.updateFromBroken(snitchBroken);
-		if (db != null) db.upsertSnitch(snitch);
+		upsertSnitchToDB(snitch);
 	}
 
 	/**
@@ -87,7 +119,11 @@ public class SnitchesStore {
 		Snitch snitch = snitches.get(pos);
 		if (snitch == null) return null;
 		snitch.updateGone();
-		if (db != null) db.upsertSnitch(snitch);
+		upsertSnitchToDB(snitch);
 		return snitch;
+	}
+
+	private void upsertSnitchToDB(Snitch snitch) {
+		if (snitch != null) queuedDBSnitches.add(snitch);
 	}
 }
