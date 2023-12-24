@@ -47,7 +47,7 @@ public class SnitchesStore {
 							snitches.add(newSnitch);
 						}
 
-						if (snitches.size() >= 1000 || System.currentTimeMillis() - startTime >= 1000) {
+						if (newSnitch == null || snitches.size() >= 1000 || System.currentTimeMillis() - startTime >= 1000) {
 							if (db != null) db.upsertSnitches(snitches);
 							lastAddedSnitchCount = snitches.size();
 							break;
