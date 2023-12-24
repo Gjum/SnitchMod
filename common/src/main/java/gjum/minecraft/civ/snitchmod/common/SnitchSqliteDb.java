@@ -111,6 +111,8 @@ public class SnitchSqliteDb {
 	synchronized
 	public void upsertSnitches(List<Snitch> snitches) {
 		if (conn == null) return;
+		if (snitches.size() == 0) return;
+
 		String sql = "INSERT INTO " + tableSnitches + " (world,x,y,z,group_name,type,name,dormant_ts,cull_ts,first_seen_ts,last_seen_ts,created_ts,created_by_uuid,renamed_ts,renamed_by_uuid,lost_jalist_access_ts,broken_ts,gone_ts,tags,notes)" +
 				" VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)" +
 				"ON CONFLICT (" + pkeySnitches + ") DO UPDATE SET " +
