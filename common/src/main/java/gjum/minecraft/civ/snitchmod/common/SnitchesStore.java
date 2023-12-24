@@ -43,11 +43,16 @@ public class SnitchesStore {
 					List<Snitch> snitches = new ArrayList<>(lastAddedSnitchCount);
 					while (true) {
 						Snitch newSnitch = queuedDBSnitches.poll();
+
 						if (newSnitch != null) {
 							snitches.add(newSnitch);
 						}
 
-						if (newSnitch == null || snitches.size() >= 1000 || System.currentTimeMillis() - startTime >= 1000) {
+						if (
+							newSnitch == null
+							|| snitches.size() >= 1000
+							|| System.currentTimeMillis() - startTime >= 1000
+						) {
 							if (db != null) db.upsertSnitches(snitches);
 							lastAddedSnitchCount = snitches.size();
 							break;
