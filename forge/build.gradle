@@ -87,13 +87,13 @@ publishing {
 	}
 }
 
-task cleanJar(type: Delete) {
+tasks.register('cleanJar', Delete) {
 	delete fileTree('../dist') {
 		include "*-forge.jar"
 	}
 }
 
-task copyJar(type: Copy) {
+tasks.register('copyJar', Copy) {
 	from remapJar
 	into '../dist'
 }
