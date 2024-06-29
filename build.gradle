@@ -1,8 +1,7 @@
 plugins {
 	id "architectury-plugin" version "3.4-SNAPSHOT"
-	id "dev.architectury.loom" version "0.11.0-SNAPSHOT" apply false
+	id "dev.architectury.loom" version "1.6-SNAPSHOT" apply false
 }
-
 architectury {
 	minecraft = rootProject.minecraft_version
 }
@@ -35,6 +34,10 @@ allprojects {
 			content {
 				includeGroup "curse.maven"
 			}
+		}
+		maven {
+			name "Modrinth"
+			url "https://api.modrinth.com/maven"
 		}
 	}
 

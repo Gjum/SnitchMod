@@ -33,7 +33,7 @@ dependencies {
 	implementation "org.xerial:sqlite-jdbc:3.36.0.3"
 	shadowCommon "org.xerial:sqlite-jdbc:3.36.0.3"
 
-	modCompileOnly "curse.maven:journeymap-32274:3796379" // version 1.18.2-5.8.4-forge
+	modCompileOnly "curse.maven:journeymap-32274:5457832" // version 1.20.4-5.10.0-forge
 }
 
 processResources {
@@ -48,17 +48,17 @@ shadowJar {
 	exclude "fabric.mod.json"
 
 	configurations = [project.configurations.shadowCommon]
-	classifier "dev-shadow"
+	archiveClassifier = "dev-shadow"
 }
 
 remapJar {
 	input.set shadowJar.archiveFile
 	dependsOn shadowJar
-	classifier "forge"
+	archiveClassifier = "forge"
 }
 
 jar {
-	classifier "dev"
+	archiveClassifier = "dev"
 }
 
 sourcesJar {

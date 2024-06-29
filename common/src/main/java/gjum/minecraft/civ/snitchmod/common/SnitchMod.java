@@ -8,7 +8,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -130,11 +129,11 @@ public abstract class SnitchMod {
 			store.close();
 			store = null;
 			getStore();
-			logToChat(new TextComponent("Reloaded the database"));
+			logToChat(Component.literal("Reloaded the database"));
 		}
 		while (toggleOverlayKey.consumeClick()) {
 			rangeOverlayVisible = !rangeOverlayVisible;
-			logToChat(new TextComponent(
+			logToChat(Component.literal(
 					"Range overlay " + (rangeOverlayVisible ? "visible" : "hidden")));
 		}
 		while (togglePlacementKey.consumeClick()) {
@@ -144,7 +143,7 @@ public abstract class SnitchMod {
 				snitchFieldToPreview = null;
 			}
 
-			logToChat(new TextComponent(
+			logToChat(Component.literal(
 					"Placement helper " + (placementHelperVisible ? "visible" : "hidden")));
 		}
 		while (previewSnitchFieldKey.consumeClick()) {
@@ -153,7 +152,7 @@ public abstract class SnitchMod {
 				.findFirst();
 			if (optNearestSnitch.isEmpty()) {
 				snitchFieldToPreview = null;
-				logToChat(new TextComponent("No nearby snitches to base a field preview on"));
+				logToChat(Component.literal("No nearby snitches to base a field preview on"));
 				break;
 			}
 			Snitch nearestSnitch = optNearestSnitch.get();
@@ -168,13 +167,13 @@ public abstract class SnitchMod {
 				snitchFieldToPreview != null
 				&& newSnitchFieldToPreview.equals(snitchFieldToPreview)
 			) {
-				logToChat(new TextComponent("Turning off the snitch field preview"));
+				logToChat(Component.literal("Turning off the snitch field preview"));
 				snitchFieldToPreview = null;
 				break;
 			}
 
 			snitchFieldToPreview = newSnitchFieldToPreview;
-			logToChat(new TextComponent("Showing a snitch field preview"));
+			logToChat(Component.literal("Showing a snitch field preview"));
 		}
 		// TODO if block pos changed -> if pos inside snitch range not in before -> send jainfo -> mark refreshed
 	}
@@ -213,7 +212,7 @@ public abstract class SnitchMod {
 				snitchFieldToPreview = new SnitchFieldPreview(
 					snitchCreated, snitchFieldToPreview.direction());
 
-				logToChat(new TextComponent("Showing an inferred snitch field preview"));
+				logToChat(Component.literal("Showing an inferred snitch field preview"));
 			}
 
 			if (
@@ -222,14 +221,14 @@ public abstract class SnitchMod {
 				&& !lastBrokenSnitch.getName().equals("")
 				&& lastBrokenSnitch.pos.equals(snitchCreated.pos)
 			) {
-				mc.player.chat(
+				mc.getConnection().sendCommand(
 					String.format(
 						"/janameat %d %d %d %s",
 						lastBrokenSnitch.pos.getX(),
 						lastBrokenSnitch.pos.getY(),
 						lastBrokenSnitch.pos.getZ(),
 						lastBrokenSnitch.getName()));
-				logToChat(new TextComponent("Named the replaced snitch"));
+				logToChat(Component.literal("Named the replaced snitch"));
 			}
 
 			return false;
@@ -292,19 +291,19 @@ public abstract class SnitchMod {
 			} catch (Throwable e) {
 				System.err.println("Failed parsing jalist stack " + i + " " + stack);
 				e.printStackTrace();
-				logToChat(new TextComponent(
+				logToChat(Component.literal(
 						"Failed reading snitch " + i + " on JAList page"));
 			}
 		}
 		store.updateSnitchesFromJalist(jalistEntries);
 		if (jalistEntries.size() > 0) {
-			logToChat(new TextComponent(
+			logToChat(Component.literal(
 					"Found " + jalistEntries.size() + " snitches on JAList page"));
 		}
 	}
 
 	public void handleRenderBlockOverlay(PoseStack matrices, float partialTicks) {
-		Renderer.renderOverlays(matrices, partialTicks);
+		Renderer.renderOverlays(matrices);
 	}
 
 	public Stream<Snitch> streamNearbySnitches(Vec3 playerPos, int distance) {
@@ -316,6 +315,6 @@ public abstract class SnitchMod {
 	}
 
 	private void logToChat(Component msg) {
-		mc.gui.getChat().addMessage(new TextComponent("[SnitchMod] ").append(msg));
+		mc.gui.getChat().addMessage(Component.literal("[SnitchMod] ").append(msg));
 	}
 }
