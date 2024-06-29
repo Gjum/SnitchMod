@@ -11,7 +11,11 @@ import net.minecraft.client.KeyMapping;
 public class FabricSnitchMod extends SnitchMod implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
-		init();
+		KeyBindingHelper.registerKeyBinding(openGuiKey);
+		KeyBindingHelper.registerKeyBinding(toggleOverlayKey);
+		KeyBindingHelper.registerKeyBinding(togglePlacementKey);
+		KeyBindingHelper.registerKeyBinding(previewSnitchFieldKey);
+
 		ClientTickEvents.START_CLIENT_TICK.register(client -> {
 			try {
 				handleTick();
@@ -21,15 +25,10 @@ public class FabricSnitchMod extends SnitchMod implements ClientModInitializer {
 		});
 		WorldRenderEvents.AFTER_TRANSLUCENT.register(((context) -> {
 			try {
-				handleRenderBlockOverlay(context.matrixStack(), context.tickDelta());
+				handleRenderBlockOverlay(context.matrixStack());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}));
-	}
-
-	@Override
-	public void registerKeyBinding(KeyMapping mapping) {
-		KeyBindingHelper.registerKeyBinding(mapping);
 	}
 }

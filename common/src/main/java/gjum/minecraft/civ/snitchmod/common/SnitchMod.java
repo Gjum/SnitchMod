@@ -1,5 +1,6 @@
 package gjum.minecraft.civ.snitchmod.common;
 
+import com.mamiyaotaru.voxelmap.VoxelMap;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import gjum.minecraft.civ.snitchmod.common.model.*;
@@ -21,28 +22,28 @@ import java.util.stream.Stream;
 public abstract class SnitchMod {
 	private final static Minecraft mc = Minecraft.getInstance();
 
-	private static final KeyMapping openGuiKey = new KeyMapping(
+	protected static final KeyMapping openGuiKey = new KeyMapping(
 			"key.snitchmod.openGui",
 			InputConstants.Type.KEYSYM,
 			GLFW.GLFW_KEY_L,
 			"category.snitchmod"
 	);
 
-	private static final KeyMapping toggleOverlayKey = new KeyMapping(
+	protected static final KeyMapping toggleOverlayKey = new KeyMapping(
 			"key.snitchmod.toggleOverlay",
 			InputConstants.Type.KEYSYM,
 			GLFW.GLFW_KEY_O,
 			"category.snitchmod"
 	);
 
-	private static final KeyMapping togglePlacementKey = new KeyMapping(
+	protected static final KeyMapping togglePlacementKey = new KeyMapping(
 			"key.snitchmod.togglePlacement",
 			InputConstants.Type.KEYSYM,
 			GLFW.GLFW_KEY_P,
 			"category.snitchmod"
 	);
 
-	private static final KeyMapping previewSnitchFieldKey = new KeyMapping(
+	protected static final KeyMapping previewSnitchFieldKey = new KeyMapping(
 			"key.snitchmod.togglePreviewSnitchFieldKey",
 			InputConstants.Type.KEYSYM,
 			GLFW.GLFW_KEY_N,
@@ -69,15 +70,6 @@ public abstract class SnitchMod {
 		if (INSTANCE != null) throw new IllegalStateException("Constructor called twice");
 		INSTANCE = this;
 	}
-
-	public void init() {
-		registerKeyBinding(openGuiKey);
-		registerKeyBinding(toggleOverlayKey);
-		registerKeyBinding(togglePlacementKey);
-		registerKeyBinding(previewSnitchFieldKey);
-	}
-
-	public abstract void registerKeyBinding(KeyMapping mapping);
 
 	public @Nullable String getCurrentServer() {
 		final ServerData currentServer = mc.getCurrentServer();
@@ -302,7 +294,7 @@ public abstract class SnitchMod {
 		}
 	}
 
-	public void handleRenderBlockOverlay(PoseStack matrices, float partialTicks) {
+	public void handleRenderBlockOverlay(PoseStack matrices) {
 		Renderer.renderOverlays(matrices);
 	}
 
