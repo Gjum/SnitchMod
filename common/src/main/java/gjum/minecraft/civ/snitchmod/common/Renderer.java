@@ -5,10 +5,10 @@ import com.mojang.blaze3d.vertex.*;
 import gjum.minecraft.civ.snitchmod.common.model.Snitch;
 import gjum.minecraft.civ.snitchmod.common.model.SnitchFieldPreview;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.debug.DebugRenderer;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +18,7 @@ import static gjum.minecraft.civ.snitchmod.common.SnitchMod.getMod;
 public class Renderer {
 	private final static Minecraft mc = Minecraft.getInstance();
 
-	public static void renderOverlays(PoseStack poseStackArg, float partialTicks) {
+	public static void renderOverlays(PoseStack poseStackArg) {
 		if (mc.player == null) return;
 		if (mc.level == null) return;
 
@@ -50,7 +50,6 @@ public class Renderer {
 			renderSnitchFieldPreview(getMod().snitchFieldToPreview);
 		}
 
-		RenderSystem.enableTexture();
 		RenderSystem.enableDepthTest();
 		RenderSystem.depthMask(true);
 		RenderSystem.enableCull();
@@ -82,7 +81,7 @@ public class Renderer {
 		RenderSystem.enableBlend();
 
 		RenderSystem.disableCull();
-		DebugRenderer.renderFilledBox(rangeBox, r, g, b, boxAlpha);
+		renderFilledBox(rangeBox, r, g, b, boxAlpha);
 
 		renderBoxOutline(rangeBox, r, g, b, lineAlpha, lineWidth);
 
@@ -127,7 +126,7 @@ public class Renderer {
 		RenderSystem.enableBlend();
 
 		RenderSystem.disableCull();
-		DebugRenderer.renderFilledBox(rangeBox, r, g, b, boxAlpha);
+		renderFilledBox(rangeBox, r, g, b, boxAlpha);
 
 		renderBoxOutline(outlineBox, r, g, b, lineAlpha, lineWidth);
 
@@ -144,12 +143,12 @@ public class Renderer {
 
 			String name = snitch.getName();
 			if (name != null && !name.isEmpty()) {
-				renderTextFacingCamera(new TextComponent(name), center, -1, 1);
+				renderTextFacingCamera(Component.literal(name), center, -1, 1);
 			}
 
 			String group = snitch.getGroup();
 			if (group != null) {
-				var comp = new TextComponent(String.format("[%s]", group));
+				var comp = Component.literal(String.format("[%s]", group));
 				renderTextFacingCamera(comp, center, 0, 1);
 			}
 
@@ -169,7 +168,7 @@ public class Renderer {
 			} else livelinessText = null;
 
 			if (livelinessText != null) {
-				renderTextFacingCamera(new TextComponent(livelinessText), center, 1, 1);
+				renderTextFacingCamera(Component.literal(livelinessText), center, 1, 1);
 			}
 		}
 	}
@@ -223,7 +222,7 @@ public class Renderer {
 		RenderSystem.enableBlend();
 
 		RenderSystem.disableCull();
-		DebugRenderer.renderFilledBox(helperBox, r, g, b, alpha);
+		renderFilledBox(helperBox, r, g, b, alpha);
 	}
 
 	private static void renderBoxOutline(AABB box, float r, float g, float b, float a, float lineWidth) {
@@ -260,6 +259,46 @@ public class Renderer {
 
 		tesselator.end();
 	}
+	
+	private static void renderFilledBox(AABB box, float r, float g, float b, float a) {
+		Tesselator tesselator = Tesselator.getInstance();
+        BufferBuilder bufferBuilder = tesselator.getBuilder();
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+		
+		bufferBuilder.vertex(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.minX, box.minY, box.maxZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.minX, box.maxY, box.minZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.minX, box.maxY, box.maxZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.minX, box.maxY, box.maxZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.minX, box.minY, box.maxZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.maxX, box.maxY, box.maxZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.maxX, box.minY, box.maxZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.maxX, box.minY, box.maxZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.maxX, box.minY, box.minZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.maxX, box.maxY, box.maxZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.maxX, box.maxY, box.minZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.maxX, box.maxY, box.minZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.maxX, box.minY, box.minZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.minX, box.maxY, box.minZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.maxX, box.minY, box.minZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.minX, box.minY, box.maxZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.maxX, box.minY, box.maxZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.maxX, box.minY, box.maxZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.minX, box.maxY, box.minZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.minX, box.maxY, box.minZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.minX, box.maxY, box.maxZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.maxX, box.maxY, box.minZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.maxX, box.maxY, box.maxZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.maxX, box.maxY, box.maxZ).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(box.maxX, box.maxY, box.maxZ).color(r, g, b, a).endVertex();
+
+		tesselator.end();
+	}
 
 	/**
 	 * middle center of text is at `pos` before moving it down the screen by `offset`
@@ -277,8 +316,6 @@ public class Renderer {
 		float x = -w / 2f;
 		float y = -(.5f - offset) * (mc.font.lineHeight + 1); // +2 for background padding, -1 for default line spacing
 
-		RenderSystem.disableTexture();
-
 		var poseStack = new PoseStack();
 		poseStack.translate(pos.x, pos.y, pos.z);
 		poseStack.mulPose(mc.gameRenderer.getMainCamera().rotation());
@@ -287,7 +324,7 @@ public class Renderer {
 		var buffer = mc.renderBuffers().bufferSource();
 
 		// XXX somehow, the letters farthest from the crosshair render behind the background
-		mc.font.drawInBatch(text, x, y, color, shadow, matrix, buffer, throughBlocks, bgColor, flags);
+		mc.font.drawInBatch(text, x, y, color, shadow, matrix, buffer, Font.DisplayMode.SEE_THROUGH, bgColor, flags);
 
 		poseStack.popPose();
 		buffer.endBatch();

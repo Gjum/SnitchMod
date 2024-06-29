@@ -28,8 +28,8 @@ dependencies {
 	implementation "org.xerial:sqlite-jdbc:3.36.0.3"
 	shadowCommon "org.xerial:sqlite-jdbc:3.36.0.3"
 
-	modCompileOnly "curse.maven:journeymap-32274:3796377" // version 1.18.2-5.8.4-fabric
-	modCompileOnly files("../libs/voxelmap-1.18.2-1.11.2.jar")
+	modCompileOnly "curse.maven:journeymap-32274:5457846" // version 1.18.2-5.8.4-fabric
+	modCompileOnly "maven.modrinth:voxelmap-updated:1.20.4-1.12.17"
 }
 
 processResources {
@@ -42,17 +42,17 @@ processResources {
 
 shadowJar {
 	configurations = [project.configurations.shadowCommon]
-	classifier "dev-shadow"
+	archiveClassifier = "dev-shadow"
 }
 
 remapJar {
 	input.set shadowJar.archiveFile
 	dependsOn shadowJar
-	classifier "fabric"
+	archiveClassifier = "fabric"
 }
 
 jar {
-	classifier "dev"
+	archiveClassifier = "dev"
 }
 
 sourcesJar {
@@ -81,13 +81,13 @@ publishing {
 	}
 }
 
-task cleanJar(type: Delete) {
+tasks.register('cleanJar', Delete) {
 	delete fileTree('../dist') {
 		include "*-fabric.jar"
 	}
 }
 
-task copyJar(type: Copy) {
+tasks.register('copyJar', Copy) {
 	from remapJar
 	into '../dist'
 }
