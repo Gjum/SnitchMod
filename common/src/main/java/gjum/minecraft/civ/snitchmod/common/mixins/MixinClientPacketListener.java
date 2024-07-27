@@ -39,19 +39,6 @@ public abstract class MixinClientPacketListener {
 		}
 	}
 
-	@Inject(method = "handleBlockUpdate", at = @At("HEAD"))
-	protected void onHandleBlockUpdate(ClientboundBlockUpdatePacket packetIn, CallbackInfo ci) {
-		if (!Minecraft.getInstance().isSameThread()) {
-			// waiting for mc to call this again from the mc thread
-			return; // continue method normally
-		}
-		try {
-			getMod().handleBlockUpdate(packetIn.getPos(), packetIn.getBlockState());
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
-	}
-
 	@Inject(method = "handleLogin", at = @At("HEAD"))
 	protected void onHandleLogin(ClientboundLoginPacket packet, CallbackInfo ci) {
 		if (!Minecraft.getInstance().isSameThread()) {

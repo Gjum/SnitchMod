@@ -1,17 +1,13 @@
 package gjum.minecraft.civ.snitchmod.common;
 
-import com.mamiyaotaru.voxelmap.VoxelMap;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import gjum.minecraft.civ.snitchmod.common.model.*;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -191,7 +187,24 @@ public abstract class SnitchMod {
 
 		Snitch snitchCreated = SnitchCreatedChatParser.fromChat(message, store.server, getCurrentWorld(), getClientUuid());
 		if (snitchCreated != null) {
+			Snitch alreadyExistingSnitch = store.getSnitch(snitchCreated.pos);
 			store.updateSnitchFromCreation(snitchCreated);
+			if (
+				alreadyExistingSnitch != null
+				&& alreadyExistingSnitch.getName() != null
+				&& !alreadyExistingSnitch.getName().equals("")
+			) {
+				mc.getConnection().sendCommand(
+					String.format(
+						"/janameat %d %d %d %s",
+						alreadyExistingSnitch.pos.getX(),
+						alreadyExistingSnitch.pos.getY(),
+						alreadyExistingSnitch.pos.getZ(),
+						alreadyExistingSnitch.getName()
+					)
+				);
+				logToChat(Component.literal("Named the replaced snitch"));
+			}
 
 			if (
 				snitchFieldToPreview != null
@@ -207,66 +220,12 @@ public abstract class SnitchMod {
 				logToChat(Component.literal("Showing an inferred snitch field preview"));
 			}
 
-			if (
-				lastBrokenSnitch != null
-				&& lastBrokenSnitch.getName() != null
-				&& !lastBrokenSnitch.getName().equals("")
-				&& lastBrokenSnitch.pos.equals(snitchCreated.pos)
-			) {
-				mc.getConnection().sendCommand(
-					String.format(
-						"/janameat %d %d %d %s",
-						lastBrokenSnitch.pos.getX(),
-						lastBrokenSnitch.pos.getY(),
-						lastBrokenSnitch.pos.getZ(),
-						lastBrokenSnitch.getName()));
-				logToChat(Component.literal("Named the replaced snitch"));
-			}
-
 			return false;
-		}
-
-		long now = System.currentTimeMillis();
-		if (lastBrokenBlockTs > now - 1000 && lastBrokenBlockPos != null) {
-			SnitchBroken snitchBroken = SnitchBroken.fromChat(message, lastBrokenBlockPos, store.server, getCurrentWorld());
-			if (snitchBroken != null) {
-				store.updateSnitchBroken(snitchBroken);
-
-				Snitch snitch = store.getSnitch(getCurrentWorld(), lastBrokenBlockPos);
-				if (snitch != null) {
-					lastBrokenSnitch = snitch;
-				}
-
-				return false;
-			}
 		}
 
 		// TODO if chat is jainfo and can refresh group -> mark refreshed
 
 		return false;
-	}
-
-	private BlockPos lastBrokenBlockPos;
-	private long lastBrokenBlockTs;
-
-	public void handleBlockUpdate(BlockPos pos, BlockState blockState) {
-		if (blockState == Blocks.AIR.defaultBlockState()) {
-			lastBrokenBlockPos = pos;
-			lastBrokenBlockTs = System.currentTimeMillis();
-		} else if (store != null
-				// Prevent interaction between this and placing new snitches.
-				&& !blockState.is(Blocks.JUKEBOX)
-				&& !blockState.is(Blocks.NOTE_BLOCK)
-		) {
-			WorldPos worldPos = new WorldPos(store.server, getCurrentWorld(), pos);
-
-			store.updateSnitchGone(worldPos);
-
-			Snitch snitch = store.getSnitch(worldPos);
-			if (snitch != null) {
-				lastBrokenSnitch = snitch;
-			}
-		}
 	}
 
 	public void handleWindowItems(List<ItemStack> stacks) {
