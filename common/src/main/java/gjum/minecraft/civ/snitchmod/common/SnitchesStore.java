@@ -123,6 +123,13 @@ public class SnitchesStore {
 		return snitch;
 	}
 
+	public @Nullable Snitch deleteSnitch(@NotNull WorldPos pos) {
+		Snitch snitch = snitches.remove(pos);
+		if (snitch == null) return null;
+		db.deleteSnitch(pos);
+		return snitch;
+	}
+
 	private void upsertSnitchToDB(Snitch snitch) {
 		if (snitch != null) queuedDBSnitches.add(snitch);
 	}
