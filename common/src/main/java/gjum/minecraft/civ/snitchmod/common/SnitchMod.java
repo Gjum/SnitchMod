@@ -231,9 +231,9 @@ public abstract class SnitchMod {
 				&& alreadyExistingSnitch.getName() != null
 				&& !alreadyExistingSnitch.getName().equals("")
 			) {
-				mc.getConnection().sendCommand(
+				mc.player.connection.sendCommand(
 					String.format(
-						"/janameat %d %d %d %s",
+						"janameat %d %d %d %s",
 						alreadyExistingSnitch.pos.getX(),
 						alreadyExistingSnitch.pos.getY(),
 						alreadyExistingSnitch.pos.getZ(),
