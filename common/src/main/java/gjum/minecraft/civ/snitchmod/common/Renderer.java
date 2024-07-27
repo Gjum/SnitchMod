@@ -11,7 +11,9 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import java.util.*;
 
 import static gjum.minecraft.civ.snitchmod.common.SnitchMod.getMod;
 
@@ -138,18 +140,17 @@ public class Renderer {
 			renderBoxOutline(blockBox, r, g, b, lineAlpha, lineWidth);
 		}
 
-		if (playerInRange || playerIsLookingAtSnitch(mc.player, snitch)) {
-			Vec3 center = snitch.pos.getCenter();
-
+		List<Component> linesToRender = new ArrayList<>(3);
+		boolean playerLookingAtSnitch = playerIsLookingAtSnitch(mc.player, snitch);
+		if (playerInRange || playerLookingAtSnitch) {
 			String name = snitch.getName();
 			if (name != null && !name.isEmpty()) {
-				renderTextFacingCamera(Component.literal(name), center, -1, 1);
+				linesToRender.add(Component.literal(name));
 			}
 
 			String group = snitch.getGroup();
 			if (group != null) {
-				var comp = Component.literal(String.format("[%s]", group));
-				renderTextFacingCamera(comp, center, 0, 1);
+				linesToRender.add(Component.literal(String.format("[%s]", group)));
 			}
 
 			final String livelinessText;
@@ -168,8 +169,39 @@ public class Renderer {
 			} else livelinessText = null;
 
 			if (livelinessText != null) {
-				renderTextFacingCamera(Component.literal(livelinessText), center, 1, 1);
+				linesToRender.add(Component.literal(livelinessText));
 			}
+
+			if (playerLookingAtSnitch) {
+				linesToRender.add(
+					Component.literal(
+						String.format(
+							"%d %d %d",
+							snitch.getPos().getX(),
+							snitch.getPos().getY(),
+							snitch.getPos().getZ()
+						)
+					)
+				);
+
+				if (snitch.getType() != null) {
+					linesToRender.add(
+						Component.literal(
+							String.format(
+								"%s",
+								StringUtils.capitalize(snitch.getType().replaceAll("_", ""))
+							)
+						)
+					);
+				}
+			}
+		}
+
+		Vec3 center = snitch.pos.getCenter();
+		int offset = -1;
+		for (Component line : linesToRender) {
+			renderTextFacingCamera(line, center, offset, 1f);
+			offset += 1;
 		}
 	}
 
