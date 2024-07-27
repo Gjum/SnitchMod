@@ -37,7 +37,7 @@ public class SnitchRename {
 	// Set snitch name to name
 	// Changed snitch name to new name from old name
 	// Changed snitch name to new name from
-	static Pattern renamePattern = Pattern.compile("^\\s*(?:Set|Changed) snitch name to (\\S+?)(?: from (\\S+?))?");
+	static Pattern renamePattern = Pattern.compile("^\\s*(?:Set|Changed) snitch name to (.+?)(?: from (.*?))?");
 	// §6Location: §b(world) [123 45 -321]\n§6Name: §bSNITCHNAME\n§6Group: §bGROUPNAME
 	static Pattern hoverPattern = Pattern.compile("Location: (?:\\(?([^\\n)]+)\\)? )?\\[([-0-9]+),? ([-0-9]+),? ([-0-9]+)\\] *\\nName: ([^\\n]*) *\\nGroup: ([^ ]+).*", Pattern.MULTILINE);
 
