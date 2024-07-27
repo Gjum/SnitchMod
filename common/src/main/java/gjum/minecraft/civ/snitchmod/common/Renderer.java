@@ -6,7 +6,6 @@ import gjum.minecraft.civ.snitchmod.common.model.Snitch;
 import gjum.minecraft.civ.snitchmod.common.model.SnitchFieldPreview;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.AABB;
@@ -141,7 +140,7 @@ public class Renderer {
 		}
 
 		List<Component> linesToRender = new ArrayList<>(3);
-		boolean playerLookingAtSnitch = playerIsLookingAtSnitch(mc.player, snitch);
+		boolean playerLookingAtSnitch = Utils.playerIsLookingAtSnitch(mc.player, snitch);
 		if (playerInRange || playerLookingAtSnitch) {
 			String name = snitch.getName();
 			if (name != null && !name.isEmpty()) {
@@ -203,35 +202,6 @@ public class Renderer {
 			renderTextFacingCamera(line, center, offset, 1f);
 			offset += 1;
 		}
-	}
-
-	public static boolean playerIsLookingAtSnitch(LocalPlayer player, Snitch snitch) {
-		Vec3 playerLookAngle = player.getLookAngle();
-		Vec3 playerPos = player.getEyePosition();
-		AABB snitchBox = new AABB(snitch.pos);
-
-		double invertedLookAngleX = 1/playerLookAngle.x;
-		double tx1 = (snitchBox.minX - playerPos.x) * invertedLookAngleX;
-		double tx2 = (snitchBox.maxX - playerPos.x) * invertedLookAngleX;
-
-		double tmin = Math.min(tx1, tx2);
-		double tmax = Math.max(tx1, tx2);
-
-		double invertedLookAngleY = 1/playerLookAngle.y;
-		double ty1 = (snitchBox.minY - playerPos.y) * invertedLookAngleY;
-		double ty2 = (snitchBox.maxY - playerPos.y) * invertedLookAngleY;
-
-		tmin = Math.max(tmin, Math.min(ty1, ty2));
-		tmax = Math.min(tmax, Math.max(ty1, ty2));
-
-		double invertedLookAngleZ = 1/playerLookAngle.z;
-		double tz1 = (snitchBox.minZ - playerPos.z) * invertedLookAngleZ;
-		double tz2 = (snitchBox.maxZ - playerPos.z) * invertedLookAngleZ;
-
-		tmin = Math.max(tmin, Math.min(tz1, tz2));
-		tmax = Math.min(tmax, Math.max(tz1, tz2));
-
-		return tmax >= 0 && tmax >= tmin;
 	}
 
 	private static void renderPlacementHelper(Snitch snitch) {

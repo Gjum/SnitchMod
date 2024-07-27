@@ -46,6 +46,13 @@ public abstract class SnitchMod {
 			"category.snitchmod"
 	);
 
+	protected static final KeyMapping deleteSnitchKey = new KeyMapping(
+			"key.snitchmod.deleteSnitchKey",
+			InputConstants.Type.KEYSYM,
+			GLFW.GLFW_KEY_DELETE,
+			"category.snitchmod"
+	);
+
 	private static SnitchMod INSTANCE;
 
 	public boolean rangeOverlayVisible = false;
@@ -119,11 +126,40 @@ public abstract class SnitchMod {
 			getStore();
 			logToChat(Component.literal("Reloaded the database"));
 		}
+
+		while (deleteSnitchKey.consumeClick()) {
+			Optional<Snitch> optSnitch = getMod().streamNearbySnitches(mc.player.position(), 260)
+					.limit(100)
+					.filter(s -> Utils.playerIsLookingAtSnitch(mc.player, s))
+					.findFirst();
+			if (optSnitch.isEmpty()) {
+				logToChat(Component.literal("Error: you must be looking at a snitch to delete it"));
+				break;
+			}
+			Snitch snitch = optSnitch.get();
+
+			store.deleteSnitch(snitch.pos);
+
+			logToChat(
+				Component.literal(
+					String.format(
+						"Irreversibly deleted snitch '%s' on group '%s' at %d %d %d",
+						snitch.getName(),
+						snitch.getGroup(),
+						snitch.getPos().getX(),
+						snitch.getPos().getY(),
+						snitch.getPos().getZ()
+					)
+				)
+			);
+		}
+
 		while (toggleOverlayKey.consumeClick()) {
 			rangeOverlayVisible = !rangeOverlayVisible;
 			logToChat(Component.literal(
 					"Range overlay " + (rangeOverlayVisible ? "visible" : "hidden")));
 		}
+
 		while (togglePlacementKey.consumeClick()) {
 			placementHelperVisible = !placementHelperVisible;
 
@@ -134,6 +170,7 @@ public abstract class SnitchMod {
 			logToChat(Component.literal(
 					"Placement helper " + (placementHelperVisible ? "visible" : "hidden")));
 		}
+
 		while (previewSnitchFieldKey.consumeClick()) {
 			Optional<Snitch> optNearestSnitch = streamNearbySnitches(mc.player.position(), 2*23)
 				.filter(Snitch::isAlive)

@@ -21,6 +21,7 @@ public class ForgeSnitchMod extends SnitchMod {
 		event.register(toggleOverlayKey);
 		event.register(togglePlacementKey);
 		event.register(previewSnitchFieldKey);
+		event.register(deleteSnitchKey);
 	}
 
 	@SubscribeEvent
