@@ -12,7 +12,7 @@ import java.util.*;
 public class SnitchesStore {
 	public final @NotNull String server;
 
-	private final HashMap<WorldPos, Snitch> snitches = new HashMap<>();
+	private final HashMap<WorldPos, Snitch> snitches = new HashMap<>(1000);
 	private final ConcurrentLinkedQueue<Snitch> queuedDBSnitches = new ConcurrentLinkedQueue<>();
 
 	private @Nullable SnitchSqliteDb db;

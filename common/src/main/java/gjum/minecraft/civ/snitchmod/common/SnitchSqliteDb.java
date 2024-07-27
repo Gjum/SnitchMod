@@ -68,7 +68,7 @@ public class SnitchSqliteDb {
 
 	synchronized
 	public Collection<Snitch> selectAllSnitches() {
-		final ArrayList<Snitch> snitches = new ArrayList<>();
+		final ArrayList<Snitch> snitches = new ArrayList<>(1000);
 		try (Statement stmt = conn.createStatement()) {
 			ResultSet rs = stmt.executeQuery("SELECT * FROM " + tableSnitches);
 			while (rs.next()) {
