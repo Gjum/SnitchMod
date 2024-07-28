@@ -185,11 +185,14 @@ public class Renderer {
 
 				if (snitch.getType() != null) {
 					linesToRender.add(
+						Component.literal(StringUtils.capitalize(snitch.getType().replaceAll("_", "")))
+					);
+				}
+
+				if (snitch.getLastSeenTs() != 0) {
+					linesToRender.add(
 						Component.literal(
-							String.format(
-								"%s",
-								StringUtils.capitalize(snitch.getType().replaceAll("_", ""))
-							)
+							String.format("last seen %s", timestampRelativeText(snitch.getLastSeenTs()))
 						)
 					);
 				}
