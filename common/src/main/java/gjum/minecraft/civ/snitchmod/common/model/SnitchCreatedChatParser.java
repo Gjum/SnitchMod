@@ -19,6 +19,14 @@ public class SnitchCreatedChatParser {
 		Matcher textMatch = createdPattern.matcher(text);
 		if (!textMatch.matches()) return null;
 
+		String rawType = textMatch.group(1).trim().toLowerCase();
+		String type = null;
+		if (rawType.equals("logsnitch")) {
+			type = "jukebox";
+		} else if (rawType.equals("snitch")) {
+			type = "note_block";
+		}
+
 		String group = textMatch.group(2);
 		world = nonEmptyOrDefault(textMatch.group(3), world);
 		int x = Integer.parseInt(textMatch.group(4));
@@ -26,7 +34,7 @@ public class SnitchCreatedChatParser {
 		int z = Integer.parseInt(textMatch.group(6));
 
 		Snitch snitch = new Snitch(new WorldPos(server, world, x, y, z));
-		snitch.updateFromCreation(group, clientUuid);
+		snitch.updateFromCreation(group, type, clientUuid);
 		return snitch;
 	}
 }

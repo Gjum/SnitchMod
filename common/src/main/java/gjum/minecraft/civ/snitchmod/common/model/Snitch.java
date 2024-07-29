@@ -73,9 +73,10 @@ public class Snitch {
 		this.notes = notes;
 	}
 
-	public void updateFromCreation(String group, UUID createdByUuid) {
+	public void updateFromCreation(String group, @Nullable String type, UUID createdByUuid) {
 		this.group = group;
 		this.createdByUuid = createdByUuid;
+		this.type = type;
 		createdTs = System.currentTimeMillis();
 		firstSeenTs = createdTs;
 		lastSeenTs = createdTs;
