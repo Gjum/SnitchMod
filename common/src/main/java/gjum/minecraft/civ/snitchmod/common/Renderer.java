@@ -312,7 +312,8 @@ public class Renderer {
 		var poseStack = new PoseStack();
 		poseStack.translate(pos.x, pos.y, pos.z);
 		poseStack.mulPose(mc.gameRenderer.getMainCamera().rotation());
-		scale *= 0.025f;
+		scale *= 0.005f * (mc.player.position().distanceTo(pos)/2.4);
+		scale = Utils.clamp(scale, 0.015f, 0.15f);
 		poseStack.scale(-scale, -scale, 1); // third component determines background distance
 
 		float w = mc.font.width(text);

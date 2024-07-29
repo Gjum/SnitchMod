@@ -43,4 +43,47 @@ public class Utils {
 
 		return tmax >= 0 && tmax >= tmin;
 	}
+
+	/**
+	 * Clamps the value to fit between min and max. If the value is less
+	 * than {@code min}, then {@code min} is returned. If the value is greater
+	 * than {@code max}, then {@code max} is returned. Otherwise, the original
+	 * value is returned. If value is NaN, the result is also NaN.
+	 * <p>
+	 * Unlike the numerical comparison operators, this method considers
+	 * negative zero to be strictly smaller than positive zero.
+	 * E.g., {@code clamp(-0.0f, 0.0f, 1.0f)} returns 0.0f.
+	 *
+	 * @param value value to clamp
+	 * @param min minimal allowed value
+	 * @param max maximal allowed value
+	 * @return a clamped value that fits into {@code min..max} interval
+	 * @throws IllegalArgumentException if either of {@code min} and {@code max}
+	 * arguments is NaN, or {@code min > max}, or {@code min} is +0.0f, and
+	 * {@code max} is -0.0f.
+	 *
+	 * @since 21
+	 *
+	 * awoo: replace with Math.clamp in Java 21. Code copy-pasted from: https://github.com/openjdk/jdk/commit/94e7cc8587356988e713d23d1653bdd5c43fb3f1#diff-9f89bc5023b5954e0e7ea49a68dafb0b115072e5b4bd3fc33c9e116c0c19bf57R2282)
+	 */
+	public static float clamp(float value, float min, float max) {
+		// This unusual condition allows keeping only one branch
+		// on common path when min < max and neither of them is NaN.
+		// If min == max, we should additionally check for +0.0/-0.0 case,
+		// so we're still visiting the if statement.
+		if (!(min < max)) { // min greater than, equal to, or unordered with respect to max; NaN values are unordered
+			if (Float.isNaN(min)) {
+				throw new IllegalArgumentException("min is NaN");
+			}
+			if (Float.isNaN(max)) {
+				throw new IllegalArgumentException("max is NaN");
+			}
+			if (Float.compare(min, max) > 0) {
+				throw new IllegalArgumentException(min + " > " + max);
+			}
+			// Fall-through if min and max are exactly equal (or min = -0.0 and max = +0.0)
+			// and none of them is NaN
+		}
+		return Math.min(max, Math.max(value, min));
+	}
 }
