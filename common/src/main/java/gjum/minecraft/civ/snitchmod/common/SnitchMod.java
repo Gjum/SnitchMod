@@ -143,8 +143,8 @@ public abstract class SnitchMod {
 			logToChat(
 				Component.literal(
 					String.format(
-						"Irreversibly deleted snitch '%s' on group '%s' at %d %d %d",
-						snitch.getName(),
+						"Irreversibly deleted snitch \"%s\" on group \"%s\" at %d %d %d",
+						snitch.getName() != null ? snitch.getName() : "",
 						snitch.getGroup(),
 						snitch.getPos().getX(),
 						snitch.getPos().getY(),
