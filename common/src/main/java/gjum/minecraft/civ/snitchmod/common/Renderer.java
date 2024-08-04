@@ -12,6 +12,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.lwjgl.opengl.GL11;
+
 import java.util.*;
 
 import static gjum.minecraft.civ.snitchmod.common.SnitchMod.getMod;
@@ -242,6 +244,8 @@ public class Renderer {
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
 		bufferBuilder.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
+
+		GL11.glEnable(GL11.GL_LINE_SMOOTH);
 
 		bufferBuilder.vertex(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
 		bufferBuilder.vertex(box.maxX, box.minY, box.minZ).color(r, g, b, a).endVertex();
