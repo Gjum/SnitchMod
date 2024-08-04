@@ -113,14 +113,20 @@ public class Renderer {
 		AABB rangeBox = playerInRange ? range.inflate(-.01) : range.inflate(.01);
 		AABB outlineBox = playerInRange ? range.inflate(-.05) : range.inflate(.05);
 
-		// yellow by default
-		float r = 1;
-		float g = 1;
-		float b = 0;
+		// Yellow - #EED840
+		float r = 0.93f;
+		float g = 0.85f;
+		float b = 0.25f;
 		if (snitch.hasCullTs() && snitch.getCullTs() < now) {
-			g = 0; // red
+			// Red - #EE4056
+			r = .93f;
+			g = .25f;
+			b = .34f;
 		} else if (snitch.hasDormantTs() && snitch.getDormantTs() < now) {
-			g = .5f; // orange
+			// Orange - #EE8140
+			r = .9f;
+			g = .5f;
+			b = .25f;
 		}
 
 		RenderSystem.enableDepthTest();
@@ -319,7 +325,7 @@ public class Renderer {
 		float w = mc.font.width(text);
 		float x = -w / 2f;
 		float y = -(.5f - offset) * (mc.font.lineHeight + 1); // +2 for background padding, -1 for default line spacing
-		int color = 0xFF_FFFFFF;
+		int color = 0xFF_EEEEEE;
 		boolean shadow = false;
 		var matrix = poseStack.last().pose();
 		var buffer = mc.renderBuffers().bufferSource();
