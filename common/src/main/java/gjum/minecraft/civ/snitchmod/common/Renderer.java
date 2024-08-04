@@ -115,6 +115,12 @@ public class Renderer {
 		AABB rangeBox = playerInRange ? range.inflate(-.01) : range.inflate(.01);
 		AABB outlineBox = playerInRange ? range.inflate(-.05) : range.inflate(.05);
 
+		final int white = 0xFF_EEEEEE;
+		// #EE4056
+		final int red = 0xFF_EE4056;
+		// #EE8140
+		final int orange = 0xFF_EE8140;
+
 		// Yellow - #EED840
 		float r = 0.93f;
 		float g = 0.85f;
@@ -148,60 +154,79 @@ public class Renderer {
 			renderFilledBox(blockBox, r, g, b, boxAlpha);
 		}
 
-		List<Component> linesToRender = new ArrayList<>(3);
+		record ColoredComponent(Component text, int colorAlphaHex) { }
+
+		List<ColoredComponent> linesToRender = new ArrayList<>(3);
 		boolean playerLookingAtSnitch = Utils.playerIsLookingAtSnitch(mc.player, snitch);
 		if (playerInRange || playerLookingAtSnitch) {
 			String name = snitch.getName();
 			if (name != null && !name.isEmpty()) {
-				linesToRender.add(Component.literal(name));
+				linesToRender.add(new ColoredComponent(Component.literal(name), white));
 			}
 
 			String group = snitch.getGroup();
 			if (group != null) {
-				linesToRender.add(Component.literal(String.format("[%s]", group)));
+				linesToRender.add(new ColoredComponent(Component.literal(String.format("[%s]", group)), white));
 			}
 
 			final String livelinessText;
+			int livelinessTextColor = white;
 			if (snitch.wasBroken()) {
 				livelinessText = "broken " + timestampRelativeText(snitch.getBrokenTs());
+				livelinessTextColor = red;
 			} else if (snitch.isGone()) {
 				livelinessText = "gone " + timestampRelativeText(snitch.getGoneTs());
+				livelinessTextColor = red;
 			} else if (snitch.hasDormantTs() && snitch.getDormantTs() > now) {
 				livelinessText = "deactivates " + timestampRelativeText(snitch.getDormantTs());
+				livelinessTextColor = white;
 			} else if (snitch.hasCullTs() && snitch.getCullTs() < now) {
 				livelinessText = "culled " + timestampRelativeText(snitch.getCullTs());
+				livelinessTextColor = red;
 			} else if (snitch.hasCullTs() && snitch.getCullTs() > now) {
 				livelinessText = "culls " + timestampRelativeText(snitch.getCullTs());
+				livelinessTextColor = orange;
 			} else if (snitch.hasDormantTs() && snitch.getDormantTs() < now) {
 				livelinessText = "deactivated " + timestampRelativeText(snitch.getDormantTs());
-			} else livelinessText = null;
-
+				livelinessTextColor = orange;
+			} else {
+				livelinessText = null;
+			}
 			if (livelinessText != null) {
-				linesToRender.add(Component.literal(livelinessText));
+				linesToRender.add(new ColoredComponent(Component.literal(livelinessText), livelinessTextColor));
 			}
 
 			if (playerLookingAtSnitch) {
 				linesToRender.add(
-					Component.literal(
-						String.format(
-							"%d %d %d",
-							snitch.getPos().getX(),
-							snitch.getPos().getY(),
-							snitch.getPos().getZ()
-						)
+					new ColoredComponent(
+						Component.literal(
+							String.format(
+								"%d %d %d",
+								snitch.getPos().getX(),
+								snitch.getPos().getY(),
+								snitch.getPos().getZ()
+							)
+						),
+						white
 					)
 				);
 
 				if (snitch.getType() != null) {
 					linesToRender.add(
-						Component.literal(StringUtils.capitalize(snitch.getType().replaceAll("_", "")))
+						new ColoredComponent(
+							Component.literal(StringUtils.capitalize(snitch.getType().replaceAll("_", ""))),
+							white
+						)
 					);
 				}
 
 				if (snitch.getLastSeenTs() != 0) {
 					linesToRender.add(
-						Component.literal(
-							String.format("last seen %s", timestampRelativeText(snitch.getLastSeenTs()))
+						new ColoredComponent(
+							Component.literal(
+								String.format("last seen %s", timestampRelativeText(snitch.getLastSeenTs()))
+							),
+							white
 						)
 					);
 				}
@@ -210,8 +235,8 @@ public class Renderer {
 
 		Vec3 center = snitch.pos.getCenter();
 		int offset = -1;
-		for (Component line : linesToRender) {
-			renderTextFacingCamera(line, center, offset, 1f);
+		for (ColoredComponent line : linesToRender) {
+			renderTextFacingCamera(line.text, center, offset, 1f, line.colorAlphaHex);
 			offset += 1;
 		}
 	}
@@ -319,7 +344,7 @@ public class Renderer {
 	/**
 	 * middle center of text is at `pos` before moving it down the screen by `offset`
 	 */
-	private static void renderTextFacingCamera(Component text, Vec3 pos, float offset, float scale) {
+	private static void renderTextFacingCamera(Component text, Vec3 pos, float offset, float scale, int colorAlphaHex) {
 		var poseStack = new PoseStack();
 		poseStack.translate(pos.x, pos.y, pos.z);
 		poseStack.mulPose(mc.gameRenderer.getMainCamera().rotation());
@@ -330,7 +355,6 @@ public class Renderer {
 		float w = mc.font.width(text);
 		float x = -w / 2f;
 		float y = -(.5f - offset) * (mc.font.lineHeight + 1); // +2 for background padding, -1 for default line spacing
-		int color = 0xFF_EEEEEE;
 		boolean shadow = false;
 		var matrix = poseStack.last().pose();
 		var buffer = mc.renderBuffers().bufferSource();
@@ -338,7 +362,7 @@ public class Renderer {
 		int bgColor = (int) (bgOpacity * 255.0f) << 24;
 		int flags = 0;
 		// XXX somehow, the letters farthest from the crosshair render behind the background
-		mc.font.drawInBatch(text, x, y, color, shadow, matrix, buffer, Font.DisplayMode.SEE_THROUGH, bgColor, flags);
+		mc.font.drawInBatch(text, x, y, colorAlphaHex, shadow, matrix, buffer, Font.DisplayMode.SEE_THROUGH, bgColor, flags);
 
 		poseStack.popPose();
 		buffer.endBatch();
