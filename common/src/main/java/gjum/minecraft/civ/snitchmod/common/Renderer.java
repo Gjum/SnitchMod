@@ -145,6 +145,7 @@ public class Renderer {
 			// inflate so it isn't obstructed by the snitch block
 			final AABB blockBox = new AABB(snitch.pos).inflate(.01);
 			renderBoxOutline(blockBox, r, g, b, lineAlpha, lineWidth);
+			renderFilledBox(blockBox, r, g, b, boxAlpha);
 		}
 
 		List<Component> linesToRender = new ArrayList<>(3);
