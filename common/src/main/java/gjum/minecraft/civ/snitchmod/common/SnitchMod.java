@@ -198,7 +198,7 @@ public abstract class SnitchMod {
 			}
 
 			snitchFieldToPreview = newSnitchFieldToPreview;
-			logToChat(Component.literal("Showing a snitch field preview"));
+			logToChat(Component.literal("Showing a snitch field preview in the direction you're looking"));
 		}
 		// TODO if block pos changed -> if pos inside snitch range not in before -> send jainfo -> mark refreshed
 	}
