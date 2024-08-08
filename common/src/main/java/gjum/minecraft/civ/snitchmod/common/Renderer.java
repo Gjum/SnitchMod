@@ -130,7 +130,7 @@ public class Renderer {
 			r = .93f;
 			g = .25f;
 			b = .34f;
-		} else if (snitch.hasDormantTs() && snitch.getDormantTs() < now) {
+		} else if (snitch.hasCullTs() || (snitch.hasDormantTs() && snitch.getDormantTs() < now)) {
 			// Orange - #EE8140
 			r = .9f;
 			g = .5f;
