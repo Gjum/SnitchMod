@@ -12,6 +12,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
 import org.lwjgl.opengl.GL11;
 
 import java.util.*;
@@ -21,7 +23,7 @@ import static gjum.minecraft.civ.snitchmod.common.SnitchMod.getMod;
 public class Renderer {
 	private final static Minecraft mc = Minecraft.getInstance();
 
-	public static void renderOverlays(PoseStack poseStackArg) {
+	public static void renderOverlays(Matrix4f matrixArg) {
 		if (mc.player == null) return;
 		if (mc.level == null) return;
 
@@ -29,10 +31,10 @@ public class Renderer {
 		// if (mc.options.renderDebug) return; // F3 mode
 
 		Vec3 camPos = mc.gameRenderer.getMainCamera().getPosition();
-		PoseStack modelViewStack = RenderSystem.getModelViewStack();
-		modelViewStack.pushPose();
-		modelViewStack.mulPoseMatrix(poseStackArg.last().pose());
-		modelViewStack.translate(-camPos.x, -camPos.y, -camPos.z);
+		Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
+		modelViewStack.pushMatrix();
+		modelViewStack.mul(matrixArg);
+		modelViewStack.translate((float) -camPos.x, (float) -camPos.y, (float) -camPos.z);
 		RenderSystem.applyModelViewMatrix();
 
 		if (getMod().rangeOverlayVisible) {
@@ -59,7 +61,7 @@ public class Renderer {
 		RenderSystem.lineWidth(1.0F);
 		RenderSystem.clearColor(1, 1, 1, 1);
 
-		modelViewStack.popPose();
+		modelViewStack.popMatrix();
 		RenderSystem.applyModelViewMatrix();
 	}
 
@@ -268,77 +270,89 @@ public class Renderer {
 		RenderSystem.lineWidth(lineWidth);
 
 		Tesselator tesselator = Tesselator.getInstance();
-		BufferBuilder bufferBuilder = tesselator.getBuilder();
-		bufferBuilder.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
+		BufferBuilder bufferBuilder = tesselator.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
 
 		GL11.glEnable(GL11.GL_LINE_SMOOTH);
 
-		bufferBuilder.vertex(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.maxX, box.minY, box.minZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.minX, box.maxY, box.minZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.minX, box.minY, box.maxZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.maxX, box.minY, box.minZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.maxX, box.maxY, box.minZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.maxX, box.maxY, box.minZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.minX, box.maxY, box.minZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.minX, box.maxY, box.minZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.minX, box.maxY, box.maxZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.minX, box.maxY, box.maxZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.minX, box.minY, box.maxZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.minX, box.minY, box.maxZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.maxX, box.minY, box.maxZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.maxX, box.minY, box.maxZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.maxX, box.minY, box.minZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.minX, box.maxY, box.maxZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.maxX, box.maxY, box.maxZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.maxX, box.minY, box.maxZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.maxX, box.maxY, box.maxZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.maxX, box.maxY, box.minZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.maxX, box.maxY, box.maxZ).color(r, g, b, a).endVertex();
+		float minX = (float) box.minX;
+		float minY = (float) box.minY;
+		float minZ = (float) box.minZ;
+		float maxX = (float) box.maxX;
+		float maxY = (float) box.maxY;
+		float maxZ = (float) box.maxZ;
 
-		tesselator.end();
+		bufferBuilder.addVertex(minX, minY, minZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(maxX, minY, minZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(minX, minY, minZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(minX, maxY, minZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(minX, minY, minZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(minX, minY, maxZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(maxX, minY, minZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(maxX, maxY, minZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(maxX, maxY, minZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(minX, maxY, minZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(minX, maxY, minZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(minX, maxY, maxZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(minX, maxY, maxZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(minX, minY, maxZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(minX, minY, maxZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(maxX, minY, maxZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(maxX, minY, maxZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(maxX, minY, minZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(minX, maxY, maxZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(maxX, maxY, maxZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(maxX, minY, maxZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(maxX, maxY, maxZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(maxX, maxY, minZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(maxX, maxY, maxZ).setColor(r, g, b, a);
+
+		BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
 	}
 
 	private static void renderFilledBox(AABB box, float r, float g, float b, float a) {
 		Tesselator tesselator = Tesselator.getInstance();
-		BufferBuilder bufferBuilder = tesselator.getBuilder();
+		BufferBuilder bufferBuilder = tesselator.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 		RenderSystem.setShader(GameRenderer::getPositionColorShader);
-		bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
-		bufferBuilder.vertex(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.minX, box.minY, box.maxZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.minX, box.maxY, box.minZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.minX, box.maxY, box.maxZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.minX, box.maxY, box.maxZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.minX, box.minY, box.maxZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.maxX, box.maxY, box.maxZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.maxX, box.minY, box.maxZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.maxX, box.minY, box.maxZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.maxX, box.minY, box.minZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.maxX, box.maxY, box.maxZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.maxX, box.maxY, box.minZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.maxX, box.maxY, box.minZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.maxX, box.minY, box.minZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.minX, box.maxY, box.minZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.maxX, box.minY, box.minZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.minX, box.minY, box.maxZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.maxX, box.minY, box.maxZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.maxX, box.minY, box.maxZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.minX, box.maxY, box.minZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.minX, box.maxY, box.minZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.minX, box.maxY, box.maxZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.maxX, box.maxY, box.minZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.maxX, box.maxY, box.maxZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.maxX, box.maxY, box.maxZ).color(r, g, b, a).endVertex();
-		bufferBuilder.vertex(box.maxX, box.maxY, box.maxZ).color(r, g, b, a).endVertex();
+		float minX = (float) box.minX;
+		float minY = (float) box.minY;
+		float minZ = (float) box.minZ;
+		float maxX = (float) box.maxX;
+		float maxY = (float) box.maxY;
+		float maxZ = (float) box.maxZ;
 
-		tesselator.end();
+		bufferBuilder.addVertex(minX, minY, minZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(minX, minY, minZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(minX, minY, minZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(minX, minY, maxZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(minX, maxY, minZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(minX, maxY, maxZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(minX, maxY, maxZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(minX, minY, maxZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(maxX, maxY, maxZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(maxX, minY, maxZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(maxX, minY, maxZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(maxX, minY, minZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(maxX, maxY, maxZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(maxX, maxY, minZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(maxX, maxY, minZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(maxX, minY, minZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(minX, maxY, minZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(minX, minY, minZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(minX, minY, minZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(maxX, minY, minZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(minX, minY, maxZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(maxX, minY, maxZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(maxX, minY, maxZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(minX, maxY, minZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(minX, maxY, minZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(minX, maxY, maxZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(maxX, maxY, minZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(maxX, maxY, maxZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(maxX, maxY, maxZ).setColor(r, g, b, a);
+		bufferBuilder.addVertex(maxX, maxY, maxZ).setColor(r, g, b, a);
+
+		BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
 	}
 
 	/**
@@ -350,7 +364,7 @@ public class Renderer {
 		poseStack.mulPose(mc.gameRenderer.getMainCamera().rotation());
 		scale *= 0.005f * (mc.player.position().distanceTo(pos)/2.4);
 		scale = Utils.clamp(scale, 0.015f, 0.15f);
-		poseStack.scale(-scale, -scale, 1); // third component determines background distance
+		poseStack.scale(scale, -scale, 1); // third component determines background distance
 
 		float w = mc.font.width(text);
 		float x = -w / 2f;

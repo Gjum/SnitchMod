@@ -26,9 +26,9 @@ public class ForgeSnitchMod extends SnitchMod {
 
 	@SubscribeEvent
 	public void onRenderLevelLast(RenderLevelStageEvent event) {
-		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
+		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) { // Forge broke the PoseStack in AFTER_TRANSLUCENT_BLOCKS (???)
 			try {
-				handleRenderBlockOverlay(event.getPoseStack());
+				handleRenderBlockOverlay(event.getPoseStack()); // Ignore, if Forge removes this it can be replaced with a mixin probably
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
