@@ -1,18 +1,15 @@
 package gjum.minecraft.civ.snitchmod.common.model;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static net.minecraft.nbt.Tag.TAG_LIST;
-import static net.minecraft.nbt.Tag.TAG_STRING;
 
 public class JalistEntry {
 	/**
@@ -68,27 +65,19 @@ public class JalistEntry {
 			type = "jukebox";
 		} else return null; // TODO support other block types
 
-		CompoundTag displayTag = stack.getTagElement("display");
-		if (displayTag == null) return null;
-		if (displayTag.getTagType("Name") != TAG_STRING) return null;
-		if (displayTag.getTagType("Lore") != TAG_LIST) return null;
+		if (stack.get(DataComponents.CUSTOM_NAME) == null) return null;
+		if (stack.get(DataComponents.LORE) == null) return null;
 
-		String name = getStringFromChatJson(displayTag.getString("Name"));
+		String name = stack.get(DataComponents.CUSTOM_NAME).getString();
 
-		ListTag lores = displayTag.getList("Lore", TAG_STRING);
+		List<Component> lores = stack.get(DataComponents.LORE).lines();
 		if (lores.size() < 3) return null;
 
-		Matcher locationMatch = locationPattern.matcher(
-				getStringFromChatJson(
-						lores.getString(0)));
+		Matcher locationMatch = locationPattern.matcher(lores.get(0).getString());
 		if (!locationMatch.matches()) return null;
-		Matcher groupMatch = groupPattern.matcher(
-				getStringFromChatJson(
-						lores.getString(1)));
+		Matcher groupMatch = groupPattern.matcher(lores.get(1).getString());
 		if (!groupMatch.matches()) return null;
-		Matcher lifetimeMatch = lifetimePattern.matcher(
-				getStringFromChatJson(
-						lores.getString(2)));
+		Matcher lifetimeMatch = lifetimePattern.matcher(lores.get(2).getString());
 		if (!lifetimeMatch.matches()) return null;
 
 		String world = locationMatch.group(1);
@@ -135,7 +124,4 @@ public class JalistEntry {
 		return new JalistEntry(ts, pos, group, type, name, dormantTs, cullTs);
 	}
 
-	private static String getStringFromChatJson(String json) {
-		return Component.Serializer.fromJson(json).getString();
-	}
 }

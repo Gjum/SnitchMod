@@ -10,6 +10,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
@@ -290,8 +291,8 @@ public abstract class SnitchMod {
 		}
 	}
 
-	public void handleRenderBlockOverlay(PoseStack matrices) {
-		Renderer.renderOverlays(matrices);
+	public void handleRenderBlockOverlay(Matrix4f matrix) {
+		Renderer.renderOverlays(matrix);
 	}
 
 	public Stream<Snitch> streamNearbySnitches(Vec3 playerPos, int distance) {
