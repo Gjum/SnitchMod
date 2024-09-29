@@ -38,6 +38,8 @@ public class Renderer {
 		if (getMod().rangeOverlayVisible) {
 			int fieldDist = 260;
 			getMod().streamNearbySnitches(mc.player.position(), fieldDist)
+					// but still show culled/gone snitches
+					.filter(s -> !s.wasBroken())
 					.limit(100)
 					.forEach(Renderer::renderSnitch);
 		}
@@ -98,9 +100,6 @@ public class Renderer {
 	}
 
 	private static void renderSnitch(Snitch snitch) {
-		if (snitch.wasBroken()) return;
-		// but still show culled/gone snitches
-
 		float boxAlpha = 0.2f;
 		float lineAlpha = 1;
 		float lineWidth = 2;
