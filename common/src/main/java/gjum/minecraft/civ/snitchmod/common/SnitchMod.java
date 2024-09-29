@@ -46,10 +46,17 @@ public abstract class SnitchMod {
 			"category.snitchmod"
 	);
 
-	protected static final KeyMapping deleteSnitchKey = new KeyMapping(
-			"key.snitchmod.deleteSnitchKey",
+	protected static final KeyMapping toggleSnitchGoneStatusKey = new KeyMapping(
+			"key.snitchmod.toggleSnitchGoneStatusKey",
 			InputConstants.Type.KEYSYM,
 			GLFW.GLFW_KEY_DELETE,
+			"category.snitchmod"
+	);
+
+	protected static final KeyMapping toggleSnitchFieldRenderKey = new KeyMapping(
+			"key.snitchmod.toggleSnitchFieldRenderKey",
+			InputConstants.Type.KEYSYM,
+			GLFW.GLFW_KEY_T,
 			"category.snitchmod"
 	);
 
@@ -127,31 +134,33 @@ public abstract class SnitchMod {
 			logToChat(Component.literal("Reloaded the database"));
 		}
 
-		while (deleteSnitchKey.consumeClick()) {
+		while (toggleSnitchGoneStatusKey.consumeClick()) {
 			Optional<Snitch> optSnitch = getMod().streamNearbySnitches(mc.player.position(), 260)
+					.filter(s -> !s.wasBroken())
 					.limit(100)
 					.filter(s -> Utils.playerIsLookingAtSnitch(mc.player, s))
 					.findFirst();
 			if (optSnitch.isEmpty()) {
-				logToChat(Component.literal("Error: you must be looking at a snitch to delete it"));
+				logToChat(Component.literal("Error: you must be looking at a snitch to change its status"));
 				break;
 			}
+
 			Snitch snitch = optSnitch.get();
-
-			store.deleteSnitch(snitch.pos);
-
-			logToChat(
-				Component.literal(
-					String.format(
-						"Irreversibly deleted snitch \"%s\" on group \"%s\" at %d %d %d",
-						snitch.getName() != null ? snitch.getName() : "",
-						snitch.getGroup(),
-						snitch.getPos().getX(),
-						snitch.getPos().getY(),
-						snitch.getPos().getZ()
-					)
-				)
+			String formattedSnitch = String.format(
+				"\"%s\" on [%s] at %d %d %d",
+				snitch.getName() != null ? snitch.getName() : "",
+				snitch.getGroup(),
+				snitch.getPos().getX(),
+				snitch.getPos().getY(),
+				snitch.getPos().getZ()
 			);
+			if (snitch.isGone()) {
+				store.updateSnitchNoLongerGone(snitch.pos);
+				logToChat(Component.literal(String.format("Marked snitch %s as alive", formattedSnitch)));
+			} else {
+				store.updateSnitchGone(snitch.pos);
+				logToChat(Component.literal(String.format("Marked snitch %s as gone", formattedSnitch)));
+			}
 		}
 
 		while (toggleOverlayKey.consumeClick()) {

@@ -128,6 +128,15 @@ public class SnitchesStore {
 		return snitch;
 	}
 
+	public @Nullable Snitch updateSnitchNoLongerGone(@NotNull WorldPos pos) {
+		Snitch snitch = snitches.get(pos);
+		if (snitch == null) return null;
+		if (!snitch.isGone()) return null;
+		snitch.updateNoLongerGone();
+		upsertSnitchToDB(snitch);
+		return snitch;
+	}
+
 	public @Nullable Snitch deleteSnitch(@NotNull WorldPos pos) {
 		Snitch snitch = snitches.remove(pos);
 		if (snitch == null) return null;

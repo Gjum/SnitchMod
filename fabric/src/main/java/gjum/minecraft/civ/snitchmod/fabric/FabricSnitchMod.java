@@ -13,7 +13,7 @@ public class FabricSnitchMod extends SnitchMod implements ClientModInitializer {
 		KeyBindingHelper.registerKeyBinding(toggleOverlayKey);
 		KeyBindingHelper.registerKeyBinding(togglePlacementKey);
 		KeyBindingHelper.registerKeyBinding(previewSnitchFieldKey);
-		KeyBindingHelper.registerKeyBinding(deleteSnitchKey);
+		KeyBindingHelper.registerKeyBinding(toggleSnitchGoneStatusKey);
 
 		ClientTickEvents.START_CLIENT_TICK.register(client -> {
 			try {

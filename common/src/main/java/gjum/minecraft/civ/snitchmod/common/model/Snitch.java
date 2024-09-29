@@ -121,8 +121,10 @@ public class Snitch {
 
 	public void updateGone() {
 		goneTs = System.currentTimeMillis();
-		dormantTs = 0;
-		cullTs = 0;
+	}
+
+	public void updateNoLongerGone() {
+		goneTs = 0;
 	}
 
 	private void updateSeen(long ts) {
