@@ -86,4 +86,30 @@ public class Utils {
 		}
 		return Math.min(max, Math.max(value, min));
 	}
+
+	public static class Color {
+		public int hex;
+
+		// range 0-255
+		public int red;
+		public int green;
+		public int blue;
+
+		// range 0.0 - 1.0
+		public float r;
+		public float g;
+		public float b;
+
+		public Color(int hex) {
+			this.hex = hex;
+
+			this.red = (hex & 0xFF0000) >> 16;
+			this.green = (hex & 0x00FF00) >> 8;
+			this.blue = (hex & 0x0000FF);
+
+			this.r = (float)this.red / 255;
+			this.g = (float)this.green / 255;
+			this.b = (float)this.blue / 255;
+		}
+	}
 }

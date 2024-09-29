@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import gjum.minecraft.civ.snitchmod.common.model.Snitch;
 import gjum.minecraft.civ.snitchmod.common.model.SnitchFieldPreview;
+import gjum.minecraft.civ.snitchmod.common.Utils.Color;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.GameRenderer;
@@ -20,6 +21,13 @@ import static gjum.minecraft.civ.snitchmod.common.SnitchMod.getMod;
 
 public class Renderer {
 	private final static Minecraft mc = Minecraft.getInstance();
+
+	private final static Color WHITE = new Color(0xEEEEEE);
+	private final static Color RED = new Color(0xEE4056);
+	private final static Color GREEN = new Color(0x56EE40);
+	private final static Color BLUE = new Color(0x00B2FF);
+	private final static Color YELLOW = new Color(0xEED840);
+	private final static Color ORANGE = new Color(0xEE8140);
 
 	public static void renderOverlays(PoseStack poseStackArg) {
 		if (mc.player == null) return;
@@ -66,45 +74,34 @@ public class Renderer {
 	}
 
 	private static void renderSnitchFieldPreview(SnitchFieldPreview preview) {
-		float boxAlpha = 0.2f;
-		float lineAlpha = 1;
-		float lineWidth = 2;
-		int blockHlDist = 64;
-
 		final AABB range = preview.field().getRangeAABB();
-
 		// inflate/deflate so the box face isn't obscured by adjacent blocks
 		final boolean playerInRange = range.contains(mc.player.position());
 		AABB rangeBox = playerInRange ? range.inflate(-.01) : range.inflate(.01);
 
-		// green by default
-		float r = 0.3f;
-		float g = 0.8f;
-		float b = 0.3f;
-
 		RenderSystem.enableDepthTest();
 		RenderSystem.enableBlend();
-
 		RenderSystem.disableCull();
-		renderFilledBox(rangeBox, r, g, b, boxAlpha);
 
-		renderBoxOutline(rangeBox, r, g, b, lineAlpha, lineWidth);
+		final Color color = GREEN;
+		final float boxAlpha = 0.2f;
+		renderFilledBox(rangeBox, color, boxAlpha);
 
+		final float lineAlpha = 1;
+		final float lineWidth = 2;
+		renderBoxOutline(rangeBox, color, lineAlpha, lineWidth);
+
+		final int blockHlDist = 64;
 		if (preview.field().pos.distSqr(mc.player.blockPosition()) < blockHlDist * blockHlDist) {
 			RenderSystem.disableDepthTest();
 
 			// inflate so it isn't obstructed by the snitch block
 			final AABB blockBox = new AABB(preview.field().pos).inflate(.01);
-			renderBoxOutline(blockBox, r, g, b, lineAlpha, lineWidth);
+			renderBoxOutline(blockBox, color, lineAlpha, lineWidth);
 		}
 	}
 
 	private static void renderSnitch(Snitch snitch) {
-		float boxAlpha = 0.2f;
-		float lineAlpha = 1;
-		float lineWidth = 2;
-		int blockHlDist = 64;
-
 		long now = System.currentTimeMillis();
 
 		final AABB range = snitch.getRangeAABB();
@@ -114,80 +111,69 @@ public class Renderer {
 		AABB rangeBox = playerInRange ? range.inflate(-.01) : range.inflate(.01);
 		AABB outlineBox = playerInRange ? range.inflate(-.05) : range.inflate(.05);
 
-		final int white = 0xFF_EEEEEE;
-		// #EE4056
-		final int red = 0xFF_EE4056;
-		// #EE8140
-		final int orange = 0xFF_EE8140;
-
-		// Yellow - #EED840
-		float r = 0.93f;
-		float g = 0.85f;
-		float b = 0.25f;
+		Color color = YELLOW;
 		if (snitch.hasCullTs() && snitch.getCullTs() < now) {
-			// Red - #EE4056
-			r = .93f;
-			g = .25f;
-			b = .34f;
+			color = RED;
 		} else if (snitch.hasCullTs() || (snitch.hasDormantTs() && snitch.getDormantTs() < now)) {
-			// Orange - #EE8140
-			r = .9f;
-			g = .5f;
-			b = .25f;
+			color = ORANGE;
 		}
 
 		RenderSystem.enableDepthTest();
 		RenderSystem.enableBlend();
-
 		RenderSystem.disableCull();
-		renderFilledBox(rangeBox, r, g, b, boxAlpha);
 
-		renderBoxOutline(outlineBox, r, g, b, lineAlpha, lineWidth);
+		final float boxAlpha = 0.2f;
+		renderFilledBox(rangeBox, color, boxAlpha);
 
+		final float lineAlpha = 1;
+		final float lineWidth = 2;
+		renderBoxOutline(outlineBox, color, lineAlpha, lineWidth);
+
+		final int blockHlDist = 64;
 		if (snitch.pos.distSqr(mc.player.blockPosition()) < blockHlDist * blockHlDist) {
 			RenderSystem.disableDepthTest();
 
 			// inflate so it isn't obstructed by the snitch block
 			final AABB blockBox = new AABB(snitch.pos).inflate(.01);
-			renderBoxOutline(blockBox, r, g, b, lineAlpha, lineWidth);
-			renderFilledBox(blockBox, r, g, b, boxAlpha);
+			renderBoxOutline(blockBox, color, lineAlpha, lineWidth);
+			renderFilledBox(blockBox, color, boxAlpha);
 		}
 
-		record ColoredComponent(Component text, int colorAlphaHex) { }
+		record ColoredComponent(Component text, Color color) { }
 
 		List<ColoredComponent> linesToRender = new ArrayList<>(3);
 		boolean playerLookingAtSnitch = Utils.playerIsLookingAtSnitch(mc.player, snitch);
 		if (playerInRange || playerLookingAtSnitch) {
 			String name = snitch.getName();
 			if (name != null && !name.isEmpty()) {
-				linesToRender.add(new ColoredComponent(Component.literal(name), white));
+				linesToRender.add(new ColoredComponent(Component.literal(name), WHITE));
 			}
 
 			String group = snitch.getGroup();
 			if (group != null) {
-				linesToRender.add(new ColoredComponent(Component.literal(String.format("[%s]", group)), white));
+				linesToRender.add(new ColoredComponent(Component.literal(String.format("[%s]", group)), WHITE));
 			}
 
 			final String livelinessText;
-			int livelinessTextColor = white;
+			Color livelinessTextColor = WHITE;
 			if (snitch.wasBroken()) {
 				livelinessText = "broken " + timestampRelativeText(snitch.getBrokenTs());
-				livelinessTextColor = red;
+				livelinessTextColor = RED;
 			} else if (snitch.isGone()) {
 				livelinessText = "gone " + timestampRelativeText(snitch.getGoneTs());
-				livelinessTextColor = red;
+				livelinessTextColor = RED;
 			} else if (snitch.hasDormantTs() && snitch.getDormantTs() > now) {
 				livelinessText = "deactivates " + timestampRelativeText(snitch.getDormantTs());
-				livelinessTextColor = white;
+				livelinessTextColor = WHITE;
 			} else if (snitch.hasCullTs() && snitch.getCullTs() < now) {
 				livelinessText = "culled " + timestampRelativeText(snitch.getCullTs());
-				livelinessTextColor = red;
+				livelinessTextColor = RED;
 			} else if (snitch.hasCullTs() && snitch.getCullTs() > now) {
 				livelinessText = "culls " + timestampRelativeText(snitch.getCullTs());
-				livelinessTextColor = orange;
+				livelinessTextColor = ORANGE;
 			} else if (snitch.hasDormantTs() && snitch.getDormantTs() < now) {
 				livelinessText = "deactivated " + timestampRelativeText(snitch.getDormantTs());
-				livelinessTextColor = orange;
+				livelinessTextColor = ORANGE;
 			} else {
 				livelinessText = null;
 			}
@@ -206,7 +192,7 @@ public class Renderer {
 								snitch.getPos().getZ()
 							)
 						),
-						white
+						WHITE
 					)
 				);
 
@@ -214,7 +200,7 @@ public class Renderer {
 					linesToRender.add(
 						new ColoredComponent(
 							Component.literal(StringUtils.capitalize(snitch.getType().replaceAll("_", ""))),
-							white
+							WHITE
 						)
 					);
 				}
@@ -225,7 +211,7 @@ public class Renderer {
 							Component.literal(
 								String.format("last seen %s", timestampRelativeText(snitch.getLastSeenTs()))
 							),
-							white
+							WHITE
 						)
 					);
 				}
@@ -235,7 +221,7 @@ public class Renderer {
 		Vec3 center = snitch.pos.getCenter();
 		int offset = -1;
 		for (ColoredComponent line : linesToRender) {
-			renderTextFacingCamera(line.text, center, offset, 1f, line.colorAlphaHex);
+			renderTextFacingCamera(line.text, center, offset, 1f, line.color.hex);
 			offset += 1;
 		}
 	}
@@ -246,24 +232,20 @@ public class Renderer {
 		if (snitch.hasCullTs() && snitch.getCullTs() < now) return;
 		if (snitch.hasDormantTs() && snitch.getDormantTs() < now) return;
 
-		// light blue
-		float r = 0;
-		float g = 0.7f;
-		float b = 1;
-		float alpha = 0.2f;
-
 		final boolean playerInRange = snitch.getRangeAABB().contains(mc.player.position());
 		if (playerInRange) return; // only render helper for snitches the player isn't inside of
 		final AABB helperBox = new AABB(snitch.pos).inflate(22.3);
 
 		RenderSystem.enableDepthTest();
 		RenderSystem.enableBlend();
-
 		RenderSystem.disableCull();
-		renderFilledBox(helperBox, r, g, b, alpha);
+
+		Color color = BLUE;
+		float alpha = 0.2f;
+		renderFilledBox(helperBox, color, alpha);
 	}
 
-	private static void renderBoxOutline(AABB box, float r, float g, float b, float a, float lineWidth) {
+	private static void renderBoxOutline(AABB box, Color color, float a, float lineWidth) {
 		RenderSystem.lineWidth(lineWidth);
 
 		Tesselator tesselator = Tesselator.getInstance();
@@ -271,6 +253,10 @@ public class Renderer {
 		bufferBuilder.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
 
 		GL11.glEnable(GL11.GL_LINE_SMOOTH);
+
+		float r = color.r;
+		float g = color.g;
+		float b = color.b;
 
 		bufferBuilder.vertex(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
 		bufferBuilder.vertex(box.maxX, box.minY, box.minZ).color(r, g, b, a).endVertex();
@@ -300,11 +286,15 @@ public class Renderer {
 		tesselator.end();
 	}
 
-	private static void renderFilledBox(AABB box, float r, float g, float b, float a) {
+	private static void renderFilledBox(AABB box, Color color, float a) {
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
 		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 		bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+
+		float r = color.r;
+		float g = color.g;
+		float b = color.b;
 
 		bufferBuilder.vertex(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
 		bufferBuilder.vertex(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
