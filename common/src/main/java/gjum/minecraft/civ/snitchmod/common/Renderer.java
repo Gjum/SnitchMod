@@ -126,6 +126,9 @@ public class Renderer {
 			color = ORANGE;
 		}
 
+		/*
+		 * Render the snitch range box.
+		 */
 		RenderSystem.enableDepthTest();
 		RenderSystem.enableBlend();
 		RenderSystem.disableCull();
@@ -140,6 +143,9 @@ public class Renderer {
 			renderBoxOutline(outlineBox, color, lineAlpha, lineWidth);
 		}
 
+		/*
+		 * Render the snitch box.
+		 */
 		final int blockHlDist = 64;
 		if (snitch.pos.distSqr(mc.player.blockPosition()) < blockHlDist * blockHlDist) {
 			RenderSystem.disableDepthTest();
@@ -153,6 +159,9 @@ public class Renderer {
 			renderFilledBox(blockBox, boxFillColor, boxAlpha);
 		}
 
+		/*
+		 * Render the snitch box text.
+		 */
 		record ColoredComponent(Component text, Color color) { }
 
 		List<ColoredComponent> linesToRender = new ArrayList<>(3);
