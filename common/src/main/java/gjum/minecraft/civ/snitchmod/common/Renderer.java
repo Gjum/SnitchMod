@@ -104,10 +104,7 @@ public class Renderer {
 	}
 
 	private static void renderSnitch(Snitch snitch) {
-		long now = System.currentTimeMillis();
-
 		final AABB range = snitch.getRangeAABB();
-
 		// inflate/deflate so the box face isn't obscured by adjacent blocks
 		final boolean playerInRange = range.contains(mc.player.position());
 		AABB rangeBox = playerInRange ? range.inflate(-.01) : range.inflate(.01);
@@ -116,6 +113,7 @@ public class Renderer {
 		enum SnitchLiveliness {
 			BROKEN (RED),
 			GONE (RED),
+			LONG_TIME_NOT_SEEN (RED),
 			CULLED (RED),
 			WILL_CULL (ORANGE),
 			DORMANT_NOW (ORANGE),
@@ -129,11 +127,18 @@ public class Renderer {
 			}
 		}
 
+		long now = System.currentTimeMillis();
+		long snitchTimer = snitch.NOTEBLOCK_TIMER_MILLI;
+		if (snitch.getType() != null && snitch.getType().equals("jukebox")) {
+			snitchTimer = snitch.JUKEBOX_TIMER_MILLI;
+		}
 		SnitchLiveliness snitchLiveliness = SnitchLiveliness.ALIVE;
 		if (snitch.wasBroken()) {
 			snitchLiveliness = SnitchLiveliness.BROKEN;
 		} else if (snitch.isGone()) {
 			snitchLiveliness = SnitchLiveliness.GONE;
+		} else if (snitch.getLastSeenTs() != 0 && now - snitch.getLastSeenTs() > snitchTimer) {
+			snitchLiveliness = SnitchLiveliness.LONG_TIME_NOT_SEEN;
 		} else if (snitch.hasCullTs() && snitch.getCullTs() < now) {
 			snitchLiveliness = SnitchLiveliness.CULLED;
 		} else if (snitch.hasCullTs() && snitch.getCullTs() > now) {
@@ -222,6 +227,11 @@ public class Renderer {
 				linesToRender.add(new ColoredComponent(Component.literal(String.format("[%s]", group)), WHITE));
 			}
 
+			String lastSeenText = null;
+			if (snitch.getLastSeenTs() != 0) {
+				lastSeenText = String.format("last seen %s", timestampRelativeText(snitch.getLastSeenTs()));
+			}
+
 			String livelinessText = null;
 			switch (snitchLiveliness) {
 			case BROKEN:
@@ -229,6 +239,9 @@ public class Renderer {
 				break;
 			case GONE:
 				livelinessText = "gone " + timestampRelativeText(snitch.getGoneTs());
+				break;
+			case LONG_TIME_NOT_SEEN:
+				livelinessText = lastSeenText;
 				break;
 			case CULLED:
 				livelinessText = "culled " + timestampRelativeText(snitch.getCullTs());
@@ -271,15 +284,8 @@ public class Renderer {
 					);
 				}
 
-				if (snitch.getLastSeenTs() != 0) {
-					linesToRender.add(
-						new ColoredComponent(
-							Component.literal(
-								String.format("last seen %s", timestampRelativeText(snitch.getLastSeenTs()))
-							),
-							WHITE
-						)
-					);
+				if (lastSeenText != null && snitchLiveliness != SnitchLiveliness.LONG_TIME_NOT_SEEN) {
+					linesToRender.add(new ColoredComponent(Component.literal(lastSeenText), WHITE));
 				}
 			}
 		}
