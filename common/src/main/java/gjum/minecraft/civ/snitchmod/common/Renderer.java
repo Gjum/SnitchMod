@@ -397,7 +397,7 @@ public class Renderer {
 
 		float w = mc.font.width(text);
 		float x = -w / 2f;
-		float y = -(.5f - offset) * (mc.font.lineHeight + 1); // +2 for background padding, -1 for default line spacing
+		float y = -(.5f - offset) * (mc.font.lineHeight + 2); // +2 for background padding, -1 for default line spacing
 		boolean shadow = false;
 		var matrix = poseStack.last().pose();
 		var buffer = mc.renderBuffers().bufferSource();
