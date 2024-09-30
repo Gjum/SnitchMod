@@ -187,7 +187,14 @@ public class Renderer {
 
 			// inflate so it isn't obstructed by the snitch block
 			final AABB blockBox = new AABB(snitch.pos).inflate(.01);
-			renderBoxOutline(blockBox, snitchLiveliness.color, lineAlpha, lineWidth);
+			Color boxOutlineColor = snitchLiveliness.color;
+			if (
+				getMod().snitchFieldToPreview != null
+				&& getMod().snitchFieldToPreview.source().equals(snitch)
+			) {
+				boxOutlineColor = PINK;
+			}
+			renderBoxOutline(blockBox, boxOutlineColor, lineAlpha, lineWidth);
 			renderFilledBox(blockBox, snitchLiveliness.color, boxAlpha);
 
 			Color boxFillColor = snitch.isGone() ? new Color(0x333333) : snitchLiveliness.color;
