@@ -55,6 +55,7 @@ public class Renderer {
 		if (getMod().placementHelperVisible) {
 			int placeHelperDist = 50;
 			getMod().streamNearbySnitches(mc.player.position(), placeHelperDist)
+					.filter(s -> s.isAlive())
 					.limit(10)
 					.forEach(Renderer::renderPlacementHelper);
 		}
@@ -227,11 +228,6 @@ public class Renderer {
 	}
 
 	private static void renderPlacementHelper(Snitch snitch) {
-		if (snitch.isGone()) return;
-		long now = System.currentTimeMillis();
-		if (snitch.hasCullTs() && snitch.getCullTs() < now) return;
-		if (snitch.hasDormantTs() && snitch.getDormantTs() < now) return;
-
 		final boolean playerInRange = snitch.getRangeAABB().contains(mc.player.position());
 		if (playerInRange) return; // only render helper for snitches the player isn't inside of
 		final AABB helperBox = new AABB(snitch.pos).inflate(22.3);
