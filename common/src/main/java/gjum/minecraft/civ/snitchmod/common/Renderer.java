@@ -113,7 +113,14 @@ public class Renderer {
 		AABB outlineBox = playerInRange ? range.inflate(-.05) : range.inflate(.05);
 
 		Color color = YELLOW;
-		if (snitch.hasCullTs() && snitch.getCullTs() < now) {
+		float boxAlpha = 0.2f;
+		float lineAlpha = 1;
+		if (snitch.isGone()) {
+			color = RED;
+			// Workaround for a bug in renderFilledBox described below.
+			boxAlpha = 0f;
+			lineAlpha = 0.5f;
+		} else if (snitch.hasCullTs() && snitch.getCullTs() < now) {
 			color = RED;
 		} else if (snitch.hasCullTs() || (snitch.hasDormantTs() && snitch.getDormantTs() < now)) {
 			color = ORANGE;
@@ -123,12 +130,15 @@ public class Renderer {
 		RenderSystem.enableBlend();
 		RenderSystem.disableCull();
 
-		final float boxAlpha = 0.2f;
 		renderFilledBox(rangeBox, color, boxAlpha);
 
-		final float lineAlpha = 1;
 		final float lineWidth = 2;
-		renderBoxOutline(outlineBox, color, lineAlpha, lineWidth);
+		if (!snitch.isGone()) {
+			// Should include renderFilledBox too but that creates a bug, no idea why. When bugged, the snitch box lines
+			// get rendered pure black when standing close (<~50 blocks?) instead of whatever we configured.
+
+			renderBoxOutline(outlineBox, color, lineAlpha, lineWidth);
+		}
 
 		final int blockHlDist = 64;
 		if (snitch.pos.distSqr(mc.player.blockPosition()) < blockHlDist * blockHlDist) {
@@ -138,13 +148,19 @@ public class Renderer {
 			final AABB blockBox = new AABB(snitch.pos).inflate(.01);
 			renderBoxOutline(blockBox, color, lineAlpha, lineWidth);
 			renderFilledBox(blockBox, color, boxAlpha);
+
+			Color boxFillColor = snitch.isGone() ? new Color(0x333333) : color;
+			renderFilledBox(blockBox, boxFillColor, boxAlpha);
 		}
 
 		record ColoredComponent(Component text, Color color) { }
 
 		List<ColoredComponent> linesToRender = new ArrayList<>(3);
 		boolean playerLookingAtSnitch = Utils.playerIsLookingAtSnitch(mc.player, snitch);
-		if (playerInRange || playerLookingAtSnitch) {
+		if (
+			(!snitch.isGone() && playerInRange)
+			|| playerLookingAtSnitch
+		) {
 			String name = snitch.getName();
 			if (name != null && !name.isEmpty()) {
 				linesToRender.add(new ColoredComponent(Component.literal(name), WHITE));
