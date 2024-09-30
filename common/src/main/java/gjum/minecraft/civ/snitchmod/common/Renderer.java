@@ -28,6 +28,7 @@ public class Renderer {
 	private final static Color BLUE = new Color(0x00B2FF);
 	private final static Color YELLOW = new Color(0xEED840);
 	private final static Color ORANGE = new Color(0xEE8140);
+	private final static Color PINK = new Color(0xFC66CC);
 
 	public static void renderOverlays(PoseStack poseStackArg) {
 		if (mc.player == null) return;
@@ -84,7 +85,7 @@ public class Renderer {
 		RenderSystem.enableBlend();
 		RenderSystem.disableCull();
 
-		final Color color = GREEN;
+		final Color color = PINK;
 		final float boxAlpha = 0.2f;
 		renderFilledBox(rangeBox, color, boxAlpha);
 
@@ -112,18 +113,52 @@ public class Renderer {
 		AABB rangeBox = playerInRange ? range.inflate(-.01) : range.inflate(.01);
 		AABB outlineBox = playerInRange ? range.inflate(-.05) : range.inflate(.05);
 
-		Color color = YELLOW;
+		enum SnitchLiveliness {
+			BROKEN (RED),
+			GONE (RED),
+			CULLED (RED),
+			WILL_CULL (ORANGE),
+			DORMANT_NOW (ORANGE),
+			DORMANT_SOON (ORANGE),
+			DORMANT_SOONISH (YELLOW),
+			ALIVE (GREEN);
+
+			private final Color color;
+			SnitchLiveliness(Color color) {
+				this.color = color;
+			}
+		}
+
+		SnitchLiveliness snitchLiveliness = SnitchLiveliness.ALIVE;
+		if (snitch.wasBroken()) {
+			snitchLiveliness = SnitchLiveliness.BROKEN;
+		} else if (snitch.isGone()) {
+			snitchLiveliness = SnitchLiveliness.GONE;
+		} else if (snitch.hasCullTs() && snitch.getCullTs() < now) {
+			snitchLiveliness = SnitchLiveliness.CULLED;
+		} else if (snitch.hasCullTs() && snitch.getCullTs() > now) {
+			snitchLiveliness = SnitchLiveliness.WILL_CULL;
+		} else if (snitch.hasDormantTs() && snitch.getDormantTs() < now) {
+			snitchLiveliness = SnitchLiveliness.DORMANT_NOW;
+		} else if (snitch.hasDormantTs() && snitch.getDormantTs() > now) {
+			final long goodThreshold = 1000L * 60L * 60L * 24L * 7L;
+			final long badThreshold = 1000L * 60L * 60L * 24L * 3L;
+			final long delta = snitch.getDormantTs() - now;
+			if (delta >= goodThreshold) {
+				// no-op: default
+			} else if (delta >= badThreshold) {
+				snitchLiveliness = SnitchLiveliness.DORMANT_SOONISH;
+			} else {
+				snitchLiveliness = SnitchLiveliness.DORMANT_SOON;
+			}
+		}
+
 		float boxAlpha = 0.2f;
 		float lineAlpha = 1;
 		if (snitch.isGone()) {
-			color = RED;
 			// Workaround for a bug in renderFilledBox described below.
 			boxAlpha = 0f;
 			lineAlpha = 0.5f;
-		} else if (snitch.hasCullTs() && snitch.getCullTs() < now) {
-			color = RED;
-		} else if (snitch.hasCullTs() || (snitch.hasDormantTs() && snitch.getDormantTs() < now)) {
-			color = ORANGE;
 		}
 
 		/*
@@ -133,14 +168,14 @@ public class Renderer {
 		RenderSystem.enableBlend();
 		RenderSystem.disableCull();
 
-		renderFilledBox(rangeBox, color, boxAlpha);
+		renderFilledBox(rangeBox, snitchLiveliness.color, boxAlpha);
 
 		final float lineWidth = 2;
 		if (!snitch.isGone()) {
 			// Should include renderFilledBox too but that creates a bug, no idea why. When bugged, the snitch box lines
 			// get rendered pure black when standing close (<~50 blocks?) instead of whatever we configured.
 
-			renderBoxOutline(outlineBox, color, lineAlpha, lineWidth);
+			renderBoxOutline(outlineBox, snitchLiveliness.color, lineAlpha, lineWidth);
 		}
 
 		/*
@@ -152,10 +187,10 @@ public class Renderer {
 
 			// inflate so it isn't obstructed by the snitch block
 			final AABB blockBox = new AABB(snitch.pos).inflate(.01);
-			renderBoxOutline(blockBox, color, lineAlpha, lineWidth);
-			renderFilledBox(blockBox, color, boxAlpha);
+			renderBoxOutline(blockBox, snitchLiveliness.color, lineAlpha, lineWidth);
+			renderFilledBox(blockBox, snitchLiveliness.color, boxAlpha);
 
-			Color boxFillColor = snitch.isGone() ? new Color(0x333333) : color;
+			Color boxFillColor = snitch.isGone() ? new Color(0x333333) : snitchLiveliness.color;
 			renderFilledBox(blockBox, boxFillColor, boxAlpha);
 		}
 
@@ -180,31 +215,29 @@ public class Renderer {
 				linesToRender.add(new ColoredComponent(Component.literal(String.format("[%s]", group)), WHITE));
 			}
 
-			final String livelinessText;
-			Color livelinessTextColor = WHITE;
-			if (snitch.wasBroken()) {
+			String livelinessText = null;
+			switch (snitchLiveliness) {
+			case BROKEN:
 				livelinessText = "broken " + timestampRelativeText(snitch.getBrokenTs());
-				livelinessTextColor = RED;
-			} else if (snitch.isGone()) {
+				break;
+			case GONE:
 				livelinessText = "gone " + timestampRelativeText(snitch.getGoneTs());
-				livelinessTextColor = RED;
-			} else if (snitch.hasDormantTs() && snitch.getDormantTs() > now) {
-				livelinessText = "deactivates " + timestampRelativeText(snitch.getDormantTs());
-				livelinessTextColor = WHITE;
-			} else if (snitch.hasCullTs() && snitch.getCullTs() < now) {
+				break;
+			case CULLED:
 				livelinessText = "culled " + timestampRelativeText(snitch.getCullTs());
-				livelinessTextColor = RED;
-			} else if (snitch.hasCullTs() && snitch.getCullTs() > now) {
+				break;
+			case WILL_CULL:
 				livelinessText = "culls " + timestampRelativeText(snitch.getCullTs());
-				livelinessTextColor = ORANGE;
-			} else if (snitch.hasDormantTs() && snitch.getDormantTs() < now) {
+				break;
+			case DORMANT_NOW:
 				livelinessText = "deactivated " + timestampRelativeText(snitch.getDormantTs());
-				livelinessTextColor = ORANGE;
-			} else {
-				livelinessText = null;
+				break;
+			case DORMANT_SOON, DORMANT_SOONISH, ALIVE:
+				livelinessText = "deactivates " + timestampRelativeText(snitch.getDormantTs());
+				break;
 			}
 			if (livelinessText != null) {
-				linesToRender.add(new ColoredComponent(Component.literal(livelinessText), livelinessTextColor));
+				linesToRender.add(new ColoredComponent(Component.literal(livelinessText), snitchLiveliness.color));
 			}
 
 			if (playerLookingAtSnitch) {
