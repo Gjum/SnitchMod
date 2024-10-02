@@ -109,6 +109,9 @@ public class Renderer {
 		final boolean playerInRange = range.contains(mc.player.position());
 		AABB rangeBox = playerInRange ? range.inflate(-.01) : range.inflate(.01);
 		AABB outlineBox = playerInRange ? range.inflate(-.05) : range.inflate(.05);
+		if (playerInRange) {
+			snitch.visitedThisSession = true;
+		}
 
 		enum SnitchLiveliness {
 			BROKEN (RED),
@@ -116,9 +119,13 @@ public class Renderer {
 			LONG_TIME_NOT_SEEN (RED),
 			CULLED (RED),
 			WILL_CULL (ORANGE),
+			WILL_CULL_MAYBE_REFRESHED (GREEN),
 			DORMANT_NOW (ORANGE),
+			DORMANT_NOW_MAYBE_REFRESHED (GREEN),
 			DORMANT_SOON (ORANGE),
+			DORMANT_SOON_MAYBE_REFRESHED (GREEN),
 			DORMANT_SOONISH (YELLOW),
+			DORMANT_SOONISH_MAYBE_REFRESHED (GREEN),
 			ALIVE (GREEN);
 
 			private final Color color;
@@ -142,9 +149,13 @@ public class Renderer {
 		} else if (snitch.hasCullTs() && snitch.getCullTs() < now) {
 			snitchLiveliness = SnitchLiveliness.CULLED;
 		} else if (snitch.hasCullTs() && snitch.getCullTs() > now) {
-			snitchLiveliness = SnitchLiveliness.WILL_CULL;
+			snitchLiveliness = snitch.visitedThisSession
+				? SnitchLiveliness.WILL_CULL_MAYBE_REFRESHED
+				: SnitchLiveliness.WILL_CULL;
 		} else if (snitch.hasDormantTs() && snitch.getDormantTs() < now) {
-			snitchLiveliness = SnitchLiveliness.DORMANT_NOW;
+			snitchLiveliness = snitch.visitedThisSession
+				? SnitchLiveliness.DORMANT_NOW_MAYBE_REFRESHED
+				: SnitchLiveliness.DORMANT_NOW;
 		} else if (snitch.hasDormantTs() && snitch.getDormantTs() > now) {
 			final long goodThreshold = 1000L * 60L * 60L * 24L * 7L;
 			final long badThreshold = 1000L * 60L * 60L * 24L * 3L;
@@ -152,9 +163,13 @@ public class Renderer {
 			if (delta >= goodThreshold) {
 				// no-op: default
 			} else if (delta >= badThreshold) {
-				snitchLiveliness = SnitchLiveliness.DORMANT_SOONISH;
+				snitchLiveliness = snitch.visitedThisSession
+					? SnitchLiveliness.DORMANT_SOONISH_MAYBE_REFRESHED
+					: SnitchLiveliness.DORMANT_SOONISH;
 			} else {
-				snitchLiveliness = SnitchLiveliness.DORMANT_SOON;
+				snitchLiveliness = snitch.visitedThisSession
+					? SnitchLiveliness.DORMANT_SOON_MAYBE_REFRESHED
+					: SnitchLiveliness.DORMANT_SOON;
 			}
 		}
 
@@ -246,17 +261,25 @@ public class Renderer {
 			case CULLED:
 				livelinessText = "culled " + timestampRelativeText(snitch.getCullTs());
 				break;
-			case WILL_CULL:
+			case WILL_CULL, WILL_CULL_MAYBE_REFRESHED:
 				livelinessText = "culls " + timestampRelativeText(snitch.getCullTs());
 				break;
-			case DORMANT_NOW:
+			case DORMANT_NOW, DORMANT_NOW_MAYBE_REFRESHED:
 				livelinessText = "deactivated " + timestampRelativeText(snitch.getDormantTs());
 				break;
-			case DORMANT_SOON, DORMANT_SOONISH, ALIVE:
+			case DORMANT_SOON, DORMANT_SOON_MAYBE_REFRESHED, DORMANT_SOONISH, DORMANT_SOONISH_MAYBE_REFRESHED, ALIVE:
 				livelinessText = "deactivates " + timestampRelativeText(snitch.getDormantTs());
 				break;
 			}
 			if (livelinessText != null) {
+				if (snitch.visitedThisSession) {
+					switch (snitchLiveliness) {
+					case WILL_CULL_MAYBE_REFRESHED, DORMANT_NOW_MAYBE_REFRESHED, DORMANT_SOON_MAYBE_REFRESHED, DORMANT_SOONISH_MAYBE_REFRESHED:
+						livelinessText = livelinessText + " (refreshed?)";
+						break;
+					default:
+					}
+				}
 				linesToRender.add(new ColoredComponent(Component.literal(livelinessText), snitchLiveliness.color));
 			}
 

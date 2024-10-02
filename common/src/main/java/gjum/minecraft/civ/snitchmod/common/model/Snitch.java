@@ -10,6 +10,7 @@ public class Snitch {
 	public final long NOTEBLOCK_TIMER_MILLI = 1000L * 60L * 60L * 24L * 28L;
 	public final long JUKEBOX_TIMER_MILLI = 1000L * 60L * 60L * 24L * 42L;
 
+	public boolean visitedThisSession;
 	public final @NotNull WorldPos pos;
 	private @Nullable String group;
 	private @Nullable String type;
