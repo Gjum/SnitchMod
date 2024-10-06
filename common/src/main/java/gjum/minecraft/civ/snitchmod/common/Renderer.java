@@ -272,11 +272,13 @@ public class Renderer {
 				livelinessText = "deactivated " + timestampRelativeText(snitch.getDormantTs());
 				break;
 			case DORMANT_SOON, DORMANT_SOON_MAYBE_REFRESHED, DORMANT_SOONISH, DORMANT_SOONISH_MAYBE_REFRESHED, ALIVE:
-				livelinessText = String.format(
-					"deactivates %s / %s",
-					timestampRelativeText(snitch.getDormantTs()),
-					durationToText(snitchTimer)
-				);
+				if (snitch.hasDormantTs()) {
+					livelinessText = String.format(
+						"deactivates %s / %s",
+						timestampRelativeText(snitch.getDormantTs()),
+						durationToText(snitchTimer)
+					);
+				}
 				break;
 			}
 			if (livelinessText != null) {
