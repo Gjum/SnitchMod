@@ -212,7 +212,6 @@ public class Renderer {
 				boxOutlineColor = PINK;
 			}
 			renderBoxOutline(blockBox, boxOutlineColor, lineAlpha, lineWidth);
-			renderFilledBox(blockBox, snitchLiveliness.color, boxAlpha);
 
 			Color boxFillColor = snitch.isGone() ? new Color(0x333333) : snitchLiveliness.color;
 			renderFilledBox(blockBox, boxFillColor, boxAlpha);
