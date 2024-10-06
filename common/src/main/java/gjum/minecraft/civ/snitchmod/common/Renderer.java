@@ -262,13 +262,21 @@ public class Renderer {
 				livelinessText = "culled " + timestampRelativeText(snitch.getCullTs());
 				break;
 			case WILL_CULL, WILL_CULL_MAYBE_REFRESHED:
-				livelinessText = "culls " + timestampRelativeText(snitch.getCullTs());
+				livelinessText = String.format(
+					"culls %s / %s",
+					timestampRelativeText(snitch.getCullTs()),
+					durationToText(snitchTimer)
+				);
 				break;
 			case DORMANT_NOW, DORMANT_NOW_MAYBE_REFRESHED:
 				livelinessText = "deactivated " + timestampRelativeText(snitch.getDormantTs());
 				break;
 			case DORMANT_SOON, DORMANT_SOON_MAYBE_REFRESHED, DORMANT_SOONISH, DORMANT_SOONISH_MAYBE_REFRESHED, ALIVE:
-				livelinessText = "deactivates " + timestampRelativeText(snitch.getDormantTs());
+				livelinessText = String.format(
+					"deactivates %s / %s",
+					timestampRelativeText(snitch.getDormantTs()),
+					durationToText(snitchTimer)
+				);
 				break;
 			}
 			if (livelinessText != null) {
