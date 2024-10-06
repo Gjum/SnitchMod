@@ -14,6 +14,8 @@ import java.util.regex.Pattern;
 import static net.minecraft.nbt.Tag.TAG_LIST;
 import static net.minecraft.nbt.Tag.TAG_STRING;
 
+import gjum.minecraft.civ.snitchmod.common.model.Snitch.Type;
+
 public class JalistEntry {
 	/**
 	 * When the `/jalist` entry was taken.
@@ -25,7 +27,7 @@ public class JalistEntry {
 	/**
 	 * Block id: note_block or jukebox
 	 */
-	public final @NotNull String type;
+	public final @NotNull Type type;
 	public final @NotNull String name;
 	/**
 	 * "soft cull" date; ms since UNIX epoch.
@@ -42,7 +44,7 @@ public class JalistEntry {
 			long ts,
 			@NotNull WorldPos pos,
 			@NotNull String group,
-			@NotNull String type,
+			@NotNull Type type,
 			@NotNull String name,
 			long dormantTs, long cullTs
 	) {
@@ -61,12 +63,12 @@ public class JalistEntry {
 
 	@Nullable
 	public static JalistEntry fromStack(ItemStack stack, @NotNull String server) {
-		String type;
+		Type type;
 		if (stack.getItem() == Items.NOTE_BLOCK) {
-			type = "note_block";
+			type = Type.NOTEBLOCK;
 		} else if (stack.getItem() == Items.JUKEBOX) {
-			type = "jukebox";
-		} else return null; // TODO support other block types
+			type = Type.JUKEBOX;
+		} else return null;
 
 		CompoundTag displayTag = stack.getTagElement("display");
 		if (displayTag == null) return null;

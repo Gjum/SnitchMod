@@ -135,10 +135,7 @@ public class Renderer {
 		}
 
 		long now = System.currentTimeMillis();
-		long snitchTimer = snitch.NOTEBLOCK_TIMER_MILLI;
-		if (snitch.getType() != null && snitch.getType().equals("jukebox")) {
-			snitchTimer = snitch.JUKEBOX_TIMER_MILLI;
-		}
+		long snitchTimer = snitch.getType() != null ? snitch.getType().timer : Snitch.Type.NOTEBLOCK.timer;
 		SnitchLiveliness snitchLiveliness = SnitchLiveliness.ALIVE;
 		if (snitch.wasBroken()) {
 			snitchLiveliness = SnitchLiveliness.BROKEN;
@@ -321,7 +318,7 @@ public class Renderer {
 				if (snitch.getType() != null) {
 					linesToRender.add(
 						new ColoredComponent(
-							Component.literal(StringUtils.capitalize(snitch.getType().replaceAll("_", ""))),
+							Component.literal(StringUtils.capitalize(snitch.getType().toString().replaceAll("_", ""))),
 							WHITE
 						)
 					);

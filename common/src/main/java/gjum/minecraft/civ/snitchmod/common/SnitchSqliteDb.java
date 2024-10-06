@@ -1,6 +1,7 @@
 package gjum.minecraft.civ.snitchmod.common;
 
 import gjum.minecraft.civ.snitchmod.common.model.Snitch;
+import gjum.minecraft.civ.snitchmod.common.model.Snitch.Type;
 import gjum.minecraft.civ.snitchmod.common.model.WorldPos;
 
 import java.io.File;
@@ -151,7 +152,7 @@ public class SnitchSqliteDb {
 				pstmt.setInt(++i, snitch.pos.getY());
 				pstmt.setInt(++i, snitch.pos.getZ());
 				pstmt.setString(++i, snitch.getGroup());
-				pstmt.setString(++i, snitch.getType());
+				pstmt.setString(++i, snitch.getType().dbRepresentation);
 				pstmt.setString(++i, snitch.getName());
 				pstmt.setLong(++i, snitch.getDormantTs());
 				pstmt.setLong(++i, snitch.getCullTs());

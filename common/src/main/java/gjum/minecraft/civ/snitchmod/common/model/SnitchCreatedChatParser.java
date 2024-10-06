@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static gjum.minecraft.civ.snitchmod.common.Utils.nonEmptyOrDefault;
+import gjum.minecraft.civ.snitchmod.common.model.Snitch.Type;
 
 public class SnitchCreatedChatParser {
 	// Created Snitch on group GROUPNAME at [123 45 -321]
@@ -20,11 +21,11 @@ public class SnitchCreatedChatParser {
 		if (!textMatch.matches()) return null;
 
 		String rawType = textMatch.group(1).trim().toLowerCase();
-		String type = null;
+		Type type = null;
 		if (rawType.equals("logsnitch")) {
-			type = "jukebox";
+			type = Type.JUKEBOX;
 		} else if (rawType.equals("snitch")) {
-			type = "note_block";
+			type = Type.NOTEBLOCK;
 		}
 
 		String group = textMatch.group(2);

@@ -7,13 +7,29 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public class Snitch {
-	public final long NOTEBLOCK_TIMER_MILLI = 1000L * 60L * 60L * 24L * 28L;
-	public final long JUKEBOX_TIMER_MILLI = 1000L * 60L * 60L * 24L * 42L;
+	private final static String JUKEBOX_DB_REPRESENTATION = "jukebox";
+	private final static String NOTEBLOCK_DB_REPRESENTATION = "note_block";
+	public enum Type {
+		JUKEBOX (1000L * 60L * 60L * 24L * 42L, JUKEBOX_DB_REPRESENTATION),
+		NOTEBLOCK (1000L * 60L * 60L * 24L * 28L, NOTEBLOCK_DB_REPRESENTATION);
+
+		public final long timer;
+		public final String dbRepresentation;
+		Type(long timer, String dbRepresentation) {
+			this.timer = timer;
+			this.dbRepresentation = dbRepresentation;
+		}
+
+		@Override
+		public String toString() {
+			return this.dbRepresentation;
+		}
+	}
 
 	public boolean visitedThisSession;
 	public final @NotNull WorldPos pos;
 	private @Nullable String group;
-	private @Nullable String type;
+	private @Nullable Type type;
 	private @Nullable String name;
 	private long dormantTs;
 	private long cullTs;
@@ -38,7 +54,7 @@ public class Snitch {
 			@NotNull String world,
 			int x, int y, int z,
 			@Nullable String group,
-			@Nullable String type,
+			@Nullable String rawType,
 			@Nullable String name,
 			long dormantTs,
 			long cullTs,
@@ -56,7 +72,17 @@ public class Snitch {
 	) {
 		this.pos = new WorldPos(server, world, x, y, z);
 		this.group = group;
-		this.type = type;
+		if (rawType != null) {
+			String type = rawType.trim().toLowerCase();
+			switch (type) {
+			case JUKEBOX_DB_REPRESENTATION, "juke_box", "juke box", "logsnitch":
+				this.type = Type.JUKEBOX;
+				break;
+			case NOTEBLOCK_DB_REPRESENTATION, "noteblock", "note block", "snitch":
+				this.type = Type.NOTEBLOCK;
+				break;
+			}
+		}
 		this.name = name;
 		this.dormantTs = dormantTs;
 		this.cullTs = cullTs;
@@ -77,7 +103,7 @@ public class Snitch {
 		this.notes = notes;
 	}
 
-	public void updateFromCreation(String group, @Nullable String type, UUID createdByUuid) {
+	public void updateFromCreation(String group, @Nullable Type type, UUID createdByUuid) {
 		this.group = group;
 		this.createdByUuid = createdByUuid;
 		this.type = type;
@@ -85,11 +111,7 @@ public class Snitch {
 		firstSeenTs = createdTs;
 		lastSeenTs = createdTs;
 		if (type != null) {
-			if (type.equals("jukebox")) {
-				this.dormantTs = createdTs + this.JUKEBOX_TIMER_MILLI;
-			} else {
-				this.dormantTs = createdTs + this.NOTEBLOCK_TIMER_MILLI;
-			}
+			this.dormantTs = createdTs + type.timer;
 		}
 	}
 
@@ -155,11 +177,8 @@ public class Snitch {
 		return group;
 	}
 
-	/**
-	 * Block id: `note_block` or `jukebox`.
-	 */
 	@Nullable
-	public String getType() {
+	public Type getType() {
 		return type;
 	}
 
