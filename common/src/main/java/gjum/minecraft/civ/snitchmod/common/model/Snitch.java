@@ -84,7 +84,13 @@ public class Snitch {
 		createdTs = System.currentTimeMillis();
 		firstSeenTs = createdTs;
 		lastSeenTs = createdTs;
-		// TODO set dormantTs/cullTs from server config
+		if (type != null) {
+			if (type.equals("jukebox")) {
+				this.dormantTs = createdTs + this.JUKEBOX_TIMER_MILLI;
+			} else {
+				this.dormantTs = createdTs + this.NOTEBLOCK_TIMER_MILLI;
+			}
+		}
 	}
 
 	public void updateFromJalist(JalistEntry jalist) {
