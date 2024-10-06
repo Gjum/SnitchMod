@@ -186,7 +186,7 @@ public abstract class SnitchMod {
 				.findFirst();
 			if (optNearestSnitch.isEmpty()) {
 				snitchFieldToPreview = null;
-				logToChat(Component.literal("No nearby snitches to base a field preview on"));
+				logToChat(Component.literal("No nearby alive snitches to base a field preview on"));
 				break;
 			}
 			Snitch nearestSnitch = optNearestSnitch.get();
@@ -249,7 +249,7 @@ public abstract class SnitchMod {
 						alreadyExistingSnitch.getName()
 					)
 				);
-				logToChat(Component.literal("Named the replaced snitch"));
+				logToChat(Component.literal(String.format("Named the replaced snitch \"%s\"", alreadyExistingSnitch.getName())));
 			}
 
 			if (
