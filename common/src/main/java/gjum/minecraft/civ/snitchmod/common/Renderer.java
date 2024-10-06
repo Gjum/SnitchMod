@@ -254,6 +254,11 @@ public class Renderer {
 				lastSeenText = String.format("last seen %s", timestampRelativeText(snitch.getLastSeenTs()));
 			}
 
+			String maxSnitchTimerText = "";
+			if (playerLookingAtSnitch) {
+				maxSnitchTimerText = String.format(" / %s", durationToText(snitchTimer));
+			}
+
 			String livelinessText = null;
 			switch (snitchLiveliness) {
 			case BROKEN:
@@ -270,9 +275,9 @@ public class Renderer {
 				break;
 			case WILL_CULL, WILL_CULL_MAYBE_REFRESHED:
 				livelinessText = String.format(
-					"culls %s / %s",
+					"culls %s%s",
 					timestampRelativeText(snitch.getCullTs()),
-					durationToText(snitchTimer)
+					maxSnitchTimerText
 				);
 				break;
 			case DORMANT_NOW, DORMANT_NOW_MAYBE_REFRESHED:
@@ -281,9 +286,9 @@ public class Renderer {
 			case DORMANT_SOON, DORMANT_SOON_MAYBE_REFRESHED, DORMANT_SOONISH, DORMANT_SOONISH_MAYBE_REFRESHED, ALIVE:
 				if (snitch.hasDormantTs()) {
 					livelinessText = String.format(
-						"deactivates %s / %s",
+						"deactivates %s%s",
 						timestampRelativeText(snitch.getDormantTs()),
-						durationToText(snitchTimer)
+						maxSnitchTimerText
 					);
 				}
 				break;
