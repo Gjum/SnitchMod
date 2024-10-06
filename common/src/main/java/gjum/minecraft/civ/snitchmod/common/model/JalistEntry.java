@@ -103,23 +103,17 @@ public class JalistEntry {
 		long ts = System.currentTimeMillis();
 
 		String lifetimeType = lifetimeMatch.group(1);
-		long h;
+		long h = 0;
 		if (lifetimeMatch.group(2) != null) {
 			h = Integer.parseInt(lifetimeMatch.group(2));
-		} else {
-			h = 0;
 		}
-		long m;
+		long m = 0;
 		if (lifetimeMatch.group(3) != null) {
 			m = Integer.parseInt(lifetimeMatch.group(3));
-		} else {
-			m = 0;
 		}
-		long s;
+		long s = 0;
 		if (lifetimeMatch.group(4) != null) {
 			s = Integer.parseInt(lifetimeMatch.group(4));
-		} else {
-			s = 0;
 		}
 		long lifetimeDurationMs = (h * 3600L + m * 60L + s) * 1000L;
 
