@@ -24,7 +24,7 @@ public class Renderer {
 
 	private final static Color WHITE = new Color(0xEEEEEE);
 	private final static Color RED = new Color(0xEE4056);
-	private final static Color GREEN = new Color(0x56EE40);
+	private final static Color GREEN = new Color(0x28CC52);
 	private final static Color BLUE = new Color(0x00B2FF);
 	private final static Color YELLOW = new Color(0xEED840);
 	private final static Color ORANGE = new Color(0xEE8140);
