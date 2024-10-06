@@ -228,9 +228,19 @@ public class Renderer {
 
 		List<ColoredComponent> linesToRender = new ArrayList<>(3);
 		boolean playerLookingAtSnitch = Utils.playerIsLookingAtSnitch(mc.player, snitch);
+		// Not using mc.player.getEyePosition() nor mc.gameRenderer.getMainCamera().getPosition() because
+		// they return a position that is too high. We simply want the block position of our head.
+		Vec3 eyePosition = new Vec3(mc.player.position().x, mc.player.position().y + 1, mc.player.position().z);
 		if (
-			(!snitch.isGone() && playerInRange)
-			|| playerLookingAtSnitch
+			(
+				(!snitch.isGone() && playerInRange)
+				|| playerLookingAtSnitch
+			)
+			// Text of close by snitches at our eye level obscures our vision.
+			&& (
+				eyePosition.y != snitch.pos.getY()
+				|| eyePosition.distanceTo(snitch.pos.getCenter()) > 3
+			)
 		) {
 			String name = snitch.getName();
 			if (name != null && !name.isEmpty()) {
