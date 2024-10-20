@@ -92,6 +92,7 @@ public class Renderer {
 		final float lineAlpha = 1;
 		final float lineWidth = 2;
 		renderBoxOutline(rangeBox, color, lineAlpha, lineWidth);
+		renderBoxGuides(rangeBox, color, lineAlpha, lineWidth);
 
 		final int blockHlDist = 64;
 		if (preview.field().pos.distSqr(mc.player.blockPosition()) < blockHlDist * blockHlDist) {
@@ -437,6 +438,40 @@ public class Renderer {
 		bufferBuilder.vertex(box.maxX, box.maxY, box.maxZ).color(r, g, b, a).endVertex();
 		bufferBuilder.vertex(box.maxX, box.maxY, box.maxZ).color(r, g, b, a).endVertex();
 		bufferBuilder.vertex(box.maxX, box.maxY, box.maxZ).color(r, g, b, a).endVertex();
+
+		tesselator.end();
+	}
+
+	private static void renderBoxGuides(AABB box, Color color, float a, float lineWidth) {
+		RenderSystem.lineWidth(lineWidth);
+
+		Tesselator tesselator = Tesselator.getInstance();
+		BufferBuilder bufferBuilder = tesselator.getBuilder();
+		bufferBuilder.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
+
+		GL11.glEnable(GL11.GL_LINE_SMOOTH);
+
+		float r = color.r;
+		float g = color.g;
+		float b = color.b;
+
+		Vec3 center = box.getCenter();
+		double radius = box.maxX - center.x;
+
+		bufferBuilder.vertex(center.x + 1, center.y, center.z).color(r, g, b, a).endVertex();
+		bufferBuilder.vertex(center.x + radius, center.y, center.z).color(r, g, b, a).endVertex();
+		bufferBuilder.vertex(center.x - 1, center.y, center.z).color(r, g, b, a).endVertex();
+		bufferBuilder.vertex(center.x - radius, center.y, center.z).color(r, g, b, a).endVertex();
+
+		bufferBuilder.vertex(center.x, center.y + 1, center.z).color(r, g, b, a).endVertex();
+		bufferBuilder.vertex(center.x, center.y + radius, center.z).color(r, g, b, a).endVertex();
+		bufferBuilder.vertex(center.x, center.y - 1, center.z).color(r, g, b, a).endVertex();
+		bufferBuilder.vertex(center.x, center.y - radius, center.z).color(r, g, b, a).endVertex();
+
+		bufferBuilder.vertex(center.x, center.y, center.z + 1).color(r, g, b, a).endVertex();
+		bufferBuilder.vertex(center.x, center.y, center.z + radius).color(r, g, b, a).endVertex();
+		bufferBuilder.vertex(center.x, center.y, center.z - 1).color(r, g, b, a).endVertex();
+		bufferBuilder.vertex(center.x, center.y, center.z - radius).color(r, g, b, a).endVertex();
 
 		tesselator.end();
 	}
