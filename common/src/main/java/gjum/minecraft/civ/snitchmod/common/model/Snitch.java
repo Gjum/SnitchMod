@@ -123,6 +123,7 @@ public class Snitch {
 		cullTs = jalist.cullTs;
 		updateSeen(jalist.ts);
 		lostJalistAccessTs = 0;
+		this.visitedThisSession = false;
 	}
 
 	public void updateFromRename(SnitchRename rename) {
