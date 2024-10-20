@@ -296,7 +296,7 @@ public class Renderer {
 			if (livelinessText != null) {
 				if (snitch.visitedThisSession) {
 					switch (snitchLiveliness) {
-					case WILL_CULL_MAYBE_REFRESHED, DORMANT_NOW_MAYBE_REFRESHED, DORMANT_SOON_MAYBE_REFRESHED, DORMANT_SOONISH_MAYBE_REFRESHED:
+					case WILL_CULL_MAYBE_REFRESHED, DORMANT_NOW_MAYBE_REFRESHED, DORMANT_SOON_MAYBE_REFRESHED, DORMANT_SOONISH_MAYBE_REFRESHED, ALIVE:
 						livelinessText = livelinessText + " (refreshed?)";
 						break;
 					default:
