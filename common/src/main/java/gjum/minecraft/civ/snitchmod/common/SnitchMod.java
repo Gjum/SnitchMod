@@ -135,6 +135,10 @@ public abstract class SnitchMod {
 		}
 
 		while (toggleSnitchGoneStatusKey.consumeClick()) {
+			if (!getMod().rangeOverlayVisible) {
+				break;
+			}
+
 			Optional<Snitch> optSnitch = getMod().streamNearbySnitches(mc.player.position(), 260)
 					.filter(s -> !s.wasBroken())
 					.limit(100)
