@@ -26,7 +26,7 @@ public class Snitch {
 		}
 	}
 
-	public boolean visitedThisSession;
+	public boolean maybeRefreshed;
 	public final @NotNull WorldPos pos;
 	private @Nullable String group;
 	private @Nullable Type type;
@@ -123,7 +123,7 @@ public class Snitch {
 		cullTs = jalist.cullTs;
 		updateSeen(jalist.ts);
 		lostJalistAccessTs = 0;
-		this.visitedThisSession = false;
+		this.maybeRefreshed = false;
 	}
 
 	public void updateFromRename(SnitchRename rename) {

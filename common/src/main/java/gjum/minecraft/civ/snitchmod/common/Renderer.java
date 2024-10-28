@@ -22,6 +22,7 @@ import static gjum.minecraft.civ.snitchmod.common.SnitchMod.getMod;
 public class Renderer {
 	private final static Minecraft mc = Minecraft.getInstance();
 
+	private final static Color BLACK = new Color(0x333333);
 	private final static Color WHITE = new Color(0xEEEEEE);
 	private final static Color RED = new Color(0xEE4056);
 	private final static Color GREEN = new Color(0x28CC52);
@@ -111,7 +112,7 @@ public class Renderer {
 		AABB rangeBox = playerInRange ? range.inflate(-.01) : range.inflate(.01);
 		AABB outlineBox = playerInRange ? range.inflate(-.05) : range.inflate(.05);
 		if (playerInRange) {
-			snitch.visitedThisSession = true;
+			snitch.maybeRefreshed = true;
 		}
 
 		enum SnitchLiveliness {
@@ -127,7 +128,7 @@ public class Renderer {
 			DORMANT_SOON_MAYBE_REFRESHED (GREEN),
 			DORMANT_SOONISH (YELLOW),
 			DORMANT_SOONISH_MAYBE_REFRESHED (GREEN),
-			ALIVE (GREEN);
+			DORMANT_EVENTUALLY (GREEN);
 
 			private final Color color;
 			SnitchLiveliness(Color color) {
@@ -137,7 +138,7 @@ public class Renderer {
 
 		long now = System.currentTimeMillis();
 		long snitchTimer = snitch.getType() != null ? snitch.getType().timer : Snitch.Type.NOTEBLOCK.timer;
-		SnitchLiveliness snitchLiveliness = SnitchLiveliness.ALIVE;
+		SnitchLiveliness snitchLiveliness = SnitchLiveliness.DORMANT_EVENTUALLY;
 		if (snitch.wasBroken()) {
 			snitchLiveliness = SnitchLiveliness.BROKEN;
 		} else if (snitch.isGone()) {
@@ -147,11 +148,11 @@ public class Renderer {
 		} else if (snitch.hasCullTs() && snitch.getCullTs() < now) {
 			snitchLiveliness = SnitchLiveliness.CULLED;
 		} else if (snitch.hasCullTs() && snitch.getCullTs() > now) {
-			snitchLiveliness = snitch.visitedThisSession
+			snitchLiveliness = snitch.maybeRefreshed
 				? SnitchLiveliness.WILL_CULL_MAYBE_REFRESHED
 				: SnitchLiveliness.WILL_CULL;
 		} else if (snitch.hasDormantTs() && snitch.getDormantTs() < now) {
-			snitchLiveliness = snitch.visitedThisSession
+			snitchLiveliness = snitch.maybeRefreshed
 				? SnitchLiveliness.DORMANT_NOW_MAYBE_REFRESHED
 				: SnitchLiveliness.DORMANT_NOW;
 		} else if (snitch.hasDormantTs() && snitch.getDormantTs() > now) {
@@ -161,11 +162,11 @@ public class Renderer {
 			if (delta >= goodThreshold) {
 				// no-op: default
 			} else if (delta >= badThreshold) {
-				snitchLiveliness = snitch.visitedThisSession
+				snitchLiveliness = snitch.maybeRefreshed
 					? SnitchLiveliness.DORMANT_SOONISH_MAYBE_REFRESHED
 					: SnitchLiveliness.DORMANT_SOONISH;
 			} else {
-				snitchLiveliness = snitch.visitedThisSession
+				snitchLiveliness = snitch.maybeRefreshed
 					? SnitchLiveliness.DORMANT_SOON_MAYBE_REFRESHED
 					: SnitchLiveliness.DORMANT_SOON;
 			}
@@ -214,7 +215,7 @@ public class Renderer {
 			}
 			renderBoxOutline(blockBox, boxOutlineColor, lineAlpha, lineWidth);
 
-			Color boxFillColor = snitch.isGone() ? new Color(0x333333) : snitchLiveliness.color;
+			Color boxFillColor = snitch.isGone() ? BLACK : snitchLiveliness.color;
 			renderFilledBox(blockBox, boxFillColor, boxAlpha);
 		}
 
@@ -283,7 +284,7 @@ public class Renderer {
 			case DORMANT_NOW, DORMANT_NOW_MAYBE_REFRESHED:
 				livelinessText = "deactivated " + timestampRelativeText(snitch.getDormantTs());
 				break;
-			case DORMANT_SOON, DORMANT_SOON_MAYBE_REFRESHED, DORMANT_SOONISH, DORMANT_SOONISH_MAYBE_REFRESHED, ALIVE:
+			case DORMANT_SOON, DORMANT_SOON_MAYBE_REFRESHED, DORMANT_SOONISH, DORMANT_SOONISH_MAYBE_REFRESHED, DORMANT_EVENTUALLY:
 				if (snitch.hasDormantTs()) {
 					livelinessText = String.format(
 						"deactivates %s%s",
@@ -294,9 +295,9 @@ public class Renderer {
 				break;
 			}
 			if (livelinessText != null) {
-				if (snitch.visitedThisSession) {
+				if (snitch.maybeRefreshed) {
 					switch (snitchLiveliness) {
-					case WILL_CULL_MAYBE_REFRESHED, DORMANT_NOW_MAYBE_REFRESHED, DORMANT_SOON_MAYBE_REFRESHED, DORMANT_SOONISH_MAYBE_REFRESHED, ALIVE:
+					case WILL_CULL_MAYBE_REFRESHED, DORMANT_NOW_MAYBE_REFRESHED, DORMANT_SOON_MAYBE_REFRESHED, DORMANT_SOONISH_MAYBE_REFRESHED, DORMANT_EVENTUALLY:
 						livelinessText = livelinessText + " (refreshed?)";
 						break;
 					default:
