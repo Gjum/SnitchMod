@@ -25,8 +25,8 @@ dependencies {
 	minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
 	mappings loom.officialMojangMappings()
 
-	implementation "org.xerial:sqlite-jdbc:3.36.0.3"
-	shadowCommon "org.xerial:sqlite-jdbc:3.36.0.3"
+	implementation "org.xerial:sqlite-jdbc:3.47.0.0"
+	shadowCommon "org.xerial:sqlite-jdbc:3.47.0.0"
 
 	modCompileOnly "curse.maven:journeymap-32274:5457846" // version 1.18.2-5.8.4-fabric
 	modCompileOnly "maven.modrinth:voxelmap-updated:1.20.4-1.12.17"

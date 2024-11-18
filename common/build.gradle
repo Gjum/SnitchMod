@@ -6,7 +6,7 @@ dependencies {
 	minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
 	mappings loom.officialMojangMappings()
 
-	implementation "org.xerial:sqlite-jdbc:3.36.0.3"
+	implementation "org.xerial:sqlite-jdbc:3.47.0.0"
 	modCompileOnly "maven.modrinth:voxelmap-updated:1.20.4-1.12.17"
 }
 
