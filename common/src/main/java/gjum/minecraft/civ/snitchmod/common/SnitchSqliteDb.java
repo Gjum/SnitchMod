@@ -145,6 +145,10 @@ public class SnitchSqliteDb {
 		}
 
 		for (Snitch snitch : snitches) {
+			String type = null;
+			if (snitch.getType() != null) {
+				type = snitch.getType().dbRepresentation;
+			}
 			try {
 				int i = 0;
 				pstmt.setString(++i, snitch.pos.getWorld());
@@ -152,7 +156,7 @@ public class SnitchSqliteDb {
 				pstmt.setInt(++i, snitch.pos.getY());
 				pstmt.setInt(++i, snitch.pos.getZ());
 				pstmt.setString(++i, snitch.getGroup());
-				pstmt.setString(++i, snitch.getType().dbRepresentation);
+				pstmt.setString(++i, type);
 				pstmt.setString(++i, snitch.getName());
 				pstmt.setLong(++i, snitch.getDormantTs());
 				pstmt.setLong(++i, snitch.getCullTs());
