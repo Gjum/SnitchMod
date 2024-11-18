@@ -218,8 +218,8 @@ public class Renderer {
 			final AABB blockBox = new AABB(snitch.pos).inflate(.01);
 			Color boxOutlineColor = snitchLiveliness.color;
 			if (
-					getMod().snitchFieldToPreview != null
-							&& getMod().snitchFieldToPreview.source().equals(snitch)
+				getMod().snitchFieldToPreview != null
+				&& getMod().snitchFieldToPreview.source().equals(snitch)
 			) {
 				boxOutlineColor = PINK;
 			}
@@ -232,8 +232,7 @@ public class Renderer {
 		/*
 		 * Render the snitch box text.
 		 */
-		record ColoredComponent(Component text, Color color) {
-		}
+		record ColoredComponent(Component text, Color color) {}
 
 		List<ColoredComponent> linesToRender = new ArrayList<>(3);
 		boolean playerLookingAtSnitch = Utils.playerIsLookingAtSnitch(mc.player, snitch);
@@ -241,15 +240,15 @@ public class Renderer {
 		// they return a position that is too high. We simply want the block position of our head.
 		Vec3 eyePosition = new Vec3(mc.player.position().x, mc.player.position().y + 1, mc.player.position().z);
 		if (
-				(
-						(!snitch.isGone() && playerInRange)
-								|| playerLookingAtSnitch
-				)
-						// Text of close by snitches at our eye level obscures our vision.
-						&& (
-						eyePosition.y != snitch.pos.getY()
-								|| eyePosition.distanceTo(snitch.pos.getCenter()) > 3
-				)
+			(
+				(!snitch.isGone() && playerInRange)
+				|| playerLookingAtSnitch
+			)
+			// Text of close by snitches at our eye level obscures our vision.
+			&& (
+				eyePosition.y != snitch.pos.getY()
+				|| eyePosition.distanceTo(snitch.pos.getCenter()) > 3
+			)
 		) {
 			String name = snitch.getName();
 			if (name != null && !name.isEmpty()) {
@@ -296,7 +295,7 @@ public class Renderer {
 					livelinessText = "deactivated " + timestampRelativeText(snitch.getDormantTs());
 					break;
 				case DORMANT_SOON, DORMANT_SOON_MAYBE_REFRESHED, DORMANT_SOONISH, DORMANT_SOONISH_MAYBE_REFRESHED,
-				     DORMANT_EVENTUALLY:
+						DORMANT_EVENTUALLY:
 					if (snitch.hasDormantTs()) {
 						livelinessText = String.format(
 								"deactivates %s%s",
@@ -310,7 +309,7 @@ public class Renderer {
 				if (snitch.maybeRefreshed) {
 					switch (snitchLiveliness) {
 						case WILL_CULL_MAYBE_REFRESHED, DORMANT_NOW_MAYBE_REFRESHED, DORMANT_SOON_MAYBE_REFRESHED,
-						     DORMANT_SOONISH_MAYBE_REFRESHED, DORMANT_EVENTUALLY:
+								DORMANT_SOONISH_MAYBE_REFRESHED, DORMANT_EVENTUALLY:
 							livelinessText = livelinessText + " (refreshed?)";
 							break;
 						default:
