@@ -20,45 +20,45 @@ public abstract class SnitchMod {
 	private final static Minecraft mc = Minecraft.getInstance();
 
 	protected static final KeyMapping openGuiKey = new KeyMapping(
-			"key.snitchmod.openGui",
-			InputConstants.Type.KEYSYM,
-			GLFW.GLFW_KEY_L,
-			"category.snitchmod"
+		"key.snitchmod.openGui",
+		InputConstants.Type.KEYSYM,
+		GLFW.GLFW_KEY_L,
+		"category.snitchmod"
 	);
 
 	protected static final KeyMapping toggleOverlayKey = new KeyMapping(
-			"key.snitchmod.toggleOverlay",
-			InputConstants.Type.KEYSYM,
-			GLFW.GLFW_KEY_O,
-			"category.snitchmod"
+		"key.snitchmod.toggleOverlay",
+		InputConstants.Type.KEYSYM,
+		GLFW.GLFW_KEY_O,
+		"category.snitchmod"
 	);
 
 	protected static final KeyMapping togglePlacementKey = new KeyMapping(
-			"key.snitchmod.togglePlacement",
-			InputConstants.Type.KEYSYM,
-			GLFW.GLFW_KEY_P,
-			"category.snitchmod"
+		"key.snitchmod.togglePlacement",
+		InputConstants.Type.KEYSYM,
+		GLFW.GLFW_KEY_P,
+		"category.snitchmod"
 	);
 
 	protected static final KeyMapping previewSnitchFieldKey = new KeyMapping(
-			"key.snitchmod.togglePreviewSnitchFieldKey",
-			InputConstants.Type.KEYSYM,
-			GLFW.GLFW_KEY_N,
-			"category.snitchmod"
+		"key.snitchmod.togglePreviewSnitchFieldKey",
+		InputConstants.Type.KEYSYM,
+		GLFW.GLFW_KEY_N,
+		"category.snitchmod"
 	);
 
 	protected static final KeyMapping toggleSnitchGoneStatusKey = new KeyMapping(
-			"key.snitchmod.toggleSnitchGoneStatusKey",
-			InputConstants.Type.KEYSYM,
-			GLFW.GLFW_KEY_DELETE,
-			"category.snitchmod"
+		"key.snitchmod.toggleSnitchGoneStatusKey",
+		InputConstants.Type.KEYSYM,
+		GLFW.GLFW_KEY_DELETE,
+		"category.snitchmod"
 	);
 
 	protected static final KeyMapping toggleSnitchFieldRenderKey = new KeyMapping(
-			"key.snitchmod.toggleSnitchFieldRenderKey",
-			InputConstants.Type.KEYSYM,
-			GLFW.GLFW_KEY_T,
-			"category.snitchmod"
+		"key.snitchmod.toggleSnitchFieldRenderKey",
+		InputConstants.Type.KEYSYM,
+		GLFW.GLFW_KEY_T,
+		"category.snitchmod"
 	);
 
 	private static SnitchMod INSTANCE;
@@ -141,10 +141,10 @@ public abstract class SnitchMod {
 			}
 
 			Optional<Snitch> optSnitch = getMod().streamNearbySnitches(mc.player.position(), 260)
-					.filter(s -> !s.wasBroken())
-					.limit(100)
-					.filter(s -> Utils.playerIsLookingAtSnitch(mc.player, s))
-					.findFirst();
+				.filter(s -> !s.wasBroken())
+				.limit(100)
+				.filter(s -> Utils.playerIsLookingAtSnitch(mc.player, s))
+				.findFirst();
 			if (optSnitch.isEmpty()) {
 				logToChat(Component.literal("Error: you must be looking at a snitch to change its status"));
 				break;
@@ -170,8 +170,9 @@ public abstract class SnitchMod {
 
 		while (toggleOverlayKey.consumeClick()) {
 			rangeOverlayVisible = !rangeOverlayVisible;
-			logToChat(Component.literal(
-					"Range overlay " + (rangeOverlayVisible ? "visible" : "hidden")));
+			logToChat(
+				Component.literal("Range overlay " + (rangeOverlayVisible ? "visible" : "hidden"))
+			);
 		}
 
 		while (togglePlacementKey.consumeClick()) {
@@ -181,8 +182,9 @@ public abstract class SnitchMod {
 				snitchFieldToPreview = null;
 			}
 
-			logToChat(Component.literal(
-					"Placement helper " + (placementHelperVisible ? "visible" : "hidden")));
+			logToChat(
+				Component.literal("Placement helper " + (placementHelperVisible ? "visible" : "hidden"))
+			);
 		}
 
 		while (previewSnitchFieldKey.consumeClick()) {
@@ -293,14 +295,12 @@ public abstract class SnitchMod {
 			} catch (Throwable e) {
 				System.err.println("Failed parsing jalist stack " + i + " " + stack);
 				e.printStackTrace();
-				logToChat(Component.literal(
-						"Failed reading snitch " + i + " on JAList page"));
+				logToChat(Component.literal("Failed reading snitch " + i + " on JAList page"));
 			}
 		}
 		store.updateSnitchesFromJalist(jalistEntries);
 		if (jalistEntries.size() > 0) {
-			logToChat(Component.literal(
-					"Found " + jalistEntries.size() + " snitches on JAList page"));
+			logToChat(Component.literal("Found " + jalistEntries.size() + " snitches on JAList page"));
 		}
 	}
 
@@ -312,8 +312,8 @@ public abstract class SnitchMod {
 		getStore();
 		if (store == null) return Stream.empty();
 		return store.getAllSnitches().stream()
-				.filter(s -> s.getPos().getCenter().distanceTo(playerPos) < distance)
-				.sorted(Comparator.comparing(s -> s.getPos().getCenter().distanceTo(playerPos)));
+			.filter(s -> s.getPos().getCenter().distanceTo(playerPos) < distance)
+			.sorted(Comparator.comparing(s -> s.getPos().getCenter().distanceTo(playerPos)));
 	}
 
 	private void logToChat(Component msg) {

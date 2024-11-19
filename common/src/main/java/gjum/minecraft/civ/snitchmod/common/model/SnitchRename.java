@@ -20,12 +20,13 @@ public class SnitchRename {
 	public final @NotNull UUID clientUuid;
 
 	public SnitchRename(
-			long ts,
-			@NotNull WorldPos pos,
-			@NotNull String snitchName,
-			@Nullable String snitchOldName,
-			@Nullable String group,
-			@NotNull UUID clientUuid) {
+		long ts,
+		@NotNull WorldPos pos,
+		@NotNull String snitchName,
+		@Nullable String snitchOldName,
+		@Nullable String group,
+		@NotNull UUID clientUuid
+	) {
 		this.ts = ts;
 		this.pos = pos;
 		this.snitchName = snitchName;
@@ -42,10 +43,10 @@ public class SnitchRename {
 	static Pattern hoverPattern = Pattern.compile("Location: (?:\\(?([^\\n)]+)\\)? )?\\[([-0-9]+),? ([-0-9]+),? ([-0-9]+)\\] *\\nName: ([^\\n]*) *\\nGroup: ([^ ]+).*", Pattern.MULTILINE);
 
 	public static @Nullable SnitchRename fromChat(
-			@NotNull Component message,
-			@NotNull String server,
-			@NotNull String world,
-			@NotNull UUID clientUuid
+		@NotNull Component message,
+		@NotNull String server,
+		@NotNull String world,
+		@NotNull UUID clientUuid
 	) {
 		String text = message.getString().replaceAll("§.", "");
 

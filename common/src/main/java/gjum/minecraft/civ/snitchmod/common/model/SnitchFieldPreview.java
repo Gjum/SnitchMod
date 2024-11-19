@@ -15,16 +15,16 @@ public class SnitchFieldPreview {
 		this.source = source;
 		this.direction = direction;
 
-		BlockPos previewPos = transposeSnitchFieldPositionByDirection(
-			source.getPos(),
-			direction);
+		BlockPos previewPos = transposeSnitchFieldPositionByDirection(source.getPos(), direction);
 		this.field = new Snitch(
 			new WorldPos(
 				source.getPos().getServer(),
 				source.getPos().getWorld(),
 				previewPos.getX(),
 				previewPos.getY(),
-				previewPos.getZ()));
+				previewPos.getZ()
+			)
+		);
 	}
 
 	public static @NotNull BlockPos transposeSnitchFieldPositionByDirection(
@@ -98,9 +98,13 @@ public class SnitchFieldPreview {
 			return new BlockPos(x-22, y, z-22);
 		}
 
-		throw new IllegalArgumentException(String.format(
-			"Out of range values of yaw %f and/or pitch %f.",
-			direction.yaw().value(), direction.pitch().value()));
+		throw new IllegalArgumentException(
+			String.format(
+				"Out of range values of yaw %f and/or pitch %f.",
+				direction.yaw().value(),
+				direction.pitch().value()
+			)
+		);
 	}
 
 	public Snitch source() {

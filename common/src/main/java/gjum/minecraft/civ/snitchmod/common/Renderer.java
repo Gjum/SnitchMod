@@ -57,18 +57,18 @@ public class Renderer {
 		if (getMod().rangeOverlayVisible) {
 			int fieldDist = 260;
 			getMod().streamNearbySnitches(mc.player.position(), fieldDist)
-					// but still show culled/gone snitches
-					.filter(s -> !s.wasBroken())
-					.limit(100)
-					.forEach(Renderer::renderSnitch);
+				// but still show culled/gone snitches
+				.filter(s -> !s.wasBroken())
+				.limit(100)
+				.forEach(Renderer::renderSnitch);
 		}
 
 		if (getMod().placementHelperVisible) {
 			int placeHelperDist = 50;
 			getMod().streamNearbySnitches(mc.player.position(), placeHelperDist)
-					.filter(Snitch::isAlive)
-					.limit(10)
-					.forEach(Renderer::renderPlacementHelper);
+				.filter(Snitch::isAlive)
+				.limit(10)
+				.forEach(Renderer::renderPlacementHelper);
 		}
 
 		if (getMod().snitchFieldToPreview != null) {
@@ -159,12 +159,12 @@ public class Renderer {
 			snitchLiveliness = SnitchLiveliness.CULLED;
 		} else if (snitch.hasCullTs() && snitch.getCullTs() > now) {
 			snitchLiveliness = snitch.maybeRefreshed
-					? SnitchLiveliness.WILL_CULL_MAYBE_REFRESHED
-					: SnitchLiveliness.WILL_CULL;
+				? SnitchLiveliness.WILL_CULL_MAYBE_REFRESHED
+				: SnitchLiveliness.WILL_CULL;
 		} else if (snitch.hasDormantTs() && snitch.getDormantTs() < now) {
 			snitchLiveliness = snitch.maybeRefreshed
-					? SnitchLiveliness.DORMANT_NOW_MAYBE_REFRESHED
-					: SnitchLiveliness.DORMANT_NOW;
+				? SnitchLiveliness.DORMANT_NOW_MAYBE_REFRESHED
+				: SnitchLiveliness.DORMANT_NOW;
 		} else if (snitch.hasDormantTs() && snitch.getDormantTs() > now) {
 			final long goodThreshold = 1000L * 60L * 60L * 24L * 7L;
 			final long badThreshold = 1000L * 60L * 60L * 24L * 3L;
@@ -173,12 +173,12 @@ public class Renderer {
 				// no-op: default
 			} else if (delta >= badThreshold) {
 				snitchLiveliness = snitch.maybeRefreshed
-						? SnitchLiveliness.DORMANT_SOONISH_MAYBE_REFRESHED
-						: SnitchLiveliness.DORMANT_SOONISH;
+					? SnitchLiveliness.DORMANT_SOONISH_MAYBE_REFRESHED
+					: SnitchLiveliness.DORMANT_SOONISH;
 			} else {
 				snitchLiveliness = snitch.maybeRefreshed
-						? SnitchLiveliness.DORMANT_SOON_MAYBE_REFRESHED
-						: SnitchLiveliness.DORMANT_SOON;
+					? SnitchLiveliness.DORMANT_SOON_MAYBE_REFRESHED
+					: SnitchLiveliness.DORMANT_SOON;
 			}
 		}
 
@@ -286,9 +286,9 @@ public class Renderer {
 					break;
 				case WILL_CULL, WILL_CULL_MAYBE_REFRESHED:
 					livelinessText = String.format(
-							"culls %s%s",
-							timestampRelativeText(snitch.getCullTs()),
-							maxSnitchTimerText
+						"culls %s%s",
+						timestampRelativeText(snitch.getCullTs()),
+						maxSnitchTimerText
 					);
 					break;
 				case DORMANT_NOW, DORMANT_NOW_MAYBE_REFRESHED:
@@ -298,9 +298,9 @@ public class Renderer {
 						DORMANT_EVENTUALLY:
 					if (snitch.hasDormantTs()) {
 						livelinessText = String.format(
-								"deactivates %s%s",
-								timestampRelativeText(snitch.getDormantTs()),
-								maxSnitchTimerText
+							"deactivates %s%s",
+							timestampRelativeText(snitch.getDormantTs()),
+							maxSnitchTimerText
 						);
 					}
 					break;
@@ -335,10 +335,10 @@ public class Renderer {
 
 				if (snitch.getType() != null) {
 					linesToRender.add(
-							new ColoredComponent(
-									Component.literal(StringUtils.capitalize(snitch.getType().toString().replaceAll("_", ""))),
-									WHITE
-							)
+						new ColoredComponent(
+							Component.literal(StringUtils.capitalize(snitch.getType().toString().replaceAll("_", ""))),
+							WHITE
+						)
 					);
 				}
 
@@ -534,7 +534,7 @@ public class Renderer {
 	private static @NotNull String timestampRelativeText(long ts) {
 		long now = System.currentTimeMillis();
 		if (ts < now) return durationToText(now - ts) + " ago";
-		else return "in " + durationToText(ts - now);
+		return "in " + durationToText(ts - now);
 	}
 
 	/**

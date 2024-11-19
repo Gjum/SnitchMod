@@ -50,25 +50,25 @@ public class Snitch {
 	}
 
 	public Snitch(
-			@NotNull String server,
-			@NotNull String world,
-			int x, int y, int z,
-			@Nullable String group,
-			@Nullable String rawType,
-			@Nullable String name,
-			long dormantTs,
-			long cullTs,
-			long firstSeenTs,
-			long lastSeenTs,
-			long createdTs,
-			@Nullable String createdByUuid,
-			long renamedTs,
-			@Nullable String renamedByUuid,
-			long lostJalistAccessTs,
-			long brokenTs,
-			long goneTs,
-			@Nullable String tags,
-			@Nullable String notes
+		@NotNull String server,
+		@NotNull String world,
+		int x, int y, int z,
+		@Nullable String group,
+		@Nullable String rawType,
+		@Nullable String name,
+		long dormantTs,
+		long cullTs,
+		long firstSeenTs,
+		long lastSeenTs,
+		long createdTs,
+		@Nullable String createdByUuid,
+		long renamedTs,
+		@Nullable String renamedByUuid,
+		long lostJalistAccessTs,
+		long brokenTs,
+		long goneTs,
+		@Nullable String tags,
+		@Nullable String notes
 	) {
 		this.pos = new WorldPos(server, world, x, y, z);
 		this.group = group;

@@ -22,12 +22,13 @@ public class SnitchAlert {
 	public final @Nullable String group;
 
 	public SnitchAlert(
-			long ts,
-			@NotNull WorldPos pos,
-			@NotNull String action,
-			@NotNull String accountName,
-			@NotNull String snitchName,
-			@Nullable String group) {
+		long ts,
+		@NotNull WorldPos pos,
+		@NotNull String action,
+		@NotNull String accountName,
+		@NotNull String snitchName,
+		@Nullable String group
+	) {
 		this.ts = ts;
 		this.pos = pos;
 		this.action = action;
@@ -43,9 +44,9 @@ public class SnitchAlert {
 
 	@Nullable
 	public static SnitchAlert fromChat(
-			@NotNull Component message,
-			@NotNull String server,
-			@NotNull String world
+		@NotNull Component message,
+		@NotNull String server,
+		@NotNull String world
 	) {
 		String text = message.getString().replaceAll("§.", "");
 

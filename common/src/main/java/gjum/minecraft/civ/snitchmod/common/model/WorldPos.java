@@ -13,18 +13,22 @@ public class WorldPos extends BlockPos {
 	public final String world;
 
 	public WorldPos(
-			@NotNull String server,
-			@NotNull String world,
-			int x, int y, int z) {
+		@NotNull String server,
+		@NotNull String world,
+		int x,
+		int y,
+		int z
+	) {
 		super(x, y, z);
 		this.server = server;
 		this.world = world;
 	}
 
 	public WorldPos(
-			@NotNull String server,
-			@NotNull String world,
-			BlockPos pos) {
+		@NotNull String server,
+		@NotNull String world,
+		BlockPos pos
+	) {
 		super(pos);
 		this.server = server;
 		this.world = world;

@@ -40,28 +40,28 @@ public class SnitchSqliteDb {
 	private void createTableSnitch() throws SQLException {
 		if (conn == null) return;
 		String sql = "CREATE TABLE IF NOT EXISTS " + tableSnitches + " " +
-				"( world TEXT" +
-				", x INT" +
-				", y INT" +
-				", z INT" +
-				", group_name TEXT" +
-				", type TEXT" +
-				", name TEXT" +
-				", dormant_ts BIGINT" +
-				", cull_ts BIGINT" +
-				", first_seen_ts BIGINT" +
-				", last_seen_ts BIGINT" +
-				", created_ts BIGINT" +
-				", created_by_uuid TEXT" +
-				", renamed_ts BIGINT" +
-				", renamed_by_uuid TEXT" +
-				", lost_jalist_access_ts BIGINT" +
-				", broken_ts BIGINT" +
-				", gone_ts BIGINT" +
-				", tags TEXT" +
-				", notes TEXT" +
-				", PRIMARY KEY (" + pkeySnitches + ")" +
-				");";
+			"( world TEXT" +
+			", x INT" +
+			", y INT" +
+			", z INT" +
+			", group_name TEXT" +
+			", type TEXT" +
+			", name TEXT" +
+			", dormant_ts BIGINT" +
+			", cull_ts BIGINT" +
+			", first_seen_ts BIGINT" +
+			", last_seen_ts BIGINT" +
+			", created_ts BIGINT" +
+			", created_by_uuid TEXT" +
+			", renamed_ts BIGINT" +
+			", renamed_by_uuid TEXT" +
+			", lost_jalist_access_ts BIGINT" +
+			", broken_ts BIGINT" +
+			", gone_ts BIGINT" +
+			", tags TEXT" +
+			", notes TEXT" +
+			", PRIMARY KEY (" + pkeySnitches + ")" +
+			");";
 		try (Statement stmt = conn.createStatement()) {
 			stmt.execute(sql);
 		}
@@ -74,27 +74,28 @@ public class SnitchSqliteDb {
 			ResultSet rs = stmt.executeQuery("SELECT * FROM " + tableSnitches);
 			while (rs.next()) {
 				final Snitch snitch = new Snitch(
-						server,
-						rs.getString("world"),
-						rs.getInt("x"),
-						rs.getInt("y"),
-						rs.getInt("z"),
-						rs.getString("group_name"),
-						rs.getString("type"),
-						rs.getString("name"),
-						rs.getLong("dormant_ts"),
-						rs.getLong("cull_ts"),
-						rs.getLong("first_seen_ts"),
-						rs.getLong("last_seen_ts"),
-						rs.getLong("created_ts"),
-						rs.getString("created_by_uuid"),
-						rs.getLong("renamed_ts"),
-						rs.getString("renamed_by_uuid"),
-						rs.getLong("lost_jalist_access_ts"),
-						rs.getLong("broken_ts"),
-						rs.getLong("gone_ts"),
-						rs.getString("tags"),
-						rs.getString("notes"));
+					server,
+					rs.getString("world"),
+					rs.getInt("x"),
+					rs.getInt("y"),
+					rs.getInt("z"),
+					rs.getString("group_name"),
+					rs.getString("type"),
+					rs.getString("name"),
+					rs.getLong("dormant_ts"),
+					rs.getLong("cull_ts"),
+					rs.getLong("first_seen_ts"),
+					rs.getLong("last_seen_ts"),
+					rs.getLong("created_ts"),
+					rs.getString("created_by_uuid"),
+					rs.getLong("renamed_ts"),
+					rs.getString("renamed_by_uuid"),
+					rs.getLong("lost_jalist_access_ts"),
+					rs.getLong("broken_ts"),
+					rs.getLong("gone_ts"),
+					rs.getString("tags"),
+					rs.getString("notes")
+				);
 				snitches.add(snitch);
 			}
 		} catch (SQLException e) {
@@ -115,24 +116,24 @@ public class SnitchSqliteDb {
 		if (snitches.size() == 0) return;
 
 		String sql = "INSERT INTO " + tableSnitches + " (world,x,y,z,group_name,type,name,dormant_ts,cull_ts,first_seen_ts,last_seen_ts,created_ts,created_by_uuid,renamed_ts,renamed_by_uuid,lost_jalist_access_ts,broken_ts,gone_ts,tags,notes)" +
-				" VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)" +
-				"ON CONFLICT (" + pkeySnitches + ") DO UPDATE SET " +
-				"group_name = excluded.group_name," +
-				"type = excluded.type," +
-				"name = excluded.name," +
-				"dormant_ts = excluded.dormant_ts," +
-				"cull_ts = excluded.cull_ts," +
-				"first_seen_ts = excluded.first_seen_ts," +
-				"last_seen_ts = excluded.last_seen_ts," +
-				"created_ts = excluded.created_ts," +
-				"created_by_uuid = excluded.created_by_uuid," +
-				"renamed_ts = excluded.renamed_ts," +
-				"renamed_by_uuid = excluded.renamed_by_uuid," +
-				"lost_jalist_access_ts = excluded.lost_jalist_access_ts," +
-				"broken_ts = excluded.broken_ts," +
-				"gone_ts = excluded.gone_ts," +
-				"tags = excluded.tags," +
-				"notes = excluded.notes";
+			" VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)" +
+			"ON CONFLICT (" + pkeySnitches + ") DO UPDATE SET " +
+			"group_name = excluded.group_name," +
+			"type = excluded.type," +
+			"name = excluded.name," +
+			"dormant_ts = excluded.dormant_ts," +
+			"cull_ts = excluded.cull_ts," +
+			"first_seen_ts = excluded.first_seen_ts," +
+			"last_seen_ts = excluded.last_seen_ts," +
+			"created_ts = excluded.created_ts," +
+			"created_by_uuid = excluded.created_by_uuid," +
+			"renamed_ts = excluded.renamed_ts," +
+			"renamed_by_uuid = excluded.renamed_by_uuid," +
+			"lost_jalist_access_ts = excluded.lost_jalist_access_ts," +
+			"broken_ts = excluded.broken_ts," +
+			"gone_ts = excluded.gone_ts," +
+			"tags = excluded.tags," +
+			"notes = excluded.notes";
 
 		PreparedStatement pstmt;
 		try {
@@ -175,7 +176,8 @@ public class SnitchSqliteDb {
 				pstmt.addBatch();
 			} catch (SQLException e) {
 				System.err.printf(
-						"Failed updating %d snitches: Failed updating snitch %s\n", snitches.size(), snitch);
+					"Failed updating %d snitches: Failed updating snitch %s\n", snitches.size(), snitch
+				);
 				e.printStackTrace();
 				return;
 			}

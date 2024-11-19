@@ -22,10 +22,10 @@ public class SnitchBroken {
 	private static final Pattern brokenPattern = Pattern.compile("^(\\S+) was reinforced on (\\S+) owned by ([A-Za-z0-9_]{3,17}).*");
 
 	public static SnitchBroken fromChat(
-			@NotNull Component message,
-			@NotNull BlockPos lastBrokenBlockPos,
-			@NotNull String server,
-			@NotNull String world
+		@NotNull Component message,
+		@NotNull BlockPos lastBrokenBlockPos,
+		@NotNull String server,
+		@NotNull String world
 	) {
 		String text = message.getString().replaceAll("§.", "");
 

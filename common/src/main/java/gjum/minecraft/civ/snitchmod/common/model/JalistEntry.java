@@ -41,12 +41,12 @@ public class JalistEntry {
 	public final long cullTs;
 
 	public JalistEntry(
-			long ts,
-			@NotNull WorldPos pos,
-			@NotNull String group,
-			@NotNull Type type,
-			@NotNull String name,
-			long dormantTs, long cullTs
+		long ts,
+		@NotNull WorldPos pos,
+		@NotNull String group,
+		@NotNull Type type,
+		@NotNull String name,
+		long dormantTs, long cullTs
 	) {
 		this.ts = ts;
 		this.pos = pos;
@@ -68,7 +68,9 @@ public class JalistEntry {
 			type = Type.NOTEBLOCK;
 		} else if (stack.getItem() == Items.JUKEBOX) {
 			type = Type.JUKEBOX;
-		} else return null;
+		} else {
+			return null;
+		}
 
 		if (stack.get(DataComponents.CUSTOM_NAME) == null) return null;
 		if (stack.get(DataComponents.LORE) == null) return null;
@@ -110,9 +112,9 @@ public class JalistEntry {
 		long lifetimeDurationMs = (h * 3600L + m * 60L + s) * 1000L;
 
 		long dormantTs = 0, cullTs = 0;
-		if ("go dormant".equals(lifetimeType)) {
+		if (lifetimeType.equals("go dormant")) {
 			dormantTs = ts + lifetimeDurationMs;
-		} else if ("cull".equals(lifetimeType)) {
+		} else if (lifetimeType.equals("cull")) {
 			cullTs = ts + lifetimeDurationMs;
 		} else {
 			System.err.println("Ignoring malformed jalist entry with lifetime type: " + lifetimeType);
@@ -122,5 +124,4 @@ public class JalistEntry {
 		var pos = new WorldPos(server, world, x, y, z);
 		return new JalistEntry(ts, pos, group, type, name, dormantTs, cullTs);
 	}
-
 }
