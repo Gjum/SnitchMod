@@ -59,7 +59,7 @@ public class JalistEntry {
 
 	private static final Pattern locationPattern = Pattern.compile("^Location: (?:([A-Za-z][^ ]+),? )?([-0-9]+),? ([-0-9]+),? ([-0-9]+)");
 	private static final Pattern groupPattern = Pattern.compile("^Group: ([^ ]+)");
-	private static final Pattern lifetimePattern = Pattern.compile("^Will (cull|go dormant) in (?:([0-9]+) h(?:our)?s? ?)?(?:([0-9]+) min(?:ute)?s? ?)?(?:([0-9]+) sec(?:ond)?s?)?\s*");
+	private static final Pattern lifetimePattern = Pattern.compile("^Will (cull|go dormant) in (?:([0-9]+) ?h(?:our)?s? ?)?(?:([0-9]+) ?m(?:in)?(?:ute)?s? ?)?(?:([0-9]+) ?s(?:ec)?(?:ond)?s?)?\s*");
 
 	@Nullable
 	public static JalistEntry fromStack(ItemStack stack, @NotNull String server) {
