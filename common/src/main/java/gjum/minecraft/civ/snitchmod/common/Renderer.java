@@ -8,12 +8,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import static gjum.minecraft.civ.snitchmod.common.SnitchMod.getMod;
 import gjum.minecraft.civ.snitchmod.common.Utils.Color;
 import gjum.minecraft.civ.snitchmod.common.model.Snitch;
 import gjum.minecraft.civ.snitchmod.common.model.SnitchFieldPreview;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.CoreShaders;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -25,8 +26,6 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static gjum.minecraft.civ.snitchmod.common.SnitchMod.getMod;
 
 public class Renderer {
 	private final static Minecraft mc = Minecraft.getInstance();
@@ -50,9 +49,9 @@ public class Renderer {
 		Vec3 camPos = mc.gameRenderer.getMainCamera().getPosition();
 		Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
 		modelViewStack.pushMatrix();
+		System.out.println(matrixArg.toString());
 		modelViewStack.mul(matrixArg);
 		modelViewStack.translate((float) -camPos.x, (float) -camPos.y, (float) -camPos.z);
-		RenderSystem.applyModelViewMatrix();
 
 		if (getMod().rangeOverlayVisible) {
 			int fieldDist = 260;
@@ -82,7 +81,6 @@ public class Renderer {
 		RenderSystem.clearColor(1, 1, 1, 1);
 
 		modelViewStack.popMatrix();
-		RenderSystem.applyModelViewMatrix();
 	}
 
 	private static void renderSnitchFieldPreview(SnitchFieldPreview preview) {
@@ -119,7 +117,7 @@ public class Renderer {
 		// inflate/deflate so the box face isn't obscured by adjacent blocks
 		final boolean playerInRange = range.contains(mc.player.position());
 		AABB rangeBox = playerInRange ? range.inflate(-.01) : range.inflate(.01);
-		AABB outlineBox = playerInRange ? range.inflate(-.05) : range.inflate(.05);
+		AABB outlineBox = playerInRange ? range.inflate(-.01) : range.inflate(.01);
 		if (playerInRange) {
 			snitch.maybeRefreshed = true;
 		}
@@ -419,7 +417,7 @@ public class Renderer {
 	private static void renderFilledBox(AABB box, Color color, float a) {
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
-		RenderSystem.setShader(GameRenderer::getPositionColorShader);
+		RenderSystem.setShader(CoreShaders.POSITION_COLOR);
 
 		float r = color.r;
 		float g = color.g;
@@ -470,7 +468,7 @@ public class Renderer {
 
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
-		RenderSystem.setShader(GameRenderer::getPositionColorShader);
+		RenderSystem.setShader(CoreShaders.POSITION_COLOR);
 
 		GL11.glEnable(GL11.GL_LINE_SMOOTH);
 
