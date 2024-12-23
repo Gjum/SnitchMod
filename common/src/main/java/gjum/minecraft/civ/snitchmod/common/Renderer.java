@@ -8,7 +8,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import static gjum.minecraft.civ.snitchmod.common.SnitchMod.getMod;
 import gjum.minecraft.civ.snitchmod.common.Utils.Color;
 import gjum.minecraft.civ.snitchmod.common.model.Snitch;
 import gjum.minecraft.civ.snitchmod.common.model.SnitchFieldPreview;
@@ -26,6 +25,8 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static gjum.minecraft.civ.snitchmod.common.SnitchMod.getMod;
 
 public class Renderer {
 	private final static Minecraft mc = Minecraft.getInstance();
