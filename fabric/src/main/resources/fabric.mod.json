@@ -20,9 +20,9 @@
 		]
 	},
 	"depends": {
-		"fabricloader": ">=0.7.4",
+		"fabricloader": ">=${fabric_loader_version}",
 		"fabric": "*",
-		"minecraft": "1.21.x"
+		"minecraft": "${minecraft_version}"
 	},
 	"mixins": [
 		"mixin.snitchmod.json"

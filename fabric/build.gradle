@@ -28,15 +28,21 @@ dependencies {
 	implementation "org.xerial:sqlite-jdbc:3.47.0.0"
 	shadowCommon "org.xerial:sqlite-jdbc:3.47.0.0"
 
-	modCompileOnly "curse.maven:journeymap-32274:5457846" // version 1.18.2-5.8.4-fabric
-	modCompileOnly "maven.modrinth:voxelmap-updated:1.20.4-1.12.17"
+	//	modCompileOnly "curse.maven:journeymap-32274:5457846" // version 1.18.2-5.8.4-fabric
+	//	modCompileOnly "maven.modrinth:voxelmap-updated:1.20.4-1.12.17"
 }
 
 processResources {
 	inputs.property "version", project.version
 
 	filesMatching("fabric.mod.json") {
-		expand "version": project.version
+		expand (
+				[
+						"version": project.version,
+						"minecraft_version": project.minecraft_version,
+						"fabric_loader_version": project.fabric_loader_version
+				]
+		)
 	}
 }
 

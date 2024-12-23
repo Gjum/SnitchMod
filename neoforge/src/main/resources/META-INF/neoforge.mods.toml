@@ -1,7 +1,10 @@
 modLoader = "javafml"
-loaderVersion = "[${forge_version},)"
+loaderVersion = "[1,)"
 issueTrackerURL = "https://github.com/Gjum/snitchmod/issues"
 license = "GPL-3.0-only"
+
+[[mixins]]
+config="mixin.snitchmod.json"
 
 [[mods]]
 modId = "snitchmod"
@@ -14,9 +17,9 @@ Snitch Mod
 logoFile = "assets/snitchmod/icon.png"
 
 [[dependencies.snitchmod]]
-modId = "forge"
+modId = "neoforge"
 mandatory = true
-versionRange = "[${forge_version},)"
+versionRange = "[${neoforge_version},)"
 ordering = "NONE"
 side = "CLIENT"
 

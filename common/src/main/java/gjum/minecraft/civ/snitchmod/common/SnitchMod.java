@@ -1,8 +1,13 @@
 package gjum.minecraft.civ.snitchmod.common;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.vertex.PoseStack;
-import gjum.minecraft.civ.snitchmod.common.model.*;
+import gjum.minecraft.civ.snitchmod.common.model.Direction;
+import gjum.minecraft.civ.snitchmod.common.model.JalistEntry;
+import gjum.minecraft.civ.snitchmod.common.model.Snitch;
+import gjum.minecraft.civ.snitchmod.common.model.SnitchAlert;
+import gjum.minecraft.civ.snitchmod.common.model.SnitchCreatedChatParser;
+import gjum.minecraft.civ.snitchmod.common.model.SnitchFieldPreview;
+import gjum.minecraft.civ.snitchmod.common.model.SnitchRename;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
@@ -13,7 +18,11 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 public abstract class SnitchMod {

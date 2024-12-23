@@ -7,12 +7,12 @@ dependencies {
 	mappings loom.officialMojangMappings()
 
 	implementation "org.xerial:sqlite-jdbc:3.47.0.0"
-	modCompileOnly "maven.modrinth:voxelmap-updated:1.20.4-1.12.17"
+	//	modCompileOnly "maven.modrinth:voxelmap-updated:1.20.4-1.12.17"
 }
 
 architectury {
 	injectInjectables = false
-	common()
+	common(rootProject.enabled_platforms.split(","))
 }
 
 processResources {
