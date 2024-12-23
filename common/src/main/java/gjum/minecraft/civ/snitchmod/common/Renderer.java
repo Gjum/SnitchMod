@@ -50,7 +50,6 @@ public class Renderer {
 		Vec3 camPos = mc.gameRenderer.getMainCamera().getPosition();
 		Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
 		modelViewStack.pushMatrix();
-		System.out.println(matrixArg.toString());
 		modelViewStack.mul(matrixArg);
 		modelViewStack.translate((float) -camPos.x, (float) -camPos.y, (float) -camPos.z);
 
