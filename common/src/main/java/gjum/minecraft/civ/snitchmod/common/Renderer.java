@@ -469,7 +469,7 @@ public class Renderer {
 		RenderSystem.lineWidth(lineWidth);
 
 		Tesselator tesselator = Tesselator.getInstance();
-		BufferBuilder bufferBuilder = tesselator.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+		BufferBuilder bufferBuilder = tesselator.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
 		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 
 		GL11.glEnable(GL11.GL_LINE_SMOOTH);
