@@ -26,6 +26,12 @@ jobs:
           name: Fabric
           path: dist/*-fabric.jar
 
+      - name: Upload Neoforge Build
+        uses: actions/upload-artifact@v3
+        with:
+          name: Neoforge
+          path: dist/*-neoforge.jar
+
       - name: Release Tag
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v1
