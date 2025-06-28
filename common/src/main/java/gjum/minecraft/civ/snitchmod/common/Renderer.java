@@ -70,9 +70,7 @@ public class Renderer {
 				.forEach(Renderer::renderPlacementHelper);
 		}
 
-		if (getMod().snitchFieldToPreview != null) {
-			renderSnitchFieldPreview(getMod().snitchFieldToPreview);
-		}
+        getMod().snitchFieldToPreview.ifPresent(Renderer::renderSnitchFieldPreview);
 
 		RenderSystem.enableDepthTest();
 		RenderSystem.depthMask(true);
@@ -145,7 +143,7 @@ public class Renderer {
 		}
 
 		long now = System.currentTimeMillis();
-		long snitchTimer = snitch.getType() != null ? snitch.getType().timer : Snitch.Type.NOTEBLOCK.timer;
+		long snitchTimer = snitch.getType().isPresent() ? snitch.getType().get().timer : Snitch.Type.NOTEBLOCK.timer;
 		SnitchLiveliness snitchLiveliness = SnitchLiveliness.DORMANT_EVENTUALLY;
 		if (snitch.wasBroken()) {
 			snitchLiveliness = SnitchLiveliness.BROKEN;
@@ -216,8 +214,8 @@ public class Renderer {
 			final AABB blockBox = new AABB(snitch.pos).inflate(.01);
 			Color boxOutlineColor = snitchLiveliness.color;
 			if (
-				getMod().snitchFieldToPreview != null
-				&& getMod().snitchFieldToPreview.source().equals(snitch)
+				getMod().snitchFieldToPreview.isPresent()
+				&& getMod().snitchFieldToPreview.get().source().equals(snitch)
 			) {
 				boxOutlineColor = PINK;
 			}

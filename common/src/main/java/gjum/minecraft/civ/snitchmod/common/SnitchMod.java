@@ -74,13 +74,9 @@ public abstract class SnitchMod {
 
 	public boolean rangeOverlayVisible = false;
 	public boolean placementHelperVisible = false;
-	@Nullable
-	public SnitchFieldPreview snitchFieldToPreview = null;
-	@Nullable
-	public Snitch lastBrokenSnitch = null;
-
-	@Nullable
-	private SnitchesStore store;
+	public Optional<SnitchFieldPreview> snitchFieldToPreview = Optional.empty();
+	public Optional<Snitch> lastBrokenSnitch = Optional.empty();
+	private Optional<SnitchesStore> store = Optional.empty();
 
 	public static SnitchMod getMod() {
 		return INSTANCE;
@@ -114,14 +110,14 @@ public abstract class SnitchMod {
 		return mc.player.getUUID();
 	}
 
-	public @Nullable SnitchesStore getStore() {
+	public Optional<SnitchesStore> getStore() {
 		String server = getCurrentServer();
-		if (store != null && !store.server.equals(server)) {
-			store.close();
-			store = null;
+		if (store.isPresent() && !store.get().server.equals(server)) {
+			store.get().close();
+			store = Optional.empty();
 		}
-		if (store == null && server != null) {
-			store = new SnitchesStore(server);
+		if (store.isPresent() && server != null) {
+			store = Optional.of(new SnitchesStore(server));
 		}
 		return store;
 	}
@@ -131,15 +127,15 @@ public abstract class SnitchMod {
 	}
 
 	public void handleDisconnectedFromServer() {
-		if (store != null) store.close();
-		store = null;
+        store.ifPresent(SnitchesStore::close);
+		store = Optional.empty();
 	}
 
 	public void handleTick() {
 		while (openGuiKey.consumeClick()) {
 			// TODO open gui, and rename keybind
-			store.close();
-			store = null;
+			store.ifPresent(SnitchesStore::close);
+			store = Optional.empty();
 			getStore();
 			logToChat(Component.literal("Reloaded the database"));
 		}
@@ -169,10 +165,10 @@ public abstract class SnitchMod {
 				snitch.getPos().getZ()
 			);
 			if (snitch.isGone()) {
-				store.updateSnitchNoLongerGone(snitch.pos);
+				store.get().updateSnitchNoLongerGone(snitch.pos);
 				logToChat(Component.literal(String.format("Marked snitch %s as alive", formattedSnitch)));
 			} else {
-				store.updateSnitchGone(snitch.pos);
+				store.get().updateSnitchGone(snitch.pos);
 				logToChat(Component.literal(String.format("Marked snitch %s as gone", formattedSnitch)));
 			}
 		}
@@ -188,7 +184,7 @@ public abstract class SnitchMod {
 			placementHelperVisible = !placementHelperVisible;
 
 			if (placementHelperVisible) {
-				snitchFieldToPreview = null;
+				snitchFieldToPreview = Optional.empty();
 			}
 
 			logToChat(
@@ -201,7 +197,7 @@ public abstract class SnitchMod {
 				.filter(Snitch::isAlive)
 				.findFirst();
 			if (optNearestSnitch.isEmpty()) {
-				snitchFieldToPreview = null;
+				snitchFieldToPreview = Optional.empty();
 				logToChat(Component.literal("No nearby alive snitches to base a field preview on"));
 				break;
 			}
@@ -214,15 +210,15 @@ public abstract class SnitchMod {
 			SnitchFieldPreview newSnitchFieldToPreview = new SnitchFieldPreview(
 				nearestSnitch, Direction.ofPlayer(mc.player));
 			if (
-				snitchFieldToPreview != null
-				&& newSnitchFieldToPreview.equals(snitchFieldToPreview)
+				snitchFieldToPreview.isPresent()
+				&& newSnitchFieldToPreview.equals(snitchFieldToPreview.get())
 			) {
 				logToChat(Component.literal("Turning off the snitch field preview"));
 				snitchFieldToPreview = null;
 				break;
 			}
 
-			snitchFieldToPreview = newSnitchFieldToPreview;
+			snitchFieldToPreview = Optional.of(newSnitchFieldToPreview);
 			logToChat(Component.literal("Showing a snitch field preview in the direction you're looking"));
 		}
 		// TODO if block pos changed -> if pos inside snitch range not in before -> send jainfo -> mark refreshed
@@ -233,24 +229,24 @@ public abstract class SnitchMod {
 	 */
 	public boolean handleChat(Component message) {
 		getStore();
-		if (store == null) return false;
+		if (store.isEmpty()) return false;
 
-		SnitchAlert snitchAlert = SnitchAlert.fromChat(message, store.server, getCurrentWorld());
+		SnitchAlert snitchAlert = SnitchAlert.fromChat(message, store.get().server, getCurrentWorld());
 		if (snitchAlert != null) {
-			store.updateSnitchFromAlert(snitchAlert);
+			store.get().updateSnitchFromAlert(snitchAlert);
 			return false;
 		}
 
-		SnitchRename snitchRename = SnitchRename.fromChat(message, store.server, getCurrentWorld(), getClientUuid());
+		SnitchRename snitchRename = SnitchRename.fromChat(message, store.get().server, getCurrentWorld(), getClientUuid());
 		if (snitchRename != null) {
-			store.updateSnitchFromRename(snitchRename);
+			store.get().updateSnitchFromRename(snitchRename);
 			return false;
 		}
 
-		Snitch snitchCreated = SnitchCreatedChatParser.fromChat(message, store.server, getCurrentWorld(), getClientUuid());
+		Snitch snitchCreated = SnitchCreatedChatParser.fromChat(message, store.get().server, getCurrentWorld(), getClientUuid());
 		if (snitchCreated != null) {
-			Snitch alreadyExistingSnitch = store.getSnitch(snitchCreated.pos);
-			store.updateSnitchFromCreation(snitchCreated);
+			Snitch alreadyExistingSnitch = store.get().getSnitch(snitchCreated.pos);
+			store.get().updateSnitchFromCreation(snitchCreated);
 			if (
 				alreadyExistingSnitch != null
 				&& alreadyExistingSnitch.getName() != null
@@ -269,15 +265,15 @@ public abstract class SnitchMod {
 			}
 
 			if (
-				snitchFieldToPreview != null
-				&& snitchFieldToPreview.field().pos.equals(snitchCreated.pos)
+				snitchFieldToPreview.isPresent()
+				&& snitchFieldToPreview.get().field().pos.equals(snitchCreated.pos)
 			) {
 				if (placementHelperVisible) {
 					placementHelperVisible = false;
 				}
 
-				snitchFieldToPreview = new SnitchFieldPreview(
-					snitchCreated, snitchFieldToPreview.direction());
+				snitchFieldToPreview = Optional.of(new SnitchFieldPreview(
+					snitchCreated, snitchFieldToPreview.get().direction()));
 
 				logToChat(Component.literal("Showing an inferred snitch field preview"));
 			}
@@ -292,12 +288,12 @@ public abstract class SnitchMod {
 
 	public void handleWindowItems(List<ItemStack> stacks) {
 		getStore();
-		if (store == null) return;
+		if (store.isEmpty()) return;
 		List<JalistEntry> jalistEntries = new ArrayList<JalistEntry>(stacks.size());
 		for (int i = 0; i < stacks.size(); i++) {
 			ItemStack stack = stacks.get(i);
 			try {
-				JalistEntry jalistEntry = JalistEntry.fromStack(stack, store.server);
+				JalistEntry jalistEntry = JalistEntry.fromStack(stack, store.get().server);
 				if (jalistEntry != null) {
 					jalistEntries.add(jalistEntry);
 				}
@@ -307,7 +303,7 @@ public abstract class SnitchMod {
 				logToChat(Component.literal("Failed reading snitch " + i + " on JAList page"));
 			}
 		}
-		store.updateSnitchesFromJalist(jalistEntries);
+		store.get().updateSnitchesFromJalist(jalistEntries);
 		if (jalistEntries.size() > 0) {
 			logToChat(Component.literal("Found " + jalistEntries.size() + " snitches on JAList page"));
 		}
@@ -319,8 +315,8 @@ public abstract class SnitchMod {
 
 	public Stream<Snitch> streamNearbySnitches(Vec3 playerPos, int distance) {
 		getStore();
-		if (store == null) return Stream.empty();
-		return store.getAllSnitches().stream()
+		if (store.isEmpty()) return Stream.empty();
+		return store.get().getAllSnitches().stream()
 			.filter(s -> s.getPos().getCenter().distanceTo(playerPos) < distance)
 			.sorted(Comparator.comparing(s -> s.getPos().getCenter().distanceTo(playerPos)));
 	}
