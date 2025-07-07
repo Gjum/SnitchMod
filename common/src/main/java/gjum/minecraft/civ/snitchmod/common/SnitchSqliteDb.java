@@ -147,8 +147,8 @@ public class SnitchSqliteDb {
 
 		for (Snitch snitch : snitches) {
 			String type = null;
-			if (snitch.getType() != null) {
-				type = snitch.getType().dbRepresentation;
+			if (snitch.getType().isPresent()) {
+				type = snitch.getType().get().dbRepresentation;
 			}
 			try {
 				int i = 0;

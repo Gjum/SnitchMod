@@ -178,9 +178,9 @@ public class Snitch {
 		return group;
 	}
 
-	@Nullable
-	public Type getType() {
-		return type;
+	@NotNull
+	public Optional<Type> getType() {
+		return Optional.ofNullable(type);
 	}
 
 	@Nullable
