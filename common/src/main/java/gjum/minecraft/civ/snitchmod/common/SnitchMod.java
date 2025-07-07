@@ -116,7 +116,7 @@ public abstract class SnitchMod {
 			store.get().close();
 			store = Optional.empty();
 		}
-		if (store.isPresent() && server != null) {
+		if (store.isEmpty() && server != null) {
 			store = Optional.of(new SnitchesStore(server));
 		}
 		return store;
