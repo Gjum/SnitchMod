@@ -5,6 +5,8 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public class FabricSnitchMod extends SnitchMod implements ClientModInitializer {
 	@Override
@@ -22,7 +24,7 @@ public class FabricSnitchMod extends SnitchMod implements ClientModInitializer {
 				e.printStackTrace();
 			}
 		});
-		WorldRenderEvents.AFTER_TRANSLUCENT.register(((context) -> {
+		WorldRenderEvents.LAST.register(((context) -> {
 			try {
 				handleRenderBlockOverlay(context.matrixStack().last().pose());
 			} catch (Exception e) {

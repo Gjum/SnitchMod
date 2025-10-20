@@ -1,20 +1,21 @@
 package gjum.minecraft.civ.snitchmod.common;
 
+import com.mojang.blaze3d.pipeline.BlendFunction;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.platform.DepthTestFunction;
+import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.*;
 import gjum.minecraft.civ.snitchmod.common.Utils.Color;
 import gjum.minecraft.civ.snitchmod.common.model.Snitch;
 import gjum.minecraft.civ.snitchmod.common.model.SnitchFieldPreview;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.CoreShaders;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +26,7 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.OptionalInt;
 
 import static gjum.minecraft.civ.snitchmod.common.SnitchMod.getMod;
 
@@ -40,6 +42,8 @@ public class Renderer {
 	private final static Color ORANGE = new Color(0xEE8140);
 	private final static Color PINK = new Color(0xFC66CC);
 
+    private static int matcount = 0;
+
 	public static void renderOverlays(Matrix4f matrixArg) {
 		if (mc.player == null) return;
 		if (mc.level == null) return;
@@ -49,38 +53,48 @@ public class Renderer {
 
 		Vec3 camPos = mc.gameRenderer.getMainCamera().getPosition();
 		Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
+        matcount += 1;
 		modelViewStack.pushMatrix();
-		modelViewStack.mul(matrixArg);
-		modelViewStack.translate((float) -camPos.x, (float) -camPos.y, (float) -camPos.z);
+        try {
+            modelViewStack.mul(matrixArg);
+            modelViewStack.translate((float) -camPos.x, (float) -camPos.y, (float) -camPos.z);
 
-		if (getMod().rangeOverlayVisible) {
-			int fieldDist = 260;
-			getMod().streamNearbySnitches(mc.player.position(), fieldDist)
-				// but still show culled/gone snitches
-				.filter(s -> !s.wasBroken())
-				.limit(100)
-				.forEach(Renderer::renderSnitch);
-		}
+            if (getMod().rangeOverlayVisible) {
+                int fieldDist = 260;
+                getMod().streamNearbySnitches(mc.player.position(), fieldDist)
+                        // but still show culled/gone snitches
+                        .filter(s -> !s.wasBroken())
+                        .limit(100)
+                        .forEach(Renderer::renderSnitch);
+            }
 
-		if (getMod().placementHelperVisible) {
-			int placeHelperDist = 50;
-			getMod().streamNearbySnitches(mc.player.position(), placeHelperDist)
-				.filter(Snitch::isAlive)
-				.limit(10)
-				.forEach(Renderer::renderPlacementHelper);
-		}
+            if (getMod().placementHelperVisible) {
+                int placeHelperDist = 50;
+                getMod().streamNearbySnitches(mc.player.position(), placeHelperDist)
+                        .filter(Snitch::isAlive)
+                        .limit(10)
+                        .forEach(Renderer::renderPlacementHelper);
+            }
 
-		if (getMod().snitchFieldToPreview != null) {
-			renderSnitchFieldPreview(getMod().snitchFieldToPreview);
-		}
-
+            if (getMod().snitchFieldToPreview != null) {
+                renderSnitchFieldPreview(getMod().snitchFieldToPreview);
+            }
+        /*
 		RenderSystem.enableDepthTest();
 		RenderSystem.depthMask(true);
 		RenderSystem.enableCull();
 		RenderSystem.lineWidth(1.0F);
 		RenderSystem.clearColor(1, 1, 1, 1);
+         */
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            modelViewStack.popMatrix();
+            matcount -= 1;
+            if (matcount > 0) System.err.println("ALERT MATCOUNT " + matcount);
+        }
 
-		modelViewStack.popMatrix();
+
 	}
 
 	private static void renderSnitchFieldPreview(SnitchFieldPreview preview) {
@@ -89,9 +103,11 @@ public class Renderer {
 		final boolean playerInRange = range.contains(mc.player.position());
 		AABB rangeBox = playerInRange ? range.inflate(-.01) : range.inflate(.01);
 
+        /*
 		RenderSystem.enableDepthTest();
 		RenderSystem.enableBlend();
 		RenderSystem.disableCull();
+         */
 
 		final Color color = PINK;
 		final float boxAlpha = 0.2f;
@@ -104,7 +120,8 @@ public class Renderer {
 
 		final int blockHlDist = 64;
 		if (preview.field().pos.distSqr(mc.player.blockPosition()) < blockHlDist * blockHlDist) {
-			RenderSystem.disableDepthTest();
+            //lmao??????
+			//RenderSystem.disableDepthTest();
 
 			// inflate so it isn't obstructed by the snitch block
 			final AABB blockBox = new AABB(preview.field().pos).inflate(.01);
@@ -191,9 +208,11 @@ public class Renderer {
 		/*
 		 * Render the snitch range box.
 		 */
+        /*
 		RenderSystem.enableDepthTest();
 		RenderSystem.enableBlend();
 		RenderSystem.disableCull();
+         */
 
 		renderFilledBox(rangeBox, snitchLiveliness.color, boxAlpha);
 
@@ -210,7 +229,8 @@ public class Renderer {
 		 */
 		final int blockHlDist = 64;
 		if (snitch.pos.distSqr(mc.player.blockPosition()) < blockHlDist * blockHlDist) {
-			RenderSystem.disableDepthTest();
+            //lmao???
+			//RenderSystem.disableDepthTest();
 
 			// inflate so it isn't obstructed by the snitch block
 			final AABB blockBox = new AABB(snitch.pos).inflate(.01);
@@ -359,9 +379,11 @@ public class Renderer {
 		if (playerInRange) return; // only render helper for snitches the player isn't inside of
 		final AABB helperBox = new AABB(snitch.pos).inflate(22.3);
 
+        /*
 		RenderSystem.enableDepthTest();
 		RenderSystem.enableBlend();
 		RenderSystem.disableCull();
+         */
 
 		Color color = BLUE;
 		float alpha = 0.2f;
@@ -372,7 +394,8 @@ public class Renderer {
 		RenderSystem.lineWidth(lineWidth);
 
 		Tesselator tesselator = Tesselator.getInstance();
-		BufferBuilder bufferBuilder = tesselator.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
+        //used to be DEBUG_LINES
+		BufferBuilder bufferBuilder = tesselator.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
 		GL11.glEnable(GL11.GL_LINE_SMOOTH);
 
@@ -411,13 +434,12 @@ public class Renderer {
 		bufferBuilder.addVertex(maxX, maxY, minZ).setColor(r, g, b, a);
 		bufferBuilder.addVertex(maxX, maxY, maxZ).setColor(r, g, b, a);
 
-		BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+        RenderType.debugLineStrip(lineWidth).draw(bufferBuilder.buildOrThrow());
 	}
 
 	private static void renderFilledBox(AABB box, Color color, float a) {
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
-		RenderSystem.setShader(CoreShaders.POSITION_COLOR);
 
 		float r = color.r;
 		float g = color.g;
@@ -460,15 +482,15 @@ public class Renderer {
 		bufferBuilder.addVertex(maxX, maxY, maxZ).setColor(r, g, b, a);
 		bufferBuilder.addVertex(maxX, maxY, maxZ).setColor(r, g, b, a);
 
-		BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+        RenderType.debugFilledBox().draw(bufferBuilder.buildOrThrow());
 	}
 
 	private static void renderBoxGuides(AABB box, Color color, float a, float lineWidth) {
 		RenderSystem.lineWidth(lineWidth);
 
 		Tesselator tesselator = Tesselator.getInstance();
-		BufferBuilder bufferBuilder = tesselator.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
-		RenderSystem.setShader(CoreShaders.POSITION_COLOR);
+        //used to be DEBUG_LINES
+		BufferBuilder bufferBuilder = tesselator.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
 		GL11.glEnable(GL11.GL_LINE_SMOOTH);
 
@@ -494,7 +516,7 @@ public class Renderer {
 		addVertex(bufferBuilder, center.x, center.y, center.z - 1).setColor(r, g, b, a);
 		addVertex(bufferBuilder, center.x, center.y, center.z - radius).setColor(r, g, b, a);
 
-		BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+        RenderType.debugLineStrip(lineWidth).draw(bufferBuilder.buildOrThrow());
 	}
 
 	// does the double->float cast for us
@@ -507,6 +529,7 @@ public class Renderer {
 	 */
 	private static void renderTextFacingCamera(Component text, Vec3 pos, float offset, float scale, int colorAlphaHex) {
 		var poseStack = new PoseStack();
+        poseStack.pushPose();
 		poseStack.translate(pos.x, pos.y, pos.z);
 		poseStack.mulPose(mc.gameRenderer.getMainCamera().rotation());
 		scale *= 0.005f * (mc.player.position().distanceTo(pos) / 2.4);
