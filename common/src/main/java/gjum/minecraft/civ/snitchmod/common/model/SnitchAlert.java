@@ -63,9 +63,9 @@ public class SnitchAlert {
 
 		String group = null;
 		final HoverEvent hoverEvent = message.getSiblings().get(0).getStyle().getHoverEvent();
-		if (hoverEvent != null && hoverEvent.getAction() == HoverEvent.Action.SHOW_TEXT) {
+		if (hoverEvent != null && hoverEvent.action() == HoverEvent.Action.SHOW_TEXT) {
 			@SuppressWarnings("ConstantConditions")
-			String hoverText = hoverEvent.getValue(HoverEvent.Action.SHOW_TEXT).getString().replaceAll("§.", "");
+			String hoverText = ((HoverEvent.ShowText)hoverEvent).value().getString().replaceAll("§.", "");
 
 			Matcher hoverMatch = hoverPattern.matcher(hoverText);
 			if (hoverMatch.matches()) {

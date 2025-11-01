@@ -1,6 +1,7 @@
 package gjum.minecraft.civ.snitchmod.common;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.vertex.PoseStack;
 import gjum.minecraft.civ.snitchmod.common.model.Direction;
 import gjum.minecraft.civ.snitchmod.common.model.JalistEntry;
 import gjum.minecraft.civ.snitchmod.common.model.Snitch;
@@ -313,8 +314,8 @@ public abstract class SnitchMod {
 		}
 	}
 
-	public void handleRenderBlockOverlay(Matrix4f matrix) {
-		Renderer.renderOverlays(matrix);
+	public void handleRenderBlockOverlay(PoseStack poseStack) {
+		Renderer.renderOverlays(poseStack);
 	}
 
 	public Stream<Snitch> streamNearbySnitches(Vec3 playerPos, int distance) {
