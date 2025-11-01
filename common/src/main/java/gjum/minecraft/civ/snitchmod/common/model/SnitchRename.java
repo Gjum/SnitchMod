@@ -57,10 +57,10 @@ public class SnitchRename {
 		String snitchOldName = textMatch.group(2);
 
 		final HoverEvent hoverEvent = message.getSiblings().get(0).getStyle().getHoverEvent();
-		if (hoverEvent == null || hoverEvent.getAction() != HoverEvent.Action.SHOW_TEXT) return null;
+		if (hoverEvent == null || hoverEvent.action() != HoverEvent.Action.SHOW_TEXT) return null;
 
 		@SuppressWarnings("ConstantConditions")
-		String hoverText = hoverEvent.getValue(HoverEvent.Action.SHOW_TEXT).getString().replaceAll("§.", "");
+		String hoverText = ((HoverEvent.ShowText)hoverEvent).value().getString().replaceAll("§.", "");
 
 		Matcher hoverMatch = hoverPattern.matcher(hoverText);
 		if (!hoverMatch.matches()) return null;

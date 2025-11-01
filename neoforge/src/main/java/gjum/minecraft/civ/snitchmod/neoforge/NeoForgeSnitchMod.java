@@ -25,10 +25,8 @@ public class NeoForgeSnitchMod extends SnitchMod {
     }
 
     @SubscribeEvent
-    public void onRenderLevelLast(RenderLevelStageEvent event) {
-        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) {
-            handleRenderBlockOverlay(event.getPoseStack().last().pose());
-        }
+    public void onAfterTripwire(RenderLevelStageEvent.AfterTripwireBlocks event) {
+        handleRenderBlockOverlay(event.getPoseStack());
     }
     
     @SubscribeEvent

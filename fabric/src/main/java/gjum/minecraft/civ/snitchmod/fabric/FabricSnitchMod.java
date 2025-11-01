@@ -22,9 +22,9 @@ public class FabricSnitchMod extends SnitchMod implements ClientModInitializer {
 				e.printStackTrace();
 			}
 		});
-		WorldRenderEvents.AFTER_TRANSLUCENT.register(((context) -> {
+		WorldRenderEvents.LAST.register(((context) -> {
 			try {
-				handleRenderBlockOverlay(context.matrixStack().last().pose());
+				handleRenderBlockOverlay(context.matrixStack());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

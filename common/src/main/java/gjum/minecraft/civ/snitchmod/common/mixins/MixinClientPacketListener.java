@@ -33,7 +33,7 @@ public abstract class MixinClientPacketListener {
 			return; // continue method normally
 		}
 		try {
-			getMod().handleWindowItems(packetIn.getItems());
+			getMod().handleWindowItems(packetIn.items());
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
