@@ -1,0 +1,29 @@
+language: java
+jdk:
+  - openjdk21
+install: true
+script:
+  - ./gradlew build
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock 
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+before_deploy:
+  - if [ -f  "$TRAVIS_BUILD_DIR/dist/forge-*.jar" ]; then cp "$TRAVIS_BUILD_DIR/dist/forge-*.jar" "$TRAVIS_BUILD_DIR/forge-build.jar"; fi
+  - if [ -f  "$TRAVIS_BUILD_DIR/dist/fabric-*.jar" ]; then cp "$TRAVIS_BUILD_DIR/dist/fabric-*.jar" "$TRAVIS_BUILD_DIR/fabric-build.jar"; fi
+  - if [ -f  "$TRAVIS_BUILD_DIR/dist/neoforge-*.jar" ]; then cp "$TRAVIS_BUILD_DIR/dist/neoforge-*.jar" "$TRAVIS_BUILD_DIR/neoforge-build.jar"; fi
+deploy:
+  provider: releases
+  api_key:
+    secure: ""
+  file_glob: true
+  file:
+    - dist/forge-*.jar
+    - dist/fabric-*.jar
+    - dist/neoforge-*.jar
+  skip_cleanup: true
+  on:
+    tags: true
