@@ -13,6 +13,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -28,54 +29,56 @@ import java.util.stream.Stream;
 
 public abstract class SnitchMod {
 	private final static Minecraft mc = Minecraft.getInstance();
+	public static final KeyMapping.Category SNITCHMOD_CATEGORY
+		= KeyMapping.Category.register(Identifier.fromNamespaceAndPath("snitchmod", "category"));
 
 	protected static final KeyMapping openGuiKey = new KeyMapping(
 		"key.snitchmod.openGui",
 		InputConstants.Type.KEYSYM,
 		GLFW.GLFW_KEY_L,
-		"category.snitchmod"
+		SNITCHMOD_CATEGORY
 	);
 
 	protected static final KeyMapping toggleOverlayKey = new KeyMapping(
 		"key.snitchmod.toggleOverlay",
 		InputConstants.Type.KEYSYM,
 		GLFW.GLFW_KEY_O,
-		"category.snitchmod"
+		SNITCHMOD_CATEGORY
 	);
 
 	protected static final KeyMapping togglePlacementKey = new KeyMapping(
 		"key.snitchmod.togglePlacement",
 		InputConstants.Type.KEYSYM,
 		GLFW.GLFW_KEY_P,
-		"category.snitchmod"
+		SNITCHMOD_CATEGORY
 	);
 
 	protected static final KeyMapping previewSnitchFieldKey = new KeyMapping(
 		"key.snitchmod.togglePreviewSnitchFieldKey",
 		InputConstants.Type.KEYSYM,
 		GLFW.GLFW_KEY_N,
-		"category.snitchmod"
+		SNITCHMOD_CATEGORY
 	);
 
 	protected static final KeyMapping jalistAutoKey = new KeyMapping(
 		"key.snitchmod.jalistAuto", 
 		InputConstants.Type.KEYSYM,
 		GLFW.GLFW_KEY_J,
-		"category.snitchmod"
+		SNITCHMOD_CATEGORY
 	);
 
 	protected static final KeyMapping toggleSnitchGoneStatusKey = new KeyMapping(
 		"key.snitchmod.toggleSnitchGoneStatusKey",
 		InputConstants.Type.KEYSYM,
 		GLFW.GLFW_KEY_DELETE,
-		"category.snitchmod"
+		SNITCHMOD_CATEGORY
 	);
 
 	protected static final KeyMapping toggleSnitchFieldRenderKey = new KeyMapping(
 		"key.snitchmod.toggleSnitchFieldRenderKey",
 		InputConstants.Type.KEYSYM,
 		GLFW.GLFW_KEY_T,
-		"category.snitchmod"
+		SNITCHMOD_CATEGORY
 	);
 
 	private static SnitchMod INSTANCE;
@@ -107,7 +110,7 @@ public abstract class SnitchMod {
 
 	public String getCurrentWorld() {
 		if (mc.level == null) return null;
-		String dimension = mc.level.dimension().location().getPath();
+		String dimension = mc.level.dimension().identifier().getPath();
 		// civ server world names as they occur in snitches are different from dimension names
 		return switch (dimension) {
 			case "overworld" -> "world";

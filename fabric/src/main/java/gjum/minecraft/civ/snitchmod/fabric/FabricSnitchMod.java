@@ -5,7 +5,8 @@ import gjum.minecraft.civ.snitchmod.common.SnitchMod;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import org.lwjgl.glfw.GLFW;
@@ -29,7 +30,7 @@ public class FabricSnitchMod extends SnitchMod implements ClientModInitializer {
 				if (mc.screen instanceof AbstractContainerScreen<?> containerScreen) {
 					String title = containerScreen.getTitle().getString();
 					if ((title.toLowerCase().contains("snitches") || title.contains("JukeAlert")) 
-						&& GLFW.glfwGetKey(mc.getWindow().getWindow(), GLFW.GLFW_KEY_J) == GLFW.GLFW_PRESS) {
+						&& GLFW.glfwGetKey(mc.getWindow().handle(), GLFW.GLFW_KEY_J) == GLFW.GLFW_PRESS) {
 						
 						// Prevent spam clicking by checking if auto-paginator is not already active
 						if (!JalistAutoPaginator.getInstance().isActive()) {
@@ -42,9 +43,9 @@ public class FabricSnitchMod extends SnitchMod implements ClientModInitializer {
 				e.printStackTrace();
 			}
 		});
-		WorldRenderEvents.LAST.register(((context) -> {
+		WorldRenderEvents.BEFORE_TRANSLUCENT.register(((context) -> {
 			try {
-				handleRenderBlockOverlay(context.matrixStack());
+				handleRenderBlockOverlay(context.matrices());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

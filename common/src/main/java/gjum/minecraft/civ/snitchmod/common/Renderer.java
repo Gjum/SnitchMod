@@ -9,9 +9,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 //import net.minecraft.client.renderer.CoreShaders;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.ShapeRenderer;
-import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
+import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -160,7 +161,7 @@ public class Renderer {
 		if (mc.options.hideGui) return; // F1 mode
 		// if (mc.options.renderDebug) return; // F3 mode
 
-		Vec3 camPos = mc.gameRenderer.getMainCamera().getPosition();
+		Vec3 camPos = mc.gameRenderer.getMainCamera().position();
 		Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
 		modelViewStack.pushMatrix();
 		modelViewStack.mul(eventPoseStack.last().pose());
@@ -186,8 +187,6 @@ public class Renderer {
 		if (getMod().snitchFieldToPreview != null) {
 			renderSnitchFieldPreview(getMod().snitchFieldToPreview);
 		}
-
-		RenderSystem.lineWidth(1.0F);
 
 		modelViewStack.popMatrix();
         MultiBufferSource.BufferSource buffers = Minecraft.getInstance().renderBuffers().bufferSource();
@@ -472,24 +471,51 @@ public class Renderer {
         }
 	}
 
-    private static void renderBoxOutline(AABB box, Color color, float alpha, float lineWidth) {
-        //mc.gui.getChat().addMessage(Component.literal("[SnitchMod] renderBoxOutline: " + box));
-        try (RenderBufferGuard guard = RenderBufferGuard.open()) {
-            RenderSystem.lineWidth(lineWidth);
-            VertexConsumer vertexConsumer = guard.bufferSource.getBuffer(RenderType.debugLineStrip(lineWidth));
-            ShapeRenderer.renderLineBox(
-                    eventPoseStack, vertexConsumer,
-                    box.minX, box.minY, box.minZ,
-                    box.maxX, box.maxY, box.maxZ,
-                    color.r, color.g, color.b, alpha
-            );
-        }
-    }
+	private static void renderBoxOutline(AABB box, Color color, float alpha, float lineWidth) {
+		// Convert the requested line width into a world-space thickness.
+		// Tweak the multiplier if you want thicker/thinner outlines visually.
+		double t = Math.max(0.01, lineWidth * 0.02);
+
+		double minX = box.minX;
+		double minY = box.minY;
+		double minZ = box.minZ;
+		double maxX = box.maxX;
+		double maxY = box.maxY;
+		double maxZ = box.maxZ;
+
+		// Clamp thickness so it cannot exceed half the box size on any axis.
+		double maxThicknessX = Math.max(0.0, (maxX - minX) / 2.0);
+		double maxThicknessY = Math.max(0.0, (maxY - minY) / 2.0);
+		double maxThicknessZ = Math.max(0.0, (maxZ - minZ) / 2.0);
+		t = Math.min(t, Math.min(maxThicknessX, Math.min(maxThicknessY, maxThicknessZ)));
+
+		if (t <= 0.0) {
+			return;
+		}
+
+		// Bottom ring
+		renderFilledBox(new AABB(minX, minY, minZ, maxX, minY + t, minZ + t), color, alpha); // north
+		renderFilledBox(new AABB(minX, minY, maxZ - t, maxX, minY + t, maxZ), color, alpha); // south
+		renderFilledBox(new AABB(minX, minY, minZ + t, minX + t, minY + t, maxZ - t), color, alpha); // west
+		renderFilledBox(new AABB(maxX - t, minY, minZ + t, maxX, minY + t, maxZ - t), color, alpha); // east
+
+		// Top ring
+		renderFilledBox(new AABB(minX, maxY - t, minZ, maxX, maxY, minZ + t), color, alpha); // north
+		renderFilledBox(new AABB(minX, maxY - t, maxZ - t, maxX, maxY, maxZ), color, alpha); // south
+		renderFilledBox(new AABB(minX, maxY - t, minZ + t, minX + t, maxY, maxZ - t), color, alpha); // west
+		renderFilledBox(new AABB(maxX - t, maxY - t, minZ + t, maxX, maxY, maxZ - t), color, alpha); // east
+
+		// Vertical edges
+		renderFilledBox(new AABB(minX, minY + t, minZ, minX + t, maxY - t, minZ + t), color, alpha); // NW
+		renderFilledBox(new AABB(maxX - t, minY + t, minZ, maxX, maxY - t, minZ + t), color, alpha); // NE
+		renderFilledBox(new AABB(minX, minY + t, maxZ - t, minX + t, maxY - t, maxZ), color, alpha); // SW
+		renderFilledBox(new AABB(maxX - t, minY + t, maxZ - t, maxX, maxY - t, maxZ), color, alpha); // SE
+	}
 
     private static void renderFilledBox(AABB box, Color color, float alpha) {
         //mc.gui.getChat().addMessage(Component.literal("[SnitchMod] renderFilledBox: " + box));
         try (RenderBufferGuard guard = RenderBufferGuard.open()) {
-            VertexConsumer vertexConsumer = guard.bufferSource.getBuffer(RenderType.debugQuads());
+			VertexConsumer vertexConsumer = guard.bufferSource.getBuffer(RenderTypes.debugQuads());
             //ShapeRenderer.renderShape(eventPoseStack, vertexConsumer, Shapes.create(box), box.minX, box.minY, box.minZ, color.hex);
             float minX = (float) box.minX;
             float minY = (float) box.minY;
@@ -497,50 +523,102 @@ public class Renderer {
             float maxX = (float) box.maxX;
             float maxY = (float) box.maxY;
             float maxZ = (float) box.maxZ;
-            for (Direction direction : Direction.values()) {
-                ShapeRenderer.renderFace(
-                        eventPoseStack, vertexConsumer, direction,
-                        minX, minY, minZ,
-                        maxX, maxY, maxZ,
-                        color.r, color.g, color.b, alpha
-                );
-            }
+			int alphaInt = Math.round(alpha * 255.0f) & 0xFF;
+			int colorInt = (alphaInt << 24) | (color.hex & 0x00FFFFFF);
+			PoseStack.Pose pose = eventPoseStack.last();
+
+			// Bottom (-Y)
+			vertexConsumer.addVertex(pose, minX, minY, minZ).setColor(colorInt);
+			vertexConsumer.addVertex(pose, maxX, minY, minZ).setColor(colorInt);
+			vertexConsumer.addVertex(pose, maxX, minY, maxZ).setColor(colorInt);
+			vertexConsumer.addVertex(pose, minX, minY, maxZ).setColor(colorInt);
+
+			// Top (+Y)
+			vertexConsumer.addVertex(pose, minX, maxY, minZ).setColor(colorInt);
+			vertexConsumer.addVertex(pose, minX, maxY, maxZ).setColor(colorInt);
+			vertexConsumer.addVertex(pose, maxX, maxY, maxZ).setColor(colorInt);
+			vertexConsumer.addVertex(pose, maxX, maxY, minZ).setColor(colorInt);
+
+			// North (-Z)
+			vertexConsumer.addVertex(pose, minX, minY, minZ).setColor(colorInt);
+			vertexConsumer.addVertex(pose, minX, maxY, minZ).setColor(colorInt);
+			vertexConsumer.addVertex(pose, maxX, maxY, minZ).setColor(colorInt);
+			vertexConsumer.addVertex(pose, maxX, minY, minZ).setColor(colorInt);
+
+			// South (+Z)
+			vertexConsumer.addVertex(pose, minX, minY, maxZ).setColor(colorInt);
+			vertexConsumer.addVertex(pose, maxX, minY, maxZ).setColor(colorInt);
+			vertexConsumer.addVertex(pose, maxX, maxY, maxZ).setColor(colorInt);
+			vertexConsumer.addVertex(pose, minX, maxY, maxZ).setColor(colorInt);
+
+			// West (-X)
+			vertexConsumer.addVertex(pose, minX, minY, minZ).setColor(colorInt);
+			vertexConsumer.addVertex(pose, minX, minY, maxZ).setColor(colorInt);
+			vertexConsumer.addVertex(pose, minX, maxY, maxZ).setColor(colorInt);
+			vertexConsumer.addVertex(pose, minX, maxY, minZ).setColor(colorInt);
+
+			// East (+X)
+			vertexConsumer.addVertex(pose, maxX, minY, minZ).setColor(colorInt);
+			vertexConsumer.addVertex(pose, maxX, maxY, minZ).setColor(colorInt);
+			vertexConsumer.addVertex(pose, maxX, maxY, maxZ).setColor(colorInt);
+			vertexConsumer.addVertex(pose, maxX, minY, maxZ).setColor(colorInt);
         }
     }
 
-    private static void renderBoxGuides(AABB box, Color color, float a, float lineWidth) {
-        boolean initialLineSmooth = GL11.glIsEnabled(GL11.GL_LINE_SMOOTH);
-        RenderSystem.lineWidth(lineWidth);
+	private static void renderBoxGuides(AABB box, Color color, float alpha, float lineWidth) {
+		Vec3 center = box.getCenter();
+		double radius = box.maxX - center.x;
 
-        float r = color.r;
-        float g = color.g;
-        float b = color.b;
-        Vec3 center = box.getCenter();
-        float radius = (float) (box.maxX - center.x);
-        try (RenderBufferGuard guard = RenderBufferGuard.open()) {
-            PoseStack poseStack = new PoseStack();
-            PoseStack.Pose pose = poseStack.last();
-            GL11.glEnable(GL11.GL_LINE_SMOOTH);
-            VertexConsumer vertexConsumer = guard.bufferSource.getBuffer(RenderType.debugLineStrip(lineWidth));
-            vertexConsumer.addVertex(pose, (float) center.x + 1, (float) center.y, (float) center.z).setColor(r, g, b, a).setNormal(1, 0, 0);
-            vertexConsumer.addVertex(pose, (float) center.x + radius, (float) center.y, (float) center.z).setColor(r, g, b, a).setNormal(1, 0, 0);
-            vertexConsumer.addVertex(pose, (float) center.x - 1, (float) center.y, (float) center.z).setColor(r, g, b, a).setNormal(-1, 0, 0);
-            vertexConsumer.addVertex(pose, (float) center.x - radius, (float) center.y, (float) center.z).setColor(r, g, b, a).setNormal(-1, 0, 0);
-            vertexConsumer.addVertex(pose, (float) center.x, (float) center.y + 1, (float) center.z).setColor(r, g, b, a).setNormal(0, 1, 0);
-            vertexConsumer.addVertex(pose, (float) center.x, (float) center.y + radius, (float) center.z).setColor(r, g, b, a).setNormal(1, 0, 0);
-            vertexConsumer.addVertex(pose, (float) center.x, (float) center.y - 1, (float) center.z).setColor(r, g, b, a).setNormal(0, -1, 0);
-            vertexConsumer.addVertex(pose, (float) center.x, (float) center.y - radius, (float) center.z).setColor(r, g, b, a).setNormal(-1, 0, 0);
-            vertexConsumer.addVertex(pose, (float) center.x, (float) center.y, (float) center.z + 1).setColor(r, g, b, a).setNormal(0, 0, 1);
-            vertexConsumer.addVertex(pose, (float) center.x, (float) center.y, (float) center.z + radius).setColor(r, g, b, a).setNormal(0, 0, 1);
-            vertexConsumer.addVertex(pose, (float) center.x, (float) center.y, (float) center.z - 1).setColor(r, g, b, a).setNormal(0, 0, -1);
-            vertexConsumer.addVertex(pose, (float) center.x, (float) center.y, (float) center.z - radius).setColor(r, g, b, a).setNormal(0, 0, -1);
-        }
-        finally {
-            if (!initialLineSmooth) {
-                GL11.glDisable(GL11.GL_LINE_SMOOTH);
-            }
-        }
-    }
+		// Convert requested line width into a world-space thickness.
+		double t = Math.max(0.01, lineWidth * 0.02);
+		double halfT = t / 2.0;
+
+		double cx = center.x;
+		double cy = center.y;
+		double cz = center.z;
+
+		// +X guide
+		renderFilledBox(
+				new AABB(cx + 1.0, cy - halfT, cz - halfT,
+						cx + radius, cy + halfT, cz + halfT),
+				color, alpha
+		);
+
+		// -X guide
+		renderFilledBox(
+				new AABB(cx - radius, cy - halfT, cz - halfT,
+						cx - 1.0, cy + halfT, cz + halfT),
+				color, alpha
+		);
+
+		// +Y guide
+		renderFilledBox(
+				new AABB(cx - halfT, cy + 1.0, cz - halfT,
+						cx + halfT, cy + radius, cz + halfT),
+				color, alpha
+		);
+
+		// -Y guide
+		renderFilledBox(
+				new AABB(cx - halfT, cy - radius, cz - halfT,
+						cx + halfT, cy - 1.0, cz + halfT),
+				color, alpha
+		);
+
+		// +Z guide
+		renderFilledBox(
+				new AABB(cx - halfT, cy - halfT, cz + 1.0,
+						cx + halfT, cy + halfT, cz + radius),
+				color, alpha
+		);
+
+		// -Z guide
+		renderFilledBox(
+				new AABB(cx - halfT, cy - halfT, cz - radius,
+						cx + halfT, cy + halfT, cz - 1.0),
+				color, alpha
+		);
+	}
 
 	/**
 	 * middle center of text is at `pos` before moving it down the screen by `offset`
@@ -548,38 +626,38 @@ public class Renderer {
 	private static void renderTextFacingCamera(Component text, Vec3 pos, float offset, float scale, int colorAlphaHex) {
         // Create a new pose stack for proper 3D positioning
         PoseStack poseStack = new PoseStack();
-        
+
         // Translate to the world position
         poseStack.translate(pos.x, pos.y, pos.z);
-        
+
         // Make text face the camera
         poseStack.mulPose(mc.gameRenderer.getMainCamera().rotation());
-        
+
         // Calculate scale based on distance
         scale *= 0.005f * (mc.player.position().distanceTo(pos) / 2.4);
         scale = Math.clamp(scale, 0.015f, 0.15f);
-        
+
         // Apply scaling (negative Y to flip text right-side up)
         poseStack.scale(scale, -scale, scale);
-        
+
         // Calculate text positioning
         float w = mc.font.width(text);
         float x = -w / 2f;
         float y = -(.5f - offset) * (mc.font.lineHeight + 2); // +2 for background padding, -1 for default line spacing
         boolean shadow = false;
-        
+
         // Get the final transformation matrix
         Matrix4f matrix = poseStack.last().pose();
-        
+
         // Background settings - make it more transparent to see text better
         float bgOpacity = Minecraft.getInstance().options.getBackgroundOpacity(0.25f);
         int bgColor = (int) (bgOpacity * 255.0f) << 24;
-        
+
         // Ensure text has full alpha if not already set
         if ((colorAlphaHex & 0xFF000000) == 0) {
             colorAlphaHex |= 0xFF000000; // Add full alpha if missing
         }
-        
+
         // Use immediate mode rendering with proper depth handling
         try (RenderBufferGuard guard = RenderBufferGuard.open(false, true, false)) {
             mc.font.drawInBatch(text, x, y, colorAlphaHex, shadow, matrix, guard.bufferSource, Font.DisplayMode.NORMAL, bgColor, 15728880);

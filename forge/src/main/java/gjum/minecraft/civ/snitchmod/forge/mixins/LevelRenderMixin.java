@@ -3,7 +3,6 @@ package gjum.minecraft.civ.snitchmod.forge.mixins;
 import com.mojang.blaze3d.vertex.PoseStack;
 import gjum.minecraft.civ.snitchmod.forge.ForgeSnitchMod;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.RenderType;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
