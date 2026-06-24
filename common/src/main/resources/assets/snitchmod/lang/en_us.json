@@ -3,6 +3,7 @@
   "key.snitchmod.toggleOverlay": "Toggle Snitch overlay",
   "key.snitchmod.togglePlacement": "Toggle Snitch placement helper",
   "key.snitchmod.togglePreviewSnitchFieldKey": "Show a Snitch field preview",
+  "key.snitchmod.jalistAuto": "Run auto jalist",
   "key.snitchmod.toggleSnitchGoneStatusKey": "Toggle the gone status of a looked at Snitch",
-  "category.snitchmod": "Snitch Mod"
+  "key.category.snitchmod.category": "Snitch Mod"
 }
