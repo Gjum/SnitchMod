@@ -332,7 +332,7 @@ public abstract class SnitchMod {
 		if (jalistEntries.size() > 0) {
 			// Notify auto-paginator that this page was processed
 			if (JalistAutoPaginator.getInstance().isActive()) {
-				JalistAutoPaginator.getInstance().onJalistPageLoaded(jalistEntries.size());
+				JalistAutoPaginator.getInstance().onJalistPageLoaded(stacks, jalistEntries.size());
 			} else {
 				logToChat(Component.literal("Found " + jalistEntries.size() + " snitches on JAList page"));
 			}
