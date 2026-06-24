@@ -8,6 +8,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class JalistAutoPaginator {
@@ -57,7 +58,7 @@ public class JalistAutoPaginator {
         logToChat("Starting JAList auto-pagination... This will read all pages automatically.");
         
         // Start the first page click immediately
-        mc.execute(this::clickNextPage);
+        mc.execute(() -> clickNextPage(((AbstractContainerScreen<?>) mc.screen).getMenu().getItems()));
     }
     
     public void stopAutoPagination() {
@@ -89,7 +90,7 @@ public class JalistAutoPaginator {
         }
     }
     
-    public void onJalistPageLoaded(int snitchCount) {
+    public void onJalistPageLoaded(List<ItemStack> stacks, int snitchCount) {
         if (!isActive) return;
         
         pagesProcessed++;
@@ -102,7 +103,7 @@ public class JalistAutoPaginator {
         }
         
         // Click next page instantly on page load for maximum speed
-        mc.execute(this::clickNextPage);
+        mc.execute(() -> clickNextPage(stacks));
     }
     
     public void addSnitchEntry(String group, long dormantTs, long cullTs) {
@@ -122,7 +123,7 @@ public class JalistAutoPaginator {
         }
     }
     
-    private void clickNextPage() {
+    private void clickNextPage(List<ItemStack> stacks) {
         if (!isActive || waitingForNextPage) {
             return;
         }
@@ -140,13 +141,12 @@ public class JalistAutoPaginator {
         
         // Get the next page button (arrow in slot 53)
         var container = containerScreen.getMenu();
-        
-        if (container.slots.size() <= NEXT_PAGE_SLOT) {
+        if (stacks.size() <= NEXT_PAGE_SLOT) {
             stopAutoPagination();
             return;
         }
-        
-        ItemStack nextPageItem = container.getSlot(NEXT_PAGE_SLOT).getItem();
+
+        ItemStack nextPageItem = stacks.get(NEXT_PAGE_SLOT);
         
         // Check if there's a next page (should be an arrow item)
         if (nextPageItem.isEmpty() || !isArrowItem(nextPageItem)) {
