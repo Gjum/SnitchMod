@@ -8,6 +8,7 @@ import gjum.minecraft.civ.snitchmod.common.model.SnitchFieldPreview;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 //import net.minecraft.client.renderer.CoreShaders;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
@@ -634,7 +635,7 @@ public class Renderer {
         poseStack.mulPose(mc.gameRenderer.getMainCamera().rotation());
 
         // Calculate scale based on distance
-        scale *= 0.005f * (mc.player.position().distanceTo(pos) / 2.4);
+        scale *= 0.007f * (mc.player.position().distanceTo(pos) / 2.4);
         scale = Math.clamp(scale, 0.015f, 0.15f);
 
         // Apply scaling (negative Y to flip text right-side up)
@@ -660,7 +661,7 @@ public class Renderer {
 
         // Use immediate mode rendering with proper depth handling
         try (RenderBufferGuard guard = RenderBufferGuard.open(false, true, false)) {
-            mc.font.drawInBatch(text, x, y, colorAlphaHex, shadow, matrix, guard.bufferSource, Font.DisplayMode.NORMAL, bgColor, 15728880);
+            mc.font.drawInBatch(text, x, y, colorAlphaHex, shadow, matrix, guard.bufferSource, Font.DisplayMode.SEE_THROUGH, bgColor, LightTexture.FULL_BRIGHT);
         }
 
 		/*var poseStack = new PoseStack();
