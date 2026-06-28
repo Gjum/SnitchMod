@@ -3,7 +3,7 @@ package gjum.minecraft.civ.snitchmod.common;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
@@ -159,11 +159,11 @@ public class JalistAutoPaginator {
         
         // Simulate a left click on the slot
         if (mc.gameMode != null) {
-            mc.gameMode.handleInventoryMouseClick(
+            mc.gameMode.handleContainerInput(
                 container.containerId, 
                 NEXT_PAGE_SLOT, 
                 0, 
-                ClickType.PICKUP, 
+                ContainerInput.PICKUP,
                 mc.player
             );
         }
@@ -211,6 +211,6 @@ public class JalistAutoPaginator {
     }
     
     private void logToChat(String message) {
-        mc.gui.getChat().addMessage(Component.literal("[JAList Auto] " + message));
+        mc.gui.getChat().addClientSystemMessage(Component.literal("[JAList Auto] " + message));
     }
 }

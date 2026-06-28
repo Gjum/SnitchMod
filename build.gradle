@@ -1,13 +1,13 @@
 plugins {
-	id "architectury-plugin" version "3.4-SNAPSHOT"
-	id "dev.architectury.loom" version "1.13-SNAPSHOT" apply false
+	id "architectury-plugin" version "3.5-SNAPSHOT"
+	id "dev.architectury.loom-no-remap" version "1.14-SNAPSHOT" apply false
 }
 architectury {
 	minecraft = rootProject.minecraft_version
 }
 
 subprojects {
-	apply plugin: "dev.architectury.loom"
+	apply plugin: "dev.architectury.loom-no-remap"
 
 	loom {
 		silentMojangMappingsLicense()
@@ -19,7 +19,7 @@ allprojects {
 	apply plugin: "architectury-plugin"
 	apply plugin: "maven-publish"
 
-	archivesBaseName = rootProject.archives_base_name
+	base.archivesName = rootProject.archives_base_name
 	version = rootProject.mod_version
 	group = rootProject.maven_group
 
@@ -44,7 +44,7 @@ allprojects {
 
 	tasks.withType(JavaCompile).configureEach {
 		options.encoding = "UTF-8"
-		options.release = 21
+		options.release = 25
 	}
 
 	java {

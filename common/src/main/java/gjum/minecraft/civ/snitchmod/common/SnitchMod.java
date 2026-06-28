@@ -368,6 +368,6 @@ public abstract class SnitchMod {
 	}
 
 	private void logToChat(Component msg) {
-		mc.gui.getChat().addMessage(Component.literal("[SnitchMod] ").append(msg));
+		mc.gui.getChat().addClientSystemMessage(Component.literal("[SnitchMod] ").append(msg));
 	}
 }
