@@ -7,21 +7,17 @@ import gjum.minecraft.civ.snitchmod.common.model.Snitch;
 import gjum.minecraft.civ.snitchmod.common.model.SnitchFieldPreview;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-//import net.minecraft.client.renderer.CoreShaders;
-import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.Lightmap;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
-import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.Shapes;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
-import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -661,30 +657,8 @@ public class Renderer {
 
         // Use immediate mode rendering with proper depth handling
         try (RenderBufferGuard guard = RenderBufferGuard.open(false, true, false)) {
-            mc.font.drawInBatch(text, x, y, colorAlphaHex, shadow, matrix, guard.bufferSource, Font.DisplayMode.SEE_THROUGH, bgColor, LightTexture.FULL_BRIGHT);
+            mc.font.drawInBatch(text, x, y, colorAlphaHex, shadow, matrix, guard.bufferSource, Font.DisplayMode.SEE_THROUGH, bgColor, LightCoordsUtil.FULL_BRIGHT);
         }
-
-		/*var poseStack = new PoseStack();
-		poseStack.translate(pos.x, pos.y, pos.z);
-		poseStack.mulPose(mc.gameRenderer.getMainCamera().rotation());
-		scale *= 0.005f * (mc.player.position().distanceTo(pos) / 2.4);
-		scale = Math.clamp(scale, 0.015f, 0.15f);
-		poseStack.scale(scale, -scale, 1); // third component determines background distance
-
-		float w = mc.font.width(text);
-		float x = -w / 2f;
-		float y = -(.5f - offset) * (mc.font.lineHeight + 2); // +2 for background padding, -1 for default line spacing
-		boolean shadow = false;
-		var matrix = poseStack.last().pose();
-		var buffer = mc.renderBuffers().bufferSource();
-		float bgOpacity = Minecraft.getInstance().options.getBackgroundOpacity(0.25f);
-		int bgColor = (int) (bgOpacity * 255.0f) << 24;
-		int flags = 0;
-		// XXX somehow, the letters farthest from the crosshair render behind the background
-		mc.font.drawInBatch(text, x, y, colorAlphaHex, shadow, matrix, buffer, Font.DisplayMode.SEE_THROUGH, bgColor, flags);
-
-		poseStack.popPose();
-		buffer.endBatch();*/
 	}
 
 	private static @NotNull String timestampRelativeText(long ts) {

@@ -1,5 +1,5 @@
 plugins {
-	id "com.github.johnrengelman.shadow" version "7.0.0"
+	id "com.gradleup.shadow" version "9.3.0"
 }
 
 architectury {
@@ -16,14 +16,13 @@ configurations {
 }
 
 dependencies {
-	modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
-	modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+	implementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+	api "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
 
-	common(project(path: ":common", configuration: "namedElements")) { transitive false }
+	common(project(path: ":common")) { transitive false }
 	shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
 	minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-	mappings loom.officialMojangMappings()
 
 	implementation "org.xerial:sqlite-jdbc:3.47.0.0"
 	shadowCommon "org.xerial:sqlite-jdbc:3.47.0.0"
@@ -47,14 +46,15 @@ processResources {
 }
 
 shadowJar {
-	configurations = [project.configurations.shadowCommon]
-	archiveClassifier = "dev-shadow"
-}
+	exclude "architectury.common.json"
 
-remapJar {
-	input.set shadowJar.archiveFile
-	dependsOn shadowJar
+	dependsOn(jar)
+	mainSpec.sourcePaths.clear()       // Remove default source set inclusion
+	from(zipTree(jar.archiveFile))     // Unpack jar output (preserves Loom modifications)
+
+	configurations = [project.configurations.shadowCommon]
 	archiveClassifier = "fabric"
+	from rootProject.file("LICENSE.txt")
 }
 
 jar {
@@ -94,7 +94,7 @@ tasks.register('cleanJar', Delete) {
 }
 
 tasks.register('copyJar', Copy) {
-	from remapJar
+	from shadowJar
 	into '../dist'
 }
 

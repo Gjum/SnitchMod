@@ -1,5 +1,5 @@
 plugins {
-	id "com.github.johnrengelman.shadow" version "7.0.0"
+	id "com.gradleup.shadow" version "9.3.0"
 }
 
 architectury {
@@ -18,11 +18,10 @@ configurations {
 dependencies {
 	neoForge "net.neoforged:neoforge:${rootProject.neoforge_version}"
 
-	common(project(path: ":common", configuration: "namedElements")) { transitive false }
+	common(project(path: ":common")) { transitive false }
 	shadowCommon(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive = false }
 
 	minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-	mappings loom.officialMojangMappings()
 
 	implementation "org.xerial:sqlite-jdbc:3.47.0.0"
 	shadowCommon "org.xerial:sqlite-jdbc:3.47.0.0"
@@ -43,16 +42,15 @@ processResources {
 }
 
 shadowJar {
-	exclude "fabric.mod.json"
+	exclude "architectury.common.json"
+
+	dependsOn(jar)
+	mainSpec.sourcePaths.clear()       // Remove default source set inclusion
+	from(zipTree(jar.archiveFile))     // Unpack jar output (preserves Loom modifications)
 
 	configurations = [project.configurations.shadowCommon]
-	archiveClassifier = "dev-shadow"
-}
-
-remapJar {
-	input.set shadowJar.archiveFile
-	dependsOn shadowJar
 	archiveClassifier = "neoforge"
+	from rootProject.file("LICENSE.txt")
 }
 
 jar {
@@ -92,7 +90,7 @@ tasks.register('cleanJar', Delete) {
 }
 
 tasks.register('copyJar', Copy) {
-	from remapJar
+	from shadowJar
 	into '../dist'
 }
 

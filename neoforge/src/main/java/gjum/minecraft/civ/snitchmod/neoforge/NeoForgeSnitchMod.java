@@ -31,7 +31,7 @@ public class NeoForgeSnitchMod extends SnitchMod {
     }
 
     @SubscribeEvent
-    public void onAfterTripwire(RenderLevelStageEvent.AfterTripwireBlocks event) {
+    public void onAfterTripwire(RenderLevelStageEvent.AfterTranslucentParticles event) {
         handleRenderBlockOverlay(event.getPoseStack());
     }
     
