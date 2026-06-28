@@ -1,11 +1,13 @@
 package gjum.minecraft.civ.snitchmod.forge;
 
 import gjum.minecraft.civ.snitchmod.common.SnitchMod;
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 @Mod("snitchmod")
@@ -21,10 +23,16 @@ public class ForgeSnitchMod extends SnitchMod {
         event.register(togglePlacementKey);
         event.register(previewSnitchFieldKey);
         event.register(toggleSnitchGoneStatusKey);
+        event.register(jalistAutoKey);
     }
 
 	@SubscribeEvent
 	public void onClientTick(TickEvent.ClientTickEvent.Pre event) {
 		handleTick();
 	}
+
+    @SubscribeEvent
+    public void onClientLoaded(FMLClientSetupEvent event) {
+        mc = Minecraft.getInstance();
+    }
 }
