@@ -8,7 +8,6 @@ import gjum.minecraft.civ.snitchmod.common.model.SnitchFieldPreview;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 //import net.minecraft.client.renderer.CoreShaders;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
@@ -661,7 +660,7 @@ public class Renderer {
 
         // Use immediate mode rendering with proper depth handling
         try (RenderBufferGuard guard = RenderBufferGuard.open(false, true, false)) {
-            mc.font.drawInBatch(text, x, y, colorAlphaHex, shadow, matrix, guard.bufferSource, Font.DisplayMode.SEE_THROUGH, bgColor, LightTexture.FULL_BRIGHT);
+            mc.font.drawInBatch(text, x, y, colorAlphaHex, shadow, matrix, guard.bufferSource, Font.DisplayMode.SEE_THROUGH, bgColor, 15728880);
         }
 
 		/*var poseStack = new PoseStack();

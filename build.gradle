@@ -1,53 +1,61 @@
 plugins {
-	id "architectury-plugin" version "3.4-SNAPSHOT"
-	id "dev.architectury.loom" version "1.13-SNAPSHOT" apply false
-}
-architectury {
-	minecraft = rootProject.minecraft_version
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+	id 'maven-publish'
 }
 
-subprojects {
-	apply plugin: "dev.architectury.loom"
+version = project.mod_version
+group = project.maven_group
 
-	loom {
-		silentMojangMappingsLicense()
+base {
+	archivesName = project.archives_base_name
+}
+
+repositories {
+	maven {
+		name "Modrinth"
+		url "https://api.modrinth.com/maven"
+	}
+	maven {
+		url "https://cursemaven.com"
+		content { includeGroup "curse.maven" }
 	}
 }
 
-allprojects {
-	apply plugin: "java"
-	apply plugin: "architectury-plugin"
-	apply plugin: "maven-publish"
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
-	archivesBaseName = rootProject.archives_base_name
-	version = rootProject.mod_version
-	group = rootProject.maven_group
+	// Bundle sqlite-jdbc inside the mod jar (Fabric jar-in-jar) so users don't install it separately.
+	implementation "org.xerial:sqlite-jdbc:3.47.0.0"
+	include "org.xerial:sqlite-jdbc:3.47.0.0"
+}
 
-	repositories {
-		// Add repositories to retrieve artifacts from in here.
-		// You should only use this when depending on other mods because
-		// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-		// See https://docs.gradle.org/current/userguide/declaring_repositories.html
-		// for more information about repositories.
-		maven {
-			url "https://cursemaven.com"
-			content {
-				includeGroup "curse.maven"
-			}
-		}
-		maven {
-			name "Modrinth"
-			url "https://api.modrinth.com/maven"
-		}
-		maven { url "https://maven.neoforged.net/releases/" }
+processResources {
+	inputs.property "version", project.version
+	inputs.property "minecraft_version", project.minecraft_version
+	inputs.property "fabric_loader_version", project.loader_version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": project.version,
+				"minecraft_version": project.minecraft_version,
+				"fabric_loader_version": project.loader_version
 	}
+}
 
-	tasks.withType(JavaCompile).configureEach {
-		options.encoding = "UTF-8"
-		options.release = 21
-	}
+tasks.withType(JavaCompile).configureEach {
+	it.options.encoding = "UTF-8"
+	it.options.release = 25
+}
 
-	java {
-		withSourcesJar()
+java {
+	withSourcesJar()
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
+}
+
+jar {
+	from("LICENSE.txt") {
+		rename { "${it}_${project.archives_base_name}" }
 	}
 }

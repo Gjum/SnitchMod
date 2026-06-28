@@ -4,9 +4,8 @@ import gjum.minecraft.civ.snitchmod.common.JalistAutoPaginator;
 import gjum.minecraft.civ.snitchmod.common.SnitchMod;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import org.lwjgl.glfw.GLFW;
@@ -14,12 +13,12 @@ import org.lwjgl.glfw.GLFW;
 public class FabricSnitchMod extends SnitchMod implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
-		KeyBindingHelper.registerKeyBinding(openGuiKey);
-		KeyBindingHelper.registerKeyBinding(toggleOverlayKey);
-		KeyBindingHelper.registerKeyBinding(togglePlacementKey);
-		KeyBindingHelper.registerKeyBinding(previewSnitchFieldKey);
-		KeyBindingHelper.registerKeyBinding(toggleSnitchGoneStatusKey);
-		KeyBindingHelper.registerKeyBinding(jalistAutoKey);
+		KeyMappingHelper.registerKeyMapping(openGuiKey);
+		KeyMappingHelper.registerKeyMapping(toggleOverlayKey);
+		KeyMappingHelper.registerKeyMapping(togglePlacementKey);
+		KeyMappingHelper.registerKeyMapping(previewSnitchFieldKey);
+		KeyMappingHelper.registerKeyMapping(toggleSnitchGoneStatusKey);
+		KeyMappingHelper.registerKeyMapping(jalistAutoKey);
 
 		ClientTickEvents.START_CLIENT_TICK.register(client -> {
 			try {
@@ -43,9 +42,9 @@ public class FabricSnitchMod extends SnitchMod implements ClientModInitializer {
 				e.printStackTrace();
 			}
 		});
-		WorldRenderEvents.END_MAIN.register(((context) -> {
+		LevelRenderEvents.END_MAIN.register(((context) -> {
 			try {
-				handleRenderBlockOverlay(context.matrices());
+				handleRenderBlockOverlay(context.poseStack());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
