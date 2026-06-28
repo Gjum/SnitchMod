@@ -11,13 +11,13 @@ import gjum.minecraft.civ.snitchmod.common.model.SnitchFieldPreview;
 import gjum.minecraft.civ.snitchmod.common.model.SnitchRename;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 public abstract class SnitchMod {
-	private final static Minecraft mc = Minecraft.getInstance();
+	protected static Minecraft mc = Minecraft.getInstance();
 	public static final KeyMapping.Category SNITCHMOD_CATEGORY
 		= KeyMapping.Category.register(Identifier.fromNamespaceAndPath("snitchmod", "category"));
 
@@ -243,6 +243,20 @@ public abstract class SnitchMod {
 			logToChat(Component.literal("Showing a snitch field preview in the direction you're looking"));
 		}
 		// TODO if block pos changed -> if pos inside snitch range not in before -> send jainfo -> mark refreshed
+		// Check for J key press while in JAList GUI
+		var mc = Minecraft.getInstance();
+		if (mc.screen instanceof AbstractContainerScreen<?> containerScreen) {
+			String title = containerScreen.getTitle().getString();
+			if ((title.toLowerCase().contains("snitches") || title.contains("JukeAlert"))
+					&& GLFW.glfwGetKey(mc.getWindow().handle(), GLFW.GLFW_KEY_J) == GLFW.GLFW_PRESS) {
+
+				// Prevent spam clicking by checking if auto-paginator is not already active
+				if (!JalistAutoPaginator.getInstance().isActive()) {
+					System.out.println("[SnitchMod] J key detected in JAList!");
+					JalistAutoPaginator.getInstance().startAutoPagination();
+				}
+			}
+		}
 	}
 
 	/**
