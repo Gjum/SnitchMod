@@ -42,6 +42,7 @@ processResources {
 }
 
 shadowJar {
+	exclude "fabric.mod.json"
 	exclude "architectury.common.json"
 
 	dependsOn(jar)
